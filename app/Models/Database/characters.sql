@@ -25,6 +25,8 @@ CREATE TABLE `characters` (
 -- Index and AUTO_INCREMENT for `characters`
 --
 ALTER TABLE `characters`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-ALTER TABLE `characters` ADD `inventory` TEXT NULL AFTER `data`;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY;
+  
+ALTER TABLE `characters` 
+  ADD `inventory` TEXT NULL AFTER `data`;
 COMMIT;
