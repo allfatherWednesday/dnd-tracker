@@ -16,6 +16,7 @@ class Router
         'logout' => 'CharacterController::logout',
         'admin' => 'AdminController::adminLogin',
 		'map' => 'MapController::displayMap',
+		'add-object' => 'MapObjectController::addObject',
         'edit' => 'CharacterController::edit',
         '404' => 'Controller::error404',
     ];
