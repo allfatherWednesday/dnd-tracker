@@ -15,7 +15,7 @@ class MapObjectModel extends Model
 
     public function addObject($name, $imageUrl)
     {
-        $req = $this->db()->prepare("INSERT INTO map_objects (name, image_url) VALUES (:name, :image_url)");
+        $req = $this->db()->prepare("INSERT INTO map_objects (name, image_url, positionX, positionY) VALUES (:name, :image_url, 0, 0)");
         $req->bindValue(':name', $name);
         $req->bindValue(':image_url', $imageUrl);
         return $req->execute();

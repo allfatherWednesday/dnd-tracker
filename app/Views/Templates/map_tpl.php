@@ -39,10 +39,15 @@
                 
                 <!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
-                    <img src="<?= $object['image_url'] ?>" 
-                         class="draggable" 
-                         data-id="<?= $object['id'] ?>" 
-                         style="position: absolute; width: 50px; height: 50px;">
+                    <div class="draggable-container" style="position: absolute; width: 50px; height: 50px; top: 0; left: 0;">
+                        <img src="<?= $object['image_url'] ?>" 
+                             class="draggable" 
+                             data-id="<?= $object['id'] ?>" 
+                             style="width: 100%; height: 100%;">
+                        <div class="position-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; background: rgba(0, 0, 0, 0.5); font-size: 10px;">
+                            0, 0
+                        </div>
+                    </div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -54,7 +59,7 @@
 <script>
     $(document).ready(function() {
         // Make objects draggable
-        interact('.draggable').draggable({
+        interact('.draggable-container').draggable({
             inertia: true,
             modifiers: [
                 interact.modifiers.restrictRect({
@@ -76,8 +81,12 @@
             target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
             target.setAttribute('data-x', x);
             target.setAttribute('data-y', y);
+			
+			// Update the position text
+            var positionText = target.querySelector('.position-text');
+            positionText.textContent = Math.round(x) + ', ' + Math.round(y);
         }
-
+		
         window.dragMoveListener = dragMoveListener;
 
         // Add click handler to load objects onto the map
@@ -85,21 +94,26 @@
             const imageUrl = $(this).data('url');
             const objectId = $(this).data('id');
 
-            // Create a new draggable image
+            // Create the image
             const newImage = $('<img>')
                 .attr('src', imageUrl)
                 .addClass('draggable')
                 .attr('data-id', objectId)
                 .css({
-                    position: 'absolute',
-                    width: '50px',
-                    height: '50px',
-                    top: '50%',
-                    left: '50%'
+                    width: '100%',
+                    height: '100%'
                 });
 
-            // Add the image to the map container
-            $('#map-container').append(newImage);
+            // Create the position text overlay
+            const newPositionText = $('<div>')
+                .addClass('position-text')
+                .text('0, 0');
+
+            // Append the image and text to the container
+            newContainer.append(newImage).append(newPositionText);
+
+            // Add the container to the map container
+            $('#map-container').append(newContainer);
 
             // Make the new image draggable
             interact(newImage[0]).draggable({
