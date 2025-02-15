@@ -34,7 +34,7 @@
 
         <!-- Map Container -->
         <div class="col-md-9">
-            <div id="map-container" style="position: relative; width: 100%; height: 600px; border: 1px solid #000; margin-left: 350px;">        
+            <div id="map-container" style="position: relative; width: 100%; height: 600px;  margin-left: 350px;">        
 				<img id="map-image" src="<?= $data['map']['image'] ?>" style="width: 100%; height: 100%;">
                 
                 <!-- Draggable Objects -->
@@ -58,6 +58,14 @@
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
     $(document).ready(function() {
+		// Get the map container's offset relative to the page
+        const mapContainer = document.getElementById('map-container');
+        const mapRect = mapContainer.getBoundingClientRect();
+        const mapOffset = {
+            left: mapRect.left,
+            top: mapRect.top
+        };
+		
         // Make objects draggable
         interact('.draggable-container').draggable({
             inertia: true,
@@ -65,7 +73,21 @@
                 interact.modifiers.restrictRect({
                     restriction: 'parent',
                     endOnly: true
-                })
+                }),
+				interact.modifiers.snap({
+					targets: [
+						interact.createSnapGrid({ 
+							x: 50, 
+							y: 50,
+							offset: {
+                                x: mapOffset.left,
+                                y: mapOffset.top
+                            }	
+						})
+					],
+					range: Infinity,
+					relativePoints: [ { x: 0, y: 0 } ]
+				})
             ],
             autoScroll: true,
             listeners: {
@@ -122,6 +144,20 @@
                     interact.modifiers.restrictRect({
                         restriction: 'parent',
                         endOnly: true
+                    }),
+					interact.modifiers.snap({
+                        targets: [
+                            interact.createSnapGrid({
+                                x: 50,
+                                y: 50,
+                                offset: {
+                                    x: mapOffset.left,
+                                    y: mapOffset.top
+                                }
+                            })
+                        ],
+                        range: Infinity,
+                        relativePoints: [ { x: 0, y: 0 } ]
                     })
                 ],
                 autoScroll: true,
