@@ -20,4 +20,12 @@ class MapObjectModel extends Model
         $req->bindValue(':image_url', $imageUrl);
         return $req->execute();
     }
+
+    public function updatePosition($id, $x, $y) {
+        $req = $this->db()->prepare("UPDATE map_objects SET positionX = :x, positionY = :y WHERE id = :id");
+        $req->bindValue(':x', $x);
+        $req->bindValue(':y', $y);
+        $req->bindValue(':id', $id);
+        return $req->execute();
+    }
 }

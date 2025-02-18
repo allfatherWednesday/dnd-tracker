@@ -6,48 +6,28 @@
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 sidebar">
-            <h3>Map Objects</h3>
-            <form action="<?= HOST ?>/add-object" method="post" class="mb-4">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Object Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="image_url" class="form-label">Image URL</label>
-                    <input type="url" class="form-control" id="image_url" name="image_url" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Add Object</button>
-            </form>
-
-            <h4>Loaded Objects</h4>
-            <ul id="object-list" class="list-group">
-                <?php
-                $mapObjectController = new \app\Controllers\MapObjectController();
-                $objects = $mapObjectController->getObjects();
-                foreach ($objects as $object): ?>
-                    <li class="list-group-item" data-id="<?= $object['id'] ?>" data-url="<?= $object['image_url'] ?>">
-                        <?= $object['name'] ?>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
+            <!-- ... existing sidebar code ... -->
         </div>
 
         <!-- Map Container -->
         <div class="col-md-9">
             <div id="map-container" style="position: relative; width: 100%; height: 600px;  margin-left: 350px;">        
-				<img id="map-image" src="<?= $data['map']['image'] ?>" style="width: 100%; height: 100%;">
+                <img id="map-image" src="<?= $data['map']['image'] ?>" style="width: 100%; height: 100%;">
                 
-                <!-- Draggable Objects -->
-                <?php foreach ($objects as $object): ?>
-                    <div class="draggable-container" style="position: absolute; width: 50px; height: 50px; top: 0; left: 0;">
-                        <img src="<?= $object['image_url'] ?>" 
-                             class="draggable" 
-                             data-id="<?= $object['id'] ?>" 
-                             style="width: 100%; height: 100%;">
-                        <div class="position-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; background: rgba(0, 0, 0, 0.5); font-size: 10px;">
-                            0, 0
-                        </div>
-                    </div>
+                <?php
+                $mapObjectModel = new \app\Models\MapObjectModel();
+                $objects = $mapObjectModel->getAllObjects();
+                foreach ($objects as $object): ?>
+                <div class="draggable-container" 
+                    style="position: absolute; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;"
+                    data-x="<?= $object['positionX'] ?>" 
+                    data-y="<?= $object['positionY'] ?>">
+                    <img src="<?= $object['image_url'] ?>" 
+                        class="draggable" 
+                        data-id="<?= $object['id'] ?>" 
+                        style="width: 100%; height: 100%;">
+                    <div class="position-text"><?= $object['positionX'] ?>, <?= $object['positionY'] ?></div>
+                </div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -58,113 +38,124 @@
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
     $(document).ready(function() {
-		// Get the map container's offset relative to the page
+        // Get map container offset
         const mapContainer = document.getElementById('map-container');
         const mapRect = mapContainer.getBoundingClientRect();
-        const mapOffset = {
-            left: mapRect.left,
-            top: mapRect.top
-        };
-		
-        // Make objects draggable
-        interact('.draggable-container').draggable({
-            inertia: true,
-            modifiers: [
-                interact.modifiers.restrictRect({
-                    restriction: 'parent',
-                    endOnly: true
-                }),
-				interact.modifiers.snap({
-					targets: [
-						interact.createSnapGrid({ 
-							x: 50, 
-							y: 50,
-							offset: {
-                                x: mapOffset.left,
-                                y: mapOffset.top
-                            }	
-						})
-					],
-					range: Infinity,
-					relativePoints: [ { x: 0, y: 0 } ]
-				})
-            ],
-            autoScroll: true,
-            listeners: {
-                move: dragMoveListener
+        const mapOffset = { left: mapRect.left, top: mapRect.top };
+
+        // WebSocket connection
+        const ws = new WebSocket('ws://localhost:8080');
+
+        // Handle incoming WebSocket messages
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.action === 'positionUpdated') {
+                document.querySelectorAll('.draggable-container').forEach(container => {
+                    const draggable = container.querySelector('.draggable');
+                    if (draggable.dataset.id == data.id) {
+                        container.style.transform = `translate(${data.x}px, ${data.y}px)`;
+                        container.setAttribute('data-x', data.x);
+                        container.setAttribute('data-y', data.y);
+                        container.querySelector('.position-text').textContent = 
+                            `${Math.round(data.x)}, ${Math.round(data.y)}`;
+                    }
+                });
             }
-        });
+        };
 
-        function dragMoveListener(event) {
-            var target = event.target;
-            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+        // Drag move handler
+        function handleDragMove(event) {
+            const target = event.target;
+            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-            target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+            target.style.transform = `translate(${x}px, ${y}px)`;
             target.setAttribute('data-x', x);
             target.setAttribute('data-y', y);
-			
-			// Update the position text
-            var positionText = target.querySelector('.position-text');
-            positionText.textContent = Math.round(x) + ', ' + Math.round(y);
+
+            const positionText = target.querySelector('.position-text');
+            positionText.textContent = `${Math.round(x)}, ${Math.round(y)}`;
+
+            // Send position via WebSocket
+            const id = target.querySelector('.draggable').dataset.id;
+            ws.send(JSON.stringify({
+                action: 'updatePosition',
+                id: id,
+                x: x,
+                y: y
+            }));
         }
-		
-        window.dragMoveListener = dragMoveListener;
 
-        // Add click handler to load objects onto the map
-        $('#object-list li').on('click', function() {
-            const imageUrl = $(this).data('url');
-            const objectId = $(this).data('id');
-
-            // Create the image
-            const newImage = $('<img>')
-                .attr('src', imageUrl)
-                .addClass('draggable')
-                .attr('data-id', objectId)
-                .css({
-                    width: '100%',
-                    height: '100%'
-                });
-
-            // Create the position text overlay
-            const newPositionText = $('<div>')
-                .addClass('position-text')
-                .text('0, 0');
-
-            // Append the image and text to the container
-            newContainer.append(newImage).append(newPositionText);
-
-            // Add the container to the map container
-            $('#map-container').append(newContainer);
-
-            // Make the new image draggable
-            interact(newImage[0]).draggable({
+        // Draggable configuration
+        function setupDraggable(element) {
+            interact(element).draggable({
                 inertia: true,
                 modifiers: [
                     interact.modifiers.restrictRect({
                         restriction: 'parent',
                         endOnly: true
                     }),
-					interact.modifiers.snap({
+                    interact.modifiers.snap({
                         targets: [
-                            interact.createSnapGrid({
-                                x: 50,
+                            interact.createSnapGrid({ 
+                                x: 50, 
                                 y: 50,
-                                offset: {
-                                    x: mapOffset.left,
-                                    y: mapOffset.top
-                                }
+                                offset: { x: mapOffset.left, y: mapOffset.top }
                             })
                         ],
                         range: Infinity,
-                        relativePoints: [ { x: 0, y: 0 } ]
+                        relativePoints: [{ x: 0, y: 0 }]
                     })
                 ],
                 autoScroll: true,
-                listeners: {
-                    move: dragMoveListener
-                }
+                listeners: { move: handleDragMove }
             });
+        }
+
+        // Initialize existing elements
+        document.querySelectorAll('.draggable-container').forEach(setupDraggable);
+
+        // Add new object handler
+        $('#object-list li').on('click', function() {
+            const imageUrl = $(this).data('url');
+            const objectId = $(this).data('id');
+
+            // Create new container
+            const newContainer = $('<div>')
+                .addClass('draggable-container')
+                .css({
+                    position: 'absolute',
+                    width: '50px',
+                    height: '50px',
+                    top: '0',
+                    left: '0'
+                });
+
+            // Create image and text elements
+            newContainer.append(
+                $('<img>')
+                    .attr('src', imageUrl)
+                    .addClass('draggable')
+                    .data('id', objectId)
+                    .css({ width: '100%', height: '100%' }),
+                $('<div>')
+                    .addClass('position-text')
+                    .css({
+                        position: 'absolute',
+                        top: '0',
+                        left: '0',
+                        width: '100%',
+                        textAlign: 'center',
+                        color: 'white',
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        fontSize: '10px'
+                    })
+                    .text('0, 0')
+            );
+
+            // Add to map and make draggable
+            $('#map-container').append(newContainer);
+            setupDraggable(newContainer[0]);
         });
     });
 </script>
