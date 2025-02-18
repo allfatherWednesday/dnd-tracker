@@ -1,13 +1,19 @@
+// app/server.php
 <?php
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 use MyApp\WebSocketHandler;
 
-require dirname(__FILE__) . '/vendor/autoload.php';
-require __DIR__ . '/app/Models/MapObjectModel.php';
+// Correct path to vendor autoload
+require dirname(__DIR__) . '/vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+// Correct paths to model and handler
+require __DIR__ . '/Models/MapObjectModel.php';
+require __DIR__ . '/WebSocketHandler.php';
+
+// Load .env from project root
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
 $server = IoServer::factory(
