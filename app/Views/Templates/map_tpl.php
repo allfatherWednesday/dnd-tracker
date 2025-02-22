@@ -39,13 +39,13 @@
                 
                 <!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
-                    <div class="draggable-container" style="position: absolute; width: 50px; height: 50px; top: 0; left: 0;">
+                    <div class="draggable-container" style="position: absolute; width: 50px; height: 50px; top: <?= $object['positionX'] ?>px; left: <?= $object['positionY'] ?>px;">
                         <img src="<?= $object['image_url'] ?>" 
                              class="draggable" 
                              data-id="<?= $object['id'] ?>" 
                              style="width: 100%; height: 100%;">
                         <div class="position-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; background: rgba(0, 0, 0, 0.5); font-size: 10px;">
-                            0, 0
+                            <?= $object['positionY'] ?>, <?= $object['positionX'] ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -104,9 +104,13 @@
             target.setAttribute('data-x', x);
             target.setAttribute('data-y', y);
 			
-			// Update the position text
-            var positionText = target.querySelector('.position-text');
-            positionText.textContent = Math.round(x) + ', ' + Math.round(y);
+			// Update the position text relative to map-container
+			var positionText = target.querySelector('.position-text');
+			var originalLeft = parseFloat(target.style.left) || 0;
+			var originalTop = parseFloat(target.style.top) || 0;
+			var currentX = originalLeft + x;
+			var currentY = originalTop + y;
+			positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);
         }
 		
         window.dragMoveListener = dragMoveListener;

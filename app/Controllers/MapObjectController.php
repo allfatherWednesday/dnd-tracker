@@ -11,13 +11,15 @@ class MapObjectController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'] ?? '';
             $imageUrl = $_POST['image_url'] ?? '';
+			$positionX = $_POST['positionX'] ?? '';
+			$positionY = $_POST['positionY'] ?? '';
 
             if (!empty($name) && !empty($imageUrl)) {
                 $mapObjectModel = new MapObjectModel();
-                $mapObjectModel->addObject($name, $imageUrl);
+                $mapObjectModel->addObject($name, $imageUrl, $positionX, $positionY);
                 $this->redirect('map');
             } else {
-                echo "Name and image URL are required.";
+                echo "Name and image and positions URL are required.";
             }
         }
     }
