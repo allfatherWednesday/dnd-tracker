@@ -45,7 +45,7 @@
                              data-id="<?= $object['id'] ?>" 
                              style="width: 100%; height: 100%;">
                         <div class="position-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; background: rgba(0, 0, 0, 0.5); font-size: 10px;">
-                            <?= $object['positionY'] ?>, <?= $object['positionX'] ?>
+                            <?= $object['positionX'] ?>, <?= $object['positionY'] ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -171,6 +171,62 @@
             });
         });
     });
+	// Connect to WebSocket
+const websocket = new WebSocket('ws://localhost:8080');
+
+websocket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.action === 'positionUpdated') {
+        const containers = document.querySelectorAll('.draggable-container');
+        containers.forEach(container => {
+            const img = container.querySelector('img');
+            if (img.dataset.id === data.objectId.toString()) {
+                // Update position (swap X/Y due to existing structure)
+                container.style.top = data.positionX + 'px';
+                container.style.left = data.positionY + 'px';
+                // Update position text
+                const text = container.querySelector('.position-text');
+                text.textContent = `${data.positionY}, ${data.positionX}`;
+                // Reset transform
+                container.style.transform = 'none';
+                container.setAttribute('data-x', 0);
+                container.setAttribute('data-y', 0);
+            }
+        });
+    }
+};
+
+// Update interact.js dragend listener
+interact('.draggable-container').on('dragend', function(event) {
+    const target = event.target;
+    const img = target.querySelector('img');
+    const objectId = img.dataset.id;
+
+    const originalLeft = parseFloat(target.style.left) || 0;
+    const originalTop = parseFloat(target.style.top) || 0;
+    const translateX = parseFloat(target.getAttribute('data-x')) || 0;
+    const translateY = parseFloat(target.getAttribute('data-y')) || 0;
+
+    const newLeft = originalLeft + translateX;
+    const newTop = originalTop + translateY;
+
+    // Send update to WebSocket server
+    websocket.send(JSON.stringify({
+        action: 'updatePosition',
+        objectId: objectId,
+        positionX: newTop, // Existing code uses top as positionX
+        positionY: newLeft // Existing code uses left as positionY
+    }));
+
+    // Update local position immediately
+    target.style.left = newLeft + 'px';
+    target.style.top = newTop + 'px';
+    target.style.transform = 'none';
+    target.setAttribute('data-x', 0);
+    target.setAttribute('data-y', 0);
+    target.querySelector('.position-text').textContent = 
+        `${Math.round(newLeft)}, ${Math.round(newTop)}`;
+});
 </script>
 
 <?php include_once 'partials/editor_bottom_tpl.php'; ?>
