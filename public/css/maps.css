@@ -9,11 +9,27 @@ body {
     background-attachment: fixed;
 }
 
-.sidebar {
+.sidebar_custom {
     height: calc(100vh - 56px);
     background-color: #f8f9fa;
     padding: 20px;
     overflow-y: auto;
+}
+
+.sidebar_left{
+	height: calc(100vh - 56px);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 250px;
+}
+
+.sidebar_right{
+	height: calc(100vh - 56px);
+    position: fixed;
+    top: 60px;
+    right: 0;
+    width: 250px;
 }
 
 #map-container {

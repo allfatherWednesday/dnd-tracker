@@ -1,11 +1,11 @@
 <?php include_once 'partials/editor_top_tpl.php'; ?>
 
-<link rel="stylesheet" href="<?= HOST ?>/public/css/map.css">
+<link rel="stylesheet" href="<?= HOST ?>/public/css/maps.css">
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 sidebar">
+        <!-- Left Sidebar -->
+        <div class="col-md-3 col-md-3 sidebar_left sidebar_custom">
             <h3>Map Objects</h3>
             <form action="<?= HOST ?>/add-object" method="post" class="mb-4">
                 <div class="mb-3">
@@ -33,8 +33,8 @@
         </div>
 
         <!-- Map Container -->
-        <div class="col-md-9">
-            <div id="map-container" style="position: relative; width: 100%; height: 600px;  margin-left: 350px;">        
+        <div class="col-md-6 col-lg-6">
+            <div id="map-container" style="position: relative; width: 100%; height: 600px;  margin-left: 250px;">        
 				<img id="map-image" src="<?= $data['map']['image'] ?>" style="width: 100%; height: 100%;">
                 
                 <!-- Draggable Objects -->
@@ -50,6 +50,42 @@
                     </div>
                 <?php endforeach; ?>
             </div>
+        </div>
+		
+		<!-- Right Sidebar -->
+        <div class="col-md-3 col-md-3 sidebar_right sidebar_custom">
+            <!-- Right Sidebar -->
+			<div class="col-md-3 col-md-3 sidebar_right sidebar_custom">
+				<!-- List of Characters -->
+				<div class="sidebar-section mb-4">
+					<h3>List of Chars</h3>
+					<ul class="list-group">
+						<?php /* Add PHP loop for characters here */ ?>
+						<li class="list-group-item">Character 1</li>
+						<li class="list-group-item">Character 2</li>
+					</ul>
+				</div>
+
+				<!-- List of Enemies -->
+				<div class="sidebar-section mb-4">
+					<h3>List of Enemies</h3>
+					<ul class="list-group">
+						<?php /* Add PHP loop for enemies here */ ?>
+						<li class="list-group-item">Enemy 1</li>
+						<li class="list-group-item">Enemy 2</li>
+					</ul>
+				</div>
+
+				<!-- List of Statuses -->
+				<div class="sidebar-section">
+					<h3>List of Statuses</h3>
+					<ul class="list-group">
+						<?php /* Add PHP loop for statuses here */ ?>
+						<li class="list-group-item">Status 1</li>
+						<li class="list-group-item">Status 2</li>
+					</ul>
+				</div>
+			</div>
         </div>
     </div>
 </div>
@@ -173,6 +209,7 @@
     });
 	// Connect to WebSocket
 const websocket = new WebSocket('ws://localhost:8080');
+//const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
 
 websocket.onmessage = function(event) {
     const data = JSON.parse(event.data);
