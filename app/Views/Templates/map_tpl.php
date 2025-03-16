@@ -2,10 +2,12 @@
 
 <link rel="stylesheet" href="<?= HOST ?>/public/css/maps.css">
 
-<div class="container-fluid">
+<?php $data['grid-size']=50?>
+
+<div class="container-fluid" style="padding-top: 4px;">
     <div class="row">
         <!-- Left Sidebar -->
-        <div class="col-md-3 col-md-3 sidebar_left sidebar_custom">
+        <div class="col-md-2 col-md-2 sidebar_left sidebar_custom">
             <h3>Map Objects</h3>
             <form action="<?= HOST ?>/add-object" method="post" class="mb-4">
                 <div class="mb-3">
@@ -33,13 +35,13 @@
         </div>
 
         <!-- Map Container -->
-        <div class="col-md-6 col-lg-6">
-            <div id="map-container" style="position: relative; width: 100%; height: 600px;  margin-left: 250px;">        
-				<img id="map-image" src="<?= $data['map']['image'] ?>" style="width: 100%; height: 100%;">
+        <div class="col-md-8 col-lg-8" style="padding: 0">
+            <div id="map-container">        
+				<img id="map-image" src="<?= $data['map']['image'] ?>" >
                 
                 <!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
-                    <div class="draggable-container" style="position: absolute; width: 50px; height: 50px; top: <?= $object['positionX'] ?>px; left: <?= $object['positionY'] ?>px;">
+                    <div class="draggable-container" style="position: absolute; width: <?= $data['grid-size']?>px; height: <?= $data['grid-size']?>px; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;">
                         <img src="<?= $object['image_url'] ?>" 
                              class="draggable" 
                              data-id="<?= $object['id'] ?>" 
@@ -51,11 +53,10 @@
                 <?php endforeach; ?>
             </div>
         </div>
+	
 		
 		<!-- Right Sidebar -->
-        <div class="col-md-3 col-md-3 sidebar_right sidebar_custom">
-            <!-- Right Sidebar -->
-			<div class="col-md-3 col-md-3 sidebar_right sidebar_custom">
+        <div class="col-md-2 col-md-2 sidebar_right sidebar_custom">
 				<!-- List of Characters -->
 				<div class="sidebar-section mb-4">
 					<h3>List of Chars</h3>
@@ -84,7 +85,6 @@
 						<li class="list-group-item">Status 1</li>
 						<li class="list-group-item">Status 2</li>
 					</ul>
-				</div>
 			</div>
         </div>
     </div>
@@ -94,9 +94,15 @@
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
     $(document).ready(function() {
+		
 		// Get the map container's offset relative to the page
         const mapContainer = document.getElementById('map-container');
-        const mapRect = mapContainer.getBoundingClientRect();
+		var mapRect = mapContainer.getBoundingClientRect();
+		mapContainer.style.width = (Math.floor(mapRect.width/<?= $data['grid-size']?>)*<?= $data['grid-size']?>)+'px';
+		mapContainer.style.height = (Math.floor(mapRect.height/<?= $data['grid-size']?>)*<?= $data['grid-size']?>)+'px';
+		
+		var mapRect = mapContainer.getBoundingClientRect();
+        
         const mapOffset = {
             left: mapRect.left,
             top: mapRect.top
@@ -113,8 +119,8 @@
 				interact.modifiers.snap({
 					targets: [
 						interact.createSnapGrid({ 
-							x: 50, 
-							y: 50,
+							x: <?= $data['grid-size']?>, 
+							y: <?= $data['grid-size']?>,
 							offset: {
                                 x: mapOffset.left,
                                 y: mapOffset.top
@@ -188,8 +194,8 @@
 					interact.modifiers.snap({
                         targets: [
                             interact.createSnapGrid({
-                                x: 50,
-                                y: 50,
+                                x: <?= $data['grid-size']?>,
+                                y: <?= $data['grid-size']?>,
                                 offset: {
                                     x: mapOffset.left,
                                     y: mapOffset.top
@@ -219,11 +225,11 @@ websocket.onmessage = function(event) {
             const img = container.querySelector('img');
             if (img.dataset.id === data.objectId.toString()) {
                 // Update position (swap X/Y due to existing structure)
-                container.style.top = data.positionX + 'px';
-                container.style.left = data.positionY + 'px';
+                container.style.left = data.positionX + 'px';
+                container.style.top = data.positionY + 'px';
                 // Update position text
                 const text = container.querySelector('.position-text');
-                text.textContent = `${data.positionY}, ${data.positionX}`;
+                text.textContent = `${data.positionX}, ${data.positionY}`;
                 // Reset transform
                 container.style.transform = 'none';
                 container.setAttribute('data-x', 0);
@@ -251,8 +257,8 @@ interact('.draggable-container').on('dragend', function(event) {
     websocket.send(JSON.stringify({
         action: 'updatePosition',
         objectId: objectId,
-        positionX: newTop, // Existing code uses top as positionX
-        positionY: newLeft // Existing code uses left as positionY
+        positionX: newLeft, // Existing code uses top as positionX
+        positionY: newTop // Existing code uses left as positionY
     }));
 
     // Update local position immediately
