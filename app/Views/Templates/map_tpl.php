@@ -2,7 +2,7 @@
 
 <link rel="stylesheet" href="<?= HOST ?>/public/css/maps.css">
 
-<?php $data['grid-size']=50?>
+<?php $data['grid-size']=37?>
 
 <div class="container-fluid" style="padding-top: 4px;">
     <div class="row">
@@ -95,11 +95,44 @@
 <script>
     $(document).ready(function() {
 		
+		function adjustMapImageSize(mi) {
+
+			const imageWidth = mi.naturalWidth;
+			const imageHeight = mi.naturalHeight;
+
+			if (imageHeight > imageWidth) {
+				// Container is wider than the image
+				mi.style.height = '100%';
+				mi.style.width = 'auto';
+			} else {
+				// Container is taller than the image
+				mi.style.width = '100%';
+				mi.style.height = 'auto';
+			}
+		}	
+		
+		function makeElementAMultipleOfGridSize(container, gridSize){
+			// Adjust the container to be the multiple of grid-size
+			var mapRect = container.getBoundingClientRect();
+			container.style.width = (Math.floor(mapRect.width/gridSize)*gridSize)+'px';
+			container.style.height = (Math.floor(mapRect.height/gridSize)*gridSize)+'px';
+		}
+		
 		// Get the map container's offset relative to the page
         const mapContainer = document.getElementById('map-container');
-		var mapRect = mapContainer.getBoundingClientRect();
-		mapContainer.style.width = (Math.floor(mapRect.width/<?= $data['grid-size']?>)*<?= $data['grid-size']?>)+'px';
-		mapContainer.style.height = (Math.floor(mapRect.height/<?= $data['grid-size']?>)*<?= $data['grid-size']?>)+'px';
+		makeElementAMultipleOfGridSize(mapContainer, <?= $data['grid-size']?>);
+		const mapImage = document.getElementById('map-image');
+		adjustMapImageSize(mapImage);
+		// Get dimensions of the map-image contained in map-container
+		const mapImageRect = mapImage.getBoundingClientRect();
+		// Set map container size to the map-image size
+		mapContainer.style.width = mapImageRect.width+'px';;
+		mapContainer.style.height = mapImageRect.height+'px';;
+		
+		makeElementAMultipleOfGridSize(mapContainer, <?= $data['grid-size']?>);
+		// Remove white margins from the Image
+		mapImage.style.objectFit="cover";
+		//window.addEventListener('resize', adjustMapImageSize);
 		
 		var mapRect = mapContainer.getBoundingClientRect();
         
