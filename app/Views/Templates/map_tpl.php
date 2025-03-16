@@ -35,10 +35,11 @@
         </div>
 
         <!-- Map Container -->
-        <div class="col-md-9">
-            <div id="map-container" style="position: relative; width: 100%; height: 600px;  margin-left: 350px;">        
-				<img id="map-image" src="<?= $data['map']['image'] ?>" style="width: 100%; height: 100%;">
-                
+        <div class="col-md-8 col-lg-8" style="padding: 0">
+            <div id="map-container">        
+				<img id="map-image" src="<?= $data['map']['image'] ?>" >
+                <!-- Grid Overlay Added Here -->
+                <div class="grid-overlay" style="background-size: <?= $data['grid-size'] ?>px <?= $data['grid-size'] ?>px;"></div>
                 <!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
                     <div class="draggable-container" style="position: absolute; width: 50px; height: 50px; top: 0; left: 0;">
