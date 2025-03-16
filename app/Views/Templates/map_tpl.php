@@ -38,8 +38,11 @@
         <div class="col-md-8 col-lg-8" style="padding: 0">
             <div id="map-container">        
 				<img id="map-image" src="<?= $data['map']['image'] ?>" >
+				
+                <!-- Grid Overlay Added Here -->
+                <div class="grid-overlay" style="background-size: <?= $data['grid-size'] ?>px <?= $data['grid-size'] ?>px;"></div>
                 
-                <!-- Draggable Objects -->
+				<!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
                     <div class="draggable-container" style="position: absolute; width: <?= $data['grid-size']?>px; height: <?= $data['grid-size']?>px; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;">
                         <img src="<?= $object['image_url'] ?>" 
