@@ -4,7 +4,7 @@
 
 <?php $data['grid-size']=37?>
 
-<div class="container-fluid" style="padding-top: 4px;">
+<div class="container-fluid no-select" style="padding-top: 4px;">
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 sidebar">
@@ -38,9 +38,11 @@
         <div class="col-md-8 col-lg-8" style="padding: 0">
             <div id="map-container">        
 				<img id="map-image" src="<?= $data['map']['image'] ?>" >
+				
                 <!-- Grid Overlay Added Here -->
                 <div class="grid-overlay" style="background-size: <?= $data['grid-size'] ?>px <?= $data['grid-size'] ?>px;"></div>
-                <!-- Draggable Objects -->
+                
+				<!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
                     <div class="draggable-container" style="position: absolute; width: 50px; height: 50px; top: 0; left: 0;">
                         <img src="<?= $object['image_url'] ?>" 

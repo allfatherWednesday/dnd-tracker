@@ -86,7 +86,7 @@ body {
 	height: '50px';
 	top: '50%';
 	left: '50%';
-    z-index: 2;
+	z-index: 2;
 }
 
 .position-text {
@@ -111,4 +111,11 @@ body {
         linear-gradient(to bottom, white 1px, transparent 1px);
     pointer-events: none; /* Allows clicks to pass through */
     z-index: 1; /* Ensures grid is below draggable objects */
+}
+
+.no-select {
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* Internet Explorer/Edge */
+    user-select: none;         /* Standard */
 }
