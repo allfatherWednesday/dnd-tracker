@@ -4,7 +4,7 @@
 
 <?php $data['grid-size']=37?>
 
-<div class="container-fluid" style="padding-top: 4px;">
+<div class="container-fluid no-select" style="padding-top: 4px;">
     <div class="row">
         <!-- Left Sidebar -->
         <div class="col-md-2 col-md-2 sidebar_left sidebar_custom">
