@@ -6,8 +6,8 @@
 
 <div class="container-fluid no-select" style="padding-top: 4px;">
     <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 sidebar">
+        <!-- Left Sidebar -->
+        <div class="col-md-2 col-md-2 sidebar_left sidebar_custom">
             <h3>Map Objects</h3>
             <form action="<?= HOST ?>/add-object" method="post" class="mb-4">
                 <div class="mb-3">
@@ -44,13 +44,13 @@
                 
 				<!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
-                    <div class="draggable-container" style="position: absolute; width: 50px; height: 50px; top: 0; left: 0;">
+                    <div class="draggable-container" style="position: absolute; width: <?= $data['grid-size']?>px; height: <?= $data['grid-size']?>px; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;">
                         <img src="<?= $object['image_url'] ?>" 
                              class="draggable" 
                              data-id="<?= $object['id'] ?>" 
                              style="width: 100%; height: 100%;">
                         <div class="position-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; background: rgba(0, 0, 0, 0.5); font-size: 10px;">
-                            0, 0
+                            <?= $object['positionX'] ?>, <?= $object['positionY'] ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -97,9 +97,48 @@
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
     $(document).ready(function() {
+		
+		function adjustMapImageSize(mi) {
+
+			const imageWidth = mi.naturalWidth;
+			const imageHeight = mi.naturalHeight;
+
+			if (imageHeight > imageWidth) {
+				// Container is wider than the image
+				mi.style.height = '100%';
+				mi.style.width = 'auto';
+			} else {
+				// Container is taller than the image
+				mi.style.width = '100%';
+				mi.style.height = 'auto';
+			}
+		}	
+		
+		function makeElementAMultipleOfGridSize(container, gridSize){
+			// Adjust the container to be the multiple of grid-size
+			var mapRect = container.getBoundingClientRect();
+			container.style.width = (Math.floor(mapRect.width/gridSize)*gridSize)+'px';
+			container.style.height = (Math.floor(mapRect.height/gridSize)*gridSize)+'px';
+		}
+		
 		// Get the map container's offset relative to the page
         const mapContainer = document.getElementById('map-container');
-        const mapRect = mapContainer.getBoundingClientRect();
+		makeElementAMultipleOfGridSize(mapContainer, <?= $data['grid-size']?>);
+		const mapImage = document.getElementById('map-image');
+		adjustMapImageSize(mapImage);
+		// Get dimensions of the map-image contained in map-container
+		const mapImageRect = mapImage.getBoundingClientRect();
+		// Set map container size to the map-image size
+		mapContainer.style.width = mapImageRect.width+'px';;
+		mapContainer.style.height = mapImageRect.height+'px';;
+		
+		makeElementAMultipleOfGridSize(mapContainer, <?= $data['grid-size']?>);
+		// Remove white margins from the Image
+		mapImage.style.objectFit="cover";
+		//window.addEventListener('resize', adjustMapImageSize);
+		
+		var mapRect = mapContainer.getBoundingClientRect();
+        
         const mapOffset = {
             left: mapRect.left,
             top: mapRect.top
@@ -116,8 +155,8 @@
 				interact.modifiers.snap({
 					targets: [
 						interact.createSnapGrid({ 
-							x: 50, 
-							y: 50,
+							x: <?= $data['grid-size']?>, 
+							y: <?= $data['grid-size']?>,
 							offset: {
                                 x: mapOffset.left,
                                 y: mapOffset.top
@@ -132,21 +171,24 @@
             listeners: {
                 move: dragMoveListener
             }
-        };
+        });
 
-        // Drag move handler
-        function handleDragMove(event) {
-            const target = event.target;
-            const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-            const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+        function dragMoveListener(event) {
+            var target = event.target;
+            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
             target.setAttribute('data-x', x);
             target.setAttribute('data-y', y);
 			
-			// Update the position text
-            var positionText = target.querySelector('.position-text');
-            positionText.textContent = Math.round(x) + ', ' + Math.round(y);
+			// Update the position text relative to map-container
+			var positionText = target.querySelector('.position-text');
+			var originalLeft = parseFloat(target.style.left) || 0;
+			var originalTop = parseFloat(target.style.top) || 0;
+			var currentX = originalLeft + x;
+			var currentY = originalTop + y;
+			positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);
         }
 		
         window.dragMoveListener = dragMoveListener;
@@ -185,11 +227,11 @@
                         restriction: 'parent',
                         endOnly: true
                     }),
-                    interact.modifiers.snap({
+					interact.modifiers.snap({
                         targets: [
                             interact.createSnapGrid({
-                                x: 50,
-                                y: 50,
+                                x: <?= $data['grid-size']?>,
+                                y: <?= $data['grid-size']?>,
                                 offset: {
                                     x: mapOffset.left,
                                     y: mapOffset.top
@@ -197,58 +239,14 @@
                             })
                         ],
                         range: Infinity,
-                        relativePoints: [{ x: 0, y: 0 }]
+                        relativePoints: [ { x: 0, y: 0 } ]
                     })
                 ],
                 autoScroll: true,
-                listeners: { move: handleDragMove }
+                listeners: {
+                    move: dragMoveListener
+                }
             });
-        }
-
-        // Initialize existing elements
-        document.querySelectorAll('.draggable-container').forEach(setupDraggable);
-
-        // Add new object handler
-        $('#object-list li').on('click', function() {
-            const imageUrl = $(this).data('url');
-            const objectId = $(this).data('id');
-
-            // Create new container
-            const newContainer = $('<div>')
-                .addClass('draggable-container')
-                .css({
-                    position: 'absolute',
-                    width: '50px',
-                    height: '50px',
-                    top: '0',
-                    left: '0'
-                });
-
-            // Create image and text elements
-            newContainer.append(
-                $('<img>')
-                    .attr('src', imageUrl)
-                    .addClass('draggable')
-                    .data('id', objectId)
-                    .css({ width: '100%', height: '100%' }),
-                $('<div>')
-                    .addClass('position-text')
-                    .css({
-                        position: 'absolute',
-                        top: '0',
-                        left: '0',
-                        width: '100%',
-                        textAlign: 'center',
-                        color: 'white',
-                        background: 'rgba(0, 0, 0, 0.5)',
-                        fontSize: '10px'
-                    })
-                    .text('0, 0')
-            );
-
-            // Add to map and make draggable
-            $('#map-container').append(newContainer);
-            setupDraggable(newContainer[0]);
         });
     });
 	// Connect to WebSocket
