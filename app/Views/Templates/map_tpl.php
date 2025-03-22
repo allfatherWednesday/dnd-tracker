@@ -8,7 +8,13 @@
     <div class="row">
         <!-- Left Sidebar -->
         <div class="col-md-2 col-md-2 sidebar_left sidebar_custom">
-            <h3>Map Objects</h3>
+            <h3>Grid Settings</h3>
+				<div class="mb-3">
+					<label for="grid-size-input" class="form-label">Grid Size (px)</label>
+					<input type="number" class="form-control" id="grid-size-input" 
+						   name="grid-size" value="<?= $data['grid-size'] ?>">
+				</div>
+			<h3>Map Objects</h3>
             <form action="<?= HOST ?>/add-object" method="post" class="mb-4">
                 <div class="mb-3">
                     <label for="name" class="form-label">Object Name</label>
@@ -96,83 +102,30 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
+
     $(document).ready(function() {
 		
-		function adjustMapImageSize(mi) {
-
-			const imageWidth = mi.naturalWidth;
-			const imageHeight = mi.naturalHeight;
-
-			if (imageHeight > imageWidth) {
-				// Container is wider than the image
-				mi.style.height = '100%';
-				mi.style.width = 'auto';
-			} else {
-				// Container is taller than the image
-				mi.style.width = '100%';
-				mi.style.height = 'auto';
-			}
-		}	
 		
-		function makeElementAMultipleOfGridSize(container, gridSize){
-			// Adjust the container to be the multiple of grid-size
-			var mapRect = container.getBoundingClientRect();
-			container.style.width = (Math.floor(mapRect.width/gridSize)*gridSize)+'px';
-			container.style.height = (Math.floor(mapRect.height/gridSize)*gridSize)+'px';
-		}
-		
-		// Get the map container's offset relative to the page
-        const mapContainer = document.getElementById('map-container');
-		makeElementAMultipleOfGridSize(mapContainer, <?= $data['grid-size']?>);
-		const mapImage = document.getElementById('map-image');
-		adjustMapImageSize(mapImage);
-		// Get dimensions of the map-image contained in map-container
-		const mapImageRect = mapImage.getBoundingClientRect();
-		// Set map container size to the map-image size
-		mapContainer.style.width = mapImageRect.width+'px';;
-		mapContainer.style.height = mapImageRect.height+'px';;
-		
-		makeElementAMultipleOfGridSize(mapContainer, <?= $data['grid-size']?>);
-		// Remove white margins from the Image
-		mapImage.style.objectFit="cover";
-		//window.addEventListener('resize', adjustMapImageSize);
-		
+		adjustMapSize(<?= $data['grid-size']?>);
+		// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
+		const mapContainer = document.getElementById('map-container');
 		var mapRect = mapContainer.getBoundingClientRect();
-        
-        const mapOffset = {
+        var mapOffset = {
             left: mapRect.left,
             top: mapRect.top
         };
+		initializeDraggables(<?= $data['grid-size']?>);
 		
-        // Make objects draggable
-        interact('.draggable-container').draggable({
-            inertia: true,
-            modifiers: [
-                interact.modifiers.restrictRect({
-                    restriction: 'parent',
-                    endOnly: true
-                }),
-				interact.modifiers.snap({
-					targets: [
-						interact.createSnapGrid({ 
-							x: <?= $data['grid-size']?>, 
-							y: <?= $data['grid-size']?>,
-							offset: {
-                                x: mapOffset.left,
-                                y: mapOffset.top
-                            }	
-						})
-					],
-					range: Infinity,
-					relativePoints: [ { x: 0, y: 0 } ]
-				})
-            ],
-            autoScroll: true,
-            listeners: {
-                move: dragMoveListener
+		// Handle grid size input changes
+        $('#grid-size-input').on('input', function() {
+            const newSize = parseInt($(this).val(), 10);
+            if (!isNaN(newSize) && newSize > 0) {
+                gridSize = newSize;
+                updateGridSize(gridSize);
             }
         });
-
+		
+		
         function dragMoveListener(event) {
             var target = event.target;
             var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
@@ -191,7 +144,140 @@
 			positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);
         }
 		
-        window.dragMoveListener = dragMoveListener;
+		
+		function adjustMapSize(gridSize){
+			// We make the container take maximum available space within parent and be the multiple of the grid
+			const mapContainer = document.getElementById('map-container');
+			mapContainer.style.width = '100%';
+			mapContainer.style.height = 'calc(100vh - 60px)';
+			makeElementAMultipleOfGridSize(mapContainer, gridSize);
+			
+			//We set image to take the maximum space within the container, without cropping it or stretching it, the whole image is within the container, plus white margins only on L+R or T+B
+			const mapImage = document.getElementById('map-image');
+			mapImage.style.objectFit = "contain";
+			takeMaxSpaceWithoutCropping(mapImage);
+			
+			// Get dimensions of the map-image contained in map-container
+			const mapImageRect = mapImage.getBoundingClientRect();
+			// Adjust the container to hug the image from all sides, the smaller of the width and height might not be the multiple of the grid-size
+			mapContainer.style.width = mapImageRect.width+'px';
+			mapContainer.style.height = mapImageRect.height+'px';
+			// Adjust the container and crop the image to be multiple of the grid size
+			makeElementAMultipleOfGridSize(mapContainer, gridSize);
+			// Remove white margins from the Image
+			mapImage.style.objectFit="cover";
+		}
+		
+		// Take the images natural W and H,
+		//set image to take the maximum space within the container, without cropping it or stretching it, the whole image is within the container, plus white margins only on L+R or only T+B
+		function takeMaxSpaceWithoutCropping(mi) {
+
+			const imageWidth = mi.naturalWidth;
+			const imageHeight = mi.naturalHeight;
+
+			if (imageHeight > imageWidth) {
+				// Container is wider than the image
+				mi.style.height = '100%';
+				mi.style.width = 'auto';
+			} else {
+				// Container is taller than the image
+				mi.style.width = '100%';
+				mi.style.height = 'auto';
+			}
+		}	
+		
+		function makeElementAMultipleOfGridSize(container, gridSize){
+			// Adjust the container to be the multiple of grid-size, by shrinking it
+			var mapRect = container.getBoundingClientRect();
+			container.style.width = roundDownToMultiple(mapRect.width, gridSize)+'px';
+			container.style.height = roundDownToMultiple(mapRect.height, gridSize)+'px';
+		}
+		
+		function updateGridSize(gridSize) {
+			// Update grid overlay
+			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
+			
+			// Resize draggable containers
+			$('.draggable-container').css({ width: `${gridSize}px`, height: `${gridSize}px` });
+
+			// Adjust map container and recalculate offset
+			adjustMapSize(gridSize);
+			const mc = document.getElementById('map-container');
+			const mapRect = mc.getBoundingClientRect();
+			mapOffset = { left: mapRect.left, top: mapRect.top };
+
+			// Reinitialize draggables with new grid size and adjust the position of objects to a new grid size
+			interact('.draggable-container').unset();
+			initializeDraggables(gridSize);
+			updateDraggableObjects(gridSize);
+			window.dragMoveListener = dragMoveListener;
+		}
+		
+		function initializeDraggables(gridSize) {
+			interact('.draggable-container').draggable({
+				inertia: false,
+				modifiers: [
+					interact.modifiers.restrictRect({
+						restriction: 'parent',
+						endOnly: true
+					}),
+					interact.modifiers.snap({
+						targets: [
+							interact.createSnapGrid({ 
+								x: gridSize, 
+								y: gridSize,
+								offset: {
+									x: mapOffset.left,
+									y: mapOffset.top
+								}	
+							})
+						],
+						range: Infinity,
+						relativePoints: [ { x: 0, y: 0 } ]
+					})
+				],
+				autoScroll: true,
+				listeners: {
+					move: dragMoveListener
+				}
+			});
+		}
+		
+		function roundDownToMultiple(num, mutlipleOf){
+			return (Math.floor(num/mutlipleOf)*mutlipleOf);
+		}
+		
+		function updateDraggableObjects(gridSize){
+			document.querySelectorAll('.draggable-container').forEach(container => {
+				const left = parseFloat(container.style.left) || 0;
+				const top = parseFloat(container.style.top) || 0;
+				
+				const snappedLeft = roundDownToMultiple(left, gridSize);
+				const snappedTop = roundDownToMultiple(top, gridSize);
+				
+				// Update position (swap X/Y due to existing structure)
+				container.style.left = snappedLeft + 'px';
+				container.style.top =  snappedTop + 'px';
+				
+				// Update position text
+				const text = container.querySelector('.position-text');
+				text.textContent = `${snappedLeft}, ${snappedTop}`;
+				
+				// Reset transform
+				container.style.transform = 'none';
+				container.setAttribute('data-x', 0);
+				container.setAttribute('data-y', 0);
+				
+			});
+		}
+		
+		
+		
+		
+		
+		
+		
+        
 
         // Add click handler to load objects onto the map
         $('#object-list li').on('click', function() {
