@@ -50,7 +50,7 @@
                 
 				<!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
-                    <div class="draggable-container" style="position: absolute; width: <?= $data['grid-size']?>px; height: <?= $data['grid-size']?>px; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;">
+                    <div class="draggable-container" style="position: absolute; width: <?= $data['grid-size']?>px; height: <?= $data['grid-size']?>px; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;" data-id="<?= $object['id'] ?>">
                         <img src="<?= $object['image_url'] ?>" 
                              class="draggable" 
                              data-id="<?= $object['id'] ?>" 
@@ -104,7 +104,8 @@
 <script>
 
     $(document).ready(function() {
-		
+		let gridSize = <?= $data['grid-size'] ?>;
+		let selectedObjectId = null;
 		
 		adjustMapSize(<?= $data['grid-size']?>);
 		// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
@@ -193,7 +194,7 @@
 			container.style.height = roundDownToMultiple(mapRect.height, gridSize)+'px';
 		}
 		
-		function updateGridSize(gridSize) {
+		/*function updateGridSize(gridSize) {
 			// Update grid overlay
 			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
 			
@@ -206,15 +207,39 @@
 			const mapRect = mc.getBoundingClientRect();
 			mapOffset = { left: mapRect.left, top: mapRect.top };
 
+			// BROKEN FEATURE - THIS UNSETS nteract('.draggable-container').on('dragend', function(event)
 			// Reinitialize draggables with new grid size and adjust the position of objects to a new grid size
 			interact('.draggable-container').unset();
 			initializeDraggables(gridSize);
 			updateDraggableObjects(gridSize);
 			window.dragMoveListener = dragMoveListener;
+		}*/
+		
+		
+		// BROKEN FEATURE - THIS UNSETS nteract('.draggable-container').on('dragend', function(event)
+		// Modified updateGridSize function
+		function updateGridSize(newSize) {
+			gridSize = newSize;
+			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
+			$('.draggable-container').css({ width: `${gridSize}px`, height: `${gridSize}px` });
+			adjustMapSize(gridSize);
+			const mc = document.getElementById('map-container');
+			const mapRect = mc.getBoundingClientRect();
+			mapOffset = { left: mapRect.left, top: mapRect.top };
+
+			interact('.draggable-container').unset();
+			if (selectedObjectId !== null) {
+				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
+			} else {
+				initializeDraggables(gridSize);
+			}
+			updateDraggableObjects(gridSize);
+			window.dragMoveListener = dragMoveListener;
 		}
 		
-		function initializeDraggables(gridSize) {
-			interact('.draggable-container').draggable({
+		// Modified initializeDraggables function
+		function initializeDraggables(gridSize, selector = '.draggable-container') {
+			interact(selector).draggable({
 				inertia: false,
 				modifiers: [
 					interact.modifiers.restrictRect({
@@ -280,7 +305,7 @@
         
 
         // Add click handler to load objects onto the map
-        $('#object-list li').on('click', function() {
+        /*$('#object-list li').on('click', function() {
             const imageUrl = $(this).data('url');
             const objectId = $(this).data('id');
 
@@ -334,7 +359,34 @@
                 }
             });
         });
-    });
+    */
+	
+		// Modified click handler for object list
+		$('#object-list li').on('click', function() {
+			const objectId = $(this).data('id');
+			const isSelected = $(this).hasClass('selected');
+
+			if (isSelected) {
+				// Deselect
+				selectedObjectId = null;
+				$('#object-list li').removeClass('selected');
+				$('.draggable-container').removeClass('selected');
+				interact('.draggable-container').draggable(true);
+				initializeDraggables(gridSize);
+			} else {
+				// Select
+				selectedObjectId = objectId;
+				$('#object-list li').removeClass('selected');
+				$(this).addClass('selected');
+				$('.draggable-container').removeClass('selected');
+				const selectedContainer = $(`.draggable-container[data-id="${objectId}"]`);
+				selectedContainer.addClass('selected');
+				interact('.draggable-container').draggable(false);
+				initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
+			}
+		});
+	
+	});
 	// Connect to WebSocket
 const websocket = new WebSocket('ws://localhost:8080');
 //const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
@@ -361,6 +413,10 @@ websocket.onmessage = function(event) {
     }
 };
 
+
+
+
+// BROKEN FEATURE - THIS DRAGEND LISTENER GETS UNSET ELSEWHERE IN THE CODE
 // Update interact.js dragend listener
 interact('.draggable-container').on('dragend', function(event) {
     const target = event.target;
