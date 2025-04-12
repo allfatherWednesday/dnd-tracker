@@ -227,7 +227,7 @@
 			const mapRect = mc.getBoundingClientRect();
 			mapOffset = { left: mapRect.left, top: mapRect.top };
 
-			interact('.draggable-container').unset();
+			interact('.draggable-container').unset();	
 			if (selectedObjectId !== null) {
 				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
 			} else {
@@ -263,7 +263,37 @@
 				],
 				autoScroll: true,
 				listeners: {
-					move: dragMoveListener
+					move: dragMoveListener,
+					end: function(event) { // Added end listener here
+						const target = event.target;
+						const img = target.querySelector('img');
+						const objectId = img.dataset.id;
+
+						const originalLeft = parseFloat(target.style.left) || 0;
+						const originalTop = parseFloat(target.style.top) || 0;
+						const translateX = parseFloat(target.getAttribute('data-x')) || 0;
+						const translateY = parseFloat(target.getAttribute('data-y')) || 0;
+
+						const newLeft = originalLeft + translateX;
+						const newTop = originalTop + translateY;
+
+						// Send update to WebSocket server
+						websocket.send(JSON.stringify({
+							action: 'updatePosition',
+							objectId: objectId,
+							positionX: newLeft,
+							positionY: newTop
+						}));
+
+						// Update local position
+						target.style.left = newLeft + 'px';
+						target.style.top = newTop + 'px';
+						target.style.transform = 'none';
+						target.setAttribute('data-x', 0);
+						target.setAttribute('data-y', 0);
+						target.querySelector('.position-text').textContent = 
+							`${Math.round(newLeft)}, ${Math.round(newTop)}`;
+					}
 				}
 			});
 		}
@@ -361,7 +391,7 @@
         });
     */
 	
-		// Modified click handler for object list
+		// Add click handler to lock all but one object from moving 
 		$('#object-list li').on('click', function() {
 			const objectId = $(this).data('id');
 			const isSelected = $(this).hasClass('selected');
@@ -416,7 +446,6 @@ websocket.onmessage = function(event) {
 
 
 
-// BROKEN FEATURE - THIS DRAGEND LISTENER GETS UNSET ELSEWHERE IN THE CODE
 // Update interact.js dragend listener
 interact('.draggable-container').on('dragend', function(event) {
     const target = event.target;
