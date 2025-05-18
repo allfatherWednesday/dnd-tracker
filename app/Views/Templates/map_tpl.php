@@ -1,8 +1,16 @@
-<?php include_once 'partials/editor_top_tpl.php'; ?>
+<?php include_once 'partials/editor_top_tpl.php'; 
+
+// Initialize controller and data
+$mapObjectController = new \app\Controllers\MapObjectController();
+$objects = $mapObjectController->getObjects();
+$gridSize = $data['map']['grid_size'] ?? 37;
+$mapImage = $data['map']['image'] ?? '';
+$mapId = $data['map']['id'] ?? 0;
+?>
+
+
 
 <link rel="stylesheet" href="<?= HOST ?>/public/css/maps.css">
-
-<?php $data['grid-size']=37?>
 
 <div class="container-fluid no-select" style="padding-top: 4px;">
     <div class="row">
@@ -12,8 +20,9 @@
 				<div class="mb-3">
 					<label for="grid-size-input" class="form-label">Grid Size (px)</label>
 					<input type="number" class="form-control" id="grid-size-input" 
-						   name="grid-size" value="<?= $data['grid-size'] ?>">
+						   name="grid-size" value="<?= $gridSize ?>">
 				</div>
+				
 			<h3>Map Objects</h3>
             <form action="<?= HOST ?>/add-object" method="post" class="mb-4">
                 <div class="mb-3">
@@ -30,8 +39,6 @@
             <h4>Loaded Objects</h4>
             <ul id="object-list" class="list-group">
                 <?php
-                $mapObjectController = new \app\Controllers\MapObjectController();
-                $objects = $mapObjectController->getObjects();
                 foreach ($objects as $object): ?>
                     <li class="list-group-item" data-id="<?= $object['id'] ?>" data-url="<?= $object['image_url'] ?>">
                         <?= $object['name'] ?>
@@ -43,14 +50,14 @@
         <!-- Map Container -->
         <div class="col-md-8 col-lg-8" style="padding: 0">
             <div id="map-container">        
-				<img id="map-image" src="<?= $data['map']['image'] ?>" >
+				<img id="map-image" src="<?= $mapImage ?>" >
 				
                 <!-- Grid Overlay Added Here -->
-                <div class="grid-overlay" style="background-size: <?= $data['grid-size'] ?>px <?= $data['grid-size'] ?>px;"></div>
+                <div class="grid-overlay" style="background-size: <?= $gridSize ?>px <?= $gridSize ?>px;"></div>
                 
 				<!-- Draggable Objects -->
                 <?php foreach ($objects as $object): ?>
-                    <div class="draggable-container" style="position: absolute; width: <?= $data['grid-size']?>px; height: <?= $data['grid-size']?>px; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;" data-id="<?= $object['id'] ?>">
+                    <div class="draggable-container" style="position: absolute; width: <?= $gridSize?>px; height: <?= $gridSize?>px; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;" data-id="<?= $object['id'] ?>">
                         <img src="<?= $object['image_url'] ?>" 
                              class="draggable" 
                              data-id="<?= $object['id'] ?>" 
@@ -66,35 +73,7 @@
 		
 		<!-- Right Sidebar -->
         <div class="col-md-2 col-md-2 sidebar_right sidebar_custom">
-				<!-- List of Characters -->
-				<div class="sidebar-section mb-4">
-					<h3>List of Chars</h3>
-					<ul class="list-group">
-						<?php /* Add PHP loop for characters here */ ?>
-						<li class="list-group-item">Character 1</li>
-						<li class="list-group-item">Character 2</li>
-					</ul>
-				</div>
-
-				<!-- List of Enemies -->
-				<div class="sidebar-section mb-4">
-					<h3>List of Enemies</h3>
-					<ul class="list-group">
-						<?php /* Add PHP loop for enemies here */ ?>
-						<li class="list-group-item">Enemy 1</li>
-						<li class="list-group-item">Enemy 2</li>
-					</ul>
-				</div>
-
-				<!-- List of Statuses -->
-				<div class="sidebar-section">
-					<h3>List of Statuses</h3>
-					<ul class="list-group">
-						<?php /* Add PHP loop for statuses here */ ?>
-						<li class="list-group-item">Status 1</li>
-						<li class="list-group-item">Status 2</li>
-					</ul>
-			</div>
+				
         </div>
     </div>
 </div>
@@ -102,12 +81,17 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
+let mapId = <?= $mapId ?>;
+let gridSize = <?= $gridSize ?>;
+		
+		
 
+		
     $(document).ready(function() {
-		let gridSize = <?= $data['grid-size'] ?>;
+		
 		let selectedObjectId = null;
 		
-		adjustMapSize(<?= $data['grid-size']?>);
+		adjustMapSize(gridSize);
 		// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
 		const mapContainer = document.getElementById('map-container');
 		var mapRect = mapContainer.getBoundingClientRect();
@@ -115,16 +99,20 @@
             left: mapRect.left,
             top: mapRect.top
         };
-		initializeDraggables(<?= $data['grid-size']?>);
+		initializeDraggables(gridSize);
 		
-		// Handle grid size input changes
-        $('#grid-size-input').on('input', function() {
-            const newSize = parseInt($(this).val(), 10);
-            if (!isNaN(newSize) && newSize > 0) {
-                gridSize = newSize;
-                updateGridSize(gridSize);
-            }
-        });
+		$('#grid-size-input').on('input', function() {
+			const newSize = parseInt($(this).val(), 10);
+			if (!isNaN(newSize) && newSize > 0 && newSize !== gridSize) {
+				gridSize = newSize;
+				updateGridSize(gridSize, true); // Pass true to send updates
+				websocket.send(JSON.stringify({
+					action: 'updateGridSize',
+					mapId: mapId,
+					gridSize: newSize
+				}));
+			}
+		});
 		
 		
         function dragMoveListener(event) {
@@ -145,7 +133,8 @@
 			positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);
         }
 		
-		
+		//Ensures map container dimensions are multiples of grid size
+		//Handles image fitting using contain/cover strategies
 		function adjustMapSize(gridSize){
 			// We make the container take maximum available space within parent and be the multiple of the grid
 			const mapContainer = document.getElementById('map-container');
@@ -194,31 +183,10 @@
 			container.style.height = roundDownToMultiple(mapRect.height, gridSize)+'px';
 		}
 		
-		/*function updateGridSize(gridSize) {
-			// Update grid overlay
-			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
-			
-			// Resize draggable containers
-			$('.draggable-container').css({ width: `${gridSize}px`, height: `${gridSize}px` });
-
-			// Adjust map container and recalculate offset
-			adjustMapSize(gridSize);
-			const mc = document.getElementById('map-container');
-			const mapRect = mc.getBoundingClientRect();
-			mapOffset = { left: mapRect.left, top: mapRect.top };
-
-			// BROKEN FEATURE - THIS UNSETS nteract('.draggable-container').on('dragend', function(event)
-			// Reinitialize draggables with new grid size and adjust the position of objects to a new grid size
-			interact('.draggable-container').unset();
-			initializeDraggables(gridSize);
-			updateDraggableObjects(gridSize);
-			window.dragMoveListener = dragMoveListener;
-		}*/
-		
-		
 		// BROKEN FEATURE - THIS UNSETS nteract('.draggable-container').on('dragend', function(event)
 		// Modified updateGridSize function
-		function updateGridSize(newSize) {
+		// Reinitialize all draggables unconditionally, then adjust for selection.
+		function updateGridSize(newSize, sendUpdates = true) {
 			gridSize = newSize;
 			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
 			$('.draggable-container').css({ width: `${gridSize}px`, height: `${gridSize}px` });
@@ -227,19 +195,21 @@
 			const mapRect = mc.getBoundingClientRect();
 			mapOffset = { left: mapRect.left, top: mapRect.top };
 
-			interact('.draggable-container').unset();	
+			interact('.draggable-container').off('dragmove dragend');
+			initializeDraggables(gridSize);
+			
 			if (selectedObjectId !== null) {
-				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
-			} else {
-				initializeDraggables(gridSize);
+				interact('.draggable-container').draggable(false);
+				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(true);
 			}
-			updateDraggableObjects(gridSize);
-			window.dragMoveListener = dragMoveListener;
+			updateDraggableObjects(gridSize, sendUpdates);
 		}
 		
+	
 		// Modified initializeDraggables function
-		function initializeDraggables(gridSize, selector = '.draggable-container') {
-			interact(selector).draggable({
+		//The function always targets all .draggable-container elements unless specifically handling a selection (managed separately in click handler).
+		function initializeDraggables(gridSize) {
+			interact('.draggable-container').draggable({
 				inertia: false,
 				modifiers: [
 					interact.modifiers.restrictRect({
@@ -302,7 +272,7 @@
 			return (Math.floor(num/mutlipleOf)*mutlipleOf);
 		}
 		
-		function updateDraggableObjects(gridSize){
+		function updateDraggableObjects(gridSize, sendUpdates) {
 			document.querySelectorAll('.draggable-container').forEach(container => {
 				const left = parseFloat(container.style.left) || 0;
 				const top = parseFloat(container.style.top) || 0;
@@ -310,19 +280,25 @@
 				const snappedLeft = roundDownToMultiple(left, gridSize);
 				const snappedTop = roundDownToMultiple(top, gridSize);
 				
-				// Update position (swap X/Y due to existing structure)
 				container.style.left = snappedLeft + 'px';
-				container.style.top =  snappedTop + 'px';
+				container.style.top = snappedTop + 'px';
 				
-				// Update position text
 				const text = container.querySelector('.position-text');
 				text.textContent = `${snappedLeft}, ${snappedTop}`;
 				
-				// Reset transform
 				container.style.transform = 'none';
 				container.setAttribute('data-x', 0);
 				container.setAttribute('data-y', 0);
 				
+				if (sendUpdates) {
+					const objectId = container.getAttribute('data-id');
+					websocket.send(JSON.stringify({
+						action: 'updatePosition',
+						objectId: objectId,
+						positionX: snappedLeft,
+						positionY: snappedTop
+					}));
+				}
 			});
 		}
 		
@@ -332,150 +308,81 @@
 		
 		
 		
-        
-
-        // Add click handler to load objects onto the map
-        /*$('#object-list li').on('click', function() {
-            const imageUrl = $(this).data('url');
-            const objectId = $(this).data('id');
-
-            // Create the image
-            const newImage = $('<img>')
-                .attr('src', imageUrl)
-                .addClass('draggable')
-                .attr('data-id', objectId)
-                .css({
-                    width: '100%',
-                    height: '100%'
-                });
-
-            // Create the position text overlay
-            const newPositionText = $('<div>')
-                .addClass('position-text')
-                .text('0, 0');
-
-            // Append the image and text to the container
-            newContainer.append(newImage).append(newPositionText);
-
-            // Add the container to the map container
-            $('#map-container').append(newContainer);
-
-            // Make the new image draggable
-            interact(newImage[0]).draggable({
-                inertia: true,
-                modifiers: [
-                    interact.modifiers.restrictRect({
-                        restriction: 'parent',
-                        endOnly: true
-                    }),
-					interact.modifiers.snap({
-                        targets: [
-                            interact.createSnapGrid({
-                                x: <?= $data['grid-size']?>,
-                                y: <?= $data['grid-size']?>,
-                                offset: {
-                                    x: mapOffset.left,
-                                    y: mapOffset.top
-                                }
-                            })
-                        ],
-                        range: Infinity,
-                        relativePoints: [ { x: 0, y: 0 } ]
-                    })
-                ],
-                autoScroll: true,
-                listeners: {
-                    move: dragMoveListener
-                }
-            });
-        });
-    */
 	
 		// Add click handler to lock all but one object from moving 
+		// When selecting an object, disable others after all are initialized.
 		$('#object-list li').on('click', function() {
 			const objectId = $(this).data('id');
 			const isSelected = $(this).hasClass('selected');
 
 			if (isSelected) {
 				// Deselect
-				selectedObjectId = null;
 				$('#object-list li').removeClass('selected');
 				$('.draggable-container').removeClass('selected');
 				interact('.draggable-container').draggable(true);
-				initializeDraggables(gridSize);
 			} else {
-				// Select
+				// Select: Disable all except selected
 				selectedObjectId = objectId;
 				$('#object-list li').removeClass('selected');
 				$(this).addClass('selected');
 				$('.draggable-container').removeClass('selected');
 				const selectedContainer = $(`.draggable-container[data-id="${objectId}"]`);
 				selectedContainer.addClass('selected');
+				
 				interact('.draggable-container').draggable(false);
-				initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
+				interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
 			}
 		});
 	
-	});
+	
 	// Connect to WebSocket
-const websocket = new WebSocket('ws://localhost:8080');
-//const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
+	const websocket = new WebSocket('ws://localhost:8080');
+	//const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
 
-websocket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    if (data.action === 'positionUpdated') {
-        const containers = document.querySelectorAll('.draggable-container');
-        containers.forEach(container => {
-            const img = container.querySelector('img');
-            if (img.dataset.id === data.objectId.toString()) {
-                // Update position (swap X/Y due to existing structure)
-                container.style.left = data.positionX + 'px';
-                container.style.top = data.positionY + 'px';
-                // Update position text
-                const text = container.querySelector('.position-text');
-                text.textContent = `${data.positionX}, ${data.positionY}`;
-                // Reset transform
-                container.style.transform = 'none';
-                container.setAttribute('data-x', 0);
-                container.setAttribute('data-y', 0);
-            }
-        });
-    }
-};
+	websocket.onmessage = function(event) {
+		const data = JSON.parse(event.data);
+		if (data.action === 'positionUpdated') {
+			const containers = document.querySelectorAll('.draggable-container');
+			containers.forEach(container => {
+				const img = container.querySelector('img');
+				if (img.dataset.id === data.objectId.toString()) {
+					// Update position (swap X/Y due to existing structure)
+					container.style.left = data.positionX + 'px';
+					container.style.top = data.positionY + 'px';
+					// Update position text
+					const text = container.querySelector('.position-text');
+					text.textContent = `${data.positionX}, ${data.positionY}`;
+					// Reset transform
+					container.style.transform = 'none';
+					container.setAttribute('data-x', 0);
+					container.setAttribute('data-y', 0);
+				}
+			});
+		}else if (data.action === 'gridSizeUpdated') {
+			if (data.gridSize !== gridSize) {
+				gridSize = data.gridSize;
+				$('#grid-size-input').val(gridSize);
+				updateGridSize(gridSize, false); // Pass false to prevent sending updates
+			}
+		}
+	};
 
+	
 
-
-
-// Update interact.js dragend listener
-interact('.draggable-container').on('dragend', function(event) {
-    const target = event.target;
-    const img = target.querySelector('img');
-    const objectId = img.dataset.id;
-
-    const originalLeft = parseFloat(target.style.left) || 0;
-    const originalTop = parseFloat(target.style.top) || 0;
-    const translateX = parseFloat(target.getAttribute('data-x')) || 0;
-    const translateY = parseFloat(target.getAttribute('data-y')) || 0;
-
-    const newLeft = originalLeft + translateX;
-    const newTop = originalTop + translateY;
-
-    // Send update to WebSocket server
-    websocket.send(JSON.stringify({
-        action: 'updatePosition',
-        objectId: objectId,
-        positionX: newLeft, // Existing code uses top as positionX
-        positionY: newTop // Existing code uses left as positionY
-    }));
-
-    // Update local position immediately
-    target.style.left = newLeft + 'px';
-    target.style.top = newTop + 'px';
-    target.style.transform = 'none';
-    target.setAttribute('data-x', 0);
-    target.setAttribute('data-y', 0);
-    target.querySelector('.position-text').textContent = 
-        `${Math.round(newLeft)}, ${Math.round(newTop)}`;
+	$('#grid-size-input').on('input', function() {
+		const newSize = parseInt($(this).val(), 10);
+		if (!isNaN(newSize) && newSize > 0 && newSize !== gridSize) {
+			gridSize = newSize;
+			updateGridSize(gridSize);
+			// Send WebSocket message
+			console.log(gridSize);
+			websocket.send(JSON.stringify({
+				action: 'updateGridSize',
+				mapId: mapId,
+				gridSize: newSize
+			}));
+		}
+	});
 });
 </script>
 

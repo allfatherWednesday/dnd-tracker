@@ -16,10 +16,14 @@ class MapWebSocket implements MessageComponentInterface {
     public function onOpen(ConnectionInterface $conn) {
         $this->clients->attach($conn);
     }
-
+	
+	// Options for messages: Load New Map, update position of an object, Update GridSize
     public function onMessage(ConnectionInterface $from, $msg) {
         $data = json_decode($msg, true);
-        if ($data['action'] === 'updatePosition') {
+        
+		if ($data['action'] === 'LoadNewMap'){
+			//...MapModel\getMapById
+		}elseif ($data['action'] === 'updatePosition') {
             $objectId = $data['objectId'];
             $positionX = $data['positionX'];
             $positionY = $data['positionY'];
@@ -39,7 +43,24 @@ class MapWebSocket implements MessageComponentInterface {
                     ]));
                 }
             }
-        }
+        }elseif ($data['action'] === 'updateGridSize') {
+			$mapId = $data['mapId'];
+			$gridSize = $data['gridSize'];
+
+			// Update database using MapModel
+			$mapModel = new \app\Models\MapModel();
+			$mapModel->updateGridSize($mapId, $gridSize);
+
+			// Broadcast new grid size to all clients except sender
+			foreach ($this->clients as $client) {
+				if ($client !== $from) {
+					$client->send(json_encode([
+						'action' => 'gridSizeUpdated',
+						'gridSize' => $gridSize
+					]));
+				}
+			}
+		}
     }
 
     public function onClose(ConnectionInterface $conn) {

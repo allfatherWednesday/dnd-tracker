@@ -7,21 +7,45 @@ use app\Models\MapModel;
 
 class MapController extends Controller
 {
-    public function displayMap()
+	//TODO add params to it to select a different map
+    /*public function displayMap()
     {
-        // Fetch map, characters, and enemies data
+        // Fetch map
         $mapModel = new MapModel();
-        $characterModel = new CharacterModel();
 
         $map = $mapModel->getMap();
-        $characters = $characterModel->getAll();
-        $enemies = $mapModel->getEnemies();
 
         // Load the view with the data
         $this->view->load('map', [
             'map' => $map,
-            'characters' => $characters,
-            'enemies' => $enemies
         ]);
+    }*/
+	
+	public function displayMap(array $parameters = []): void
+    {
+        try {
+            // Extract mapId from parameters with named key fallback to default
+            $mapId = (int)($parameters['mapId'] ?? $parameters[0] ?? 1);
+            
+            $mapModel = new MapModel();
+            $map = $mapModel->getMapById($mapId);
+
+            if (!$map) {
+                throw new NotFoundException("Map with ID {$mapId} not found");
+            }
+
+            $this->view->load('map', [
+                'map' => $map,
+                'gridSize' => $map['grid_size'] ?? 37,
+            ]);
+            
+        } catch (\PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            $this->view->load('error', ['message' => 'Failed to load map data']);
+        }
     }
+	/*public function addMap(id)
+    {
+		TODO
+    }*/
 }
