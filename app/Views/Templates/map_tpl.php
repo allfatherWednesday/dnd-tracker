@@ -62,9 +62,9 @@ $mapId = $data['map']['id'] ?? 0;
                              class="draggable" 
                              data-id="<?= $object['id'] ?>" 
                              style="width: 100%; height: 100%;">
-                        <div class="position-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; background: rgba(0, 0, 0, 0.5); font-size: 10px;">
-                            <?= $object['positionX'] ?>, <?= $object['positionY'] ?>
-                        </div>
+                        <!--<div class="position-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; background: rgba(0, 0, 0, 0.5); font-size: 10px;">
+                            < ?= $object['positionX'] ? >, < ?= $object['positionY'] ? >
+                        </div>-->
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -128,12 +128,12 @@ let gridSize = <?= $gridSize ?>;
             target.setAttribute('data-y', y);
 			
 			// Update the position text relative to map-container
-			var positionText = target.querySelector('.position-text');
+			/*var positionText = target.querySelector('.position-text');
 			var originalLeft = parseFloat(target.style.left) || 0;
 			var originalTop = parseFloat(target.style.top) || 0;
 			var currentX = originalLeft + x;
 			var currentY = originalTop + y;
-			positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);
+			positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);*/
         }
 		
 		//Ensures map container dimensions are multiples of grid size
@@ -264,8 +264,8 @@ let gridSize = <?= $gridSize ?>;
 						target.style.transform = 'none';
 						target.setAttribute('data-x', 0);
 						target.setAttribute('data-y', 0);
-						target.querySelector('.position-text').textContent = 
-							`${Math.round(newLeft)}, ${Math.round(newTop)}`;
+						/*target.querySelector('.position-text').textContent = 
+							`${Math.round(newLeft)}, ${Math.round(newTop)}`;*/
 					}
 				}
 			});
@@ -286,8 +286,8 @@ let gridSize = <?= $gridSize ?>;
 				container.style.left = snappedLeft + 'px';
 				container.style.top = snappedTop + 'px';
 				
-				const text = container.querySelector('.position-text');
-				text.textContent = `${snappedLeft}, ${snappedTop}`;
+				/*const text = container.querySelector('.position-text');
+				text.textContent = `${snappedLeft}, ${snappedTop}`;*/
 				
 				container.style.transform = 'none';
 				container.setAttribute('data-x', 0);
@@ -354,8 +354,8 @@ let gridSize = <?= $gridSize ?>;
 					container.style.left = data.positionX + 'px';
 					container.style.top = data.positionY + 'px';
 					// Update position text
-					const text = container.querySelector('.position-text');
-					text.textContent = `${data.positionX}, ${data.positionY}`;
+					/*const text = container.querySelector('.position-text');
+					text.textContent = `${data.positionX}, ${data.positionY}`;*/
 					// Reset transform
 					container.style.transform = 'none';
 					container.setAttribute('data-x', 0);
