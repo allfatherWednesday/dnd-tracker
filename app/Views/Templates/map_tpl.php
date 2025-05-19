@@ -114,7 +114,10 @@ let gridSize = <?= $gridSize ?>;
 			}
 		});
 		
-		
+		//later change:
+		//$('.draggable-container').addClass('locked');
+		//$(`.draggable-container[data-id="${objectId}"]`).removeClass('locked');
+		//if (event.target.classList.contains('locked')) return;
         function dragMoveListener(event) {
             var target = event.target;
             var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
@@ -208,8 +211,8 @@ let gridSize = <?= $gridSize ?>;
 	
 		// Modified initializeDraggables function
 		//The function always targets all .draggable-container elements unless specifically handling a selection (managed separately in click handler).
-		function initializeDraggables(gridSize) {
-			interact('.draggable-container').draggable({
+		function initializeDraggables(gridSize, filterSelector ='.draggable-container') {
+			interact(filterSelector).draggable({
 				inertia: false,
 				modifiers: [
 					interact.modifiers.restrictRect({
@@ -331,6 +334,7 @@ let gridSize = <?= $gridSize ?>;
 				
 				interact('.draggable-container').draggable(false);
 				interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
+				initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
 			}
 		});
 	
