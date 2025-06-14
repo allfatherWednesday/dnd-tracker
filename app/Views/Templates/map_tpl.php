@@ -73,7 +73,9 @@ $mapId = $data['map']['id'] ?? 0;
 		
 		<!-- Right Sidebar -->
         <div class="col-md-2 col-md-2 sidebar_right sidebar_custom">
-				
+			<div id="status-effects-container" ><!--style="display: none;"-->
+				<h4>Status Effects</h4>
+			</div>
         </div>
     </div>
 </div>
@@ -83,11 +85,44 @@ $mapId = $data['map']['id'] ?? 0;
 <script>
 let mapId = <?= $mapId ?>;
 let gridSize = <?= $gridSize ?>;
-		
+const statusEffects = [
+    { name: 'Acid', icon: 'https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png' },
+    { name: 'Bleeding', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Bleeding%20Out.png' },
+    { name: 'Blind', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Blinded.png' },
+    { name: 'Burning', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/On%20Fire.png' },
+    { name: 'Electrocuted', icon: '' }, // Add actual URL
+    { name: 'Freezing', icon: '' }, // Add actual URL
+    { name: 'Necrosis', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Ancenstral%20Protectors.png' },
+    { name: 'Petrified', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Petrified.png' },
+    { name: 'Poison', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Poisoned.png' },
+    { name: 'Prone', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Prone.png' },
+    { name: 'Radiant', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Highlighted.png' },
+    { name: 'Stunned', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Stunned.png' },
+    { name: 'Thunder', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Blur.png' },
+    { name: 'Wet', icon: 'https://static.thenounproject.com/png/2287944-200.png' },
+    { name: 'Confused', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Confused.png' },
+    { name: 'Frightened', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Frightened.png' },
+    { name: 'Possessed', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Possessed.png' },
+    { name: 'Unconscious', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Unconcious.png' }
+];		
+				
 		
 
 		
     $(document).ready(function() {
+		// generate a grid with status effect in status-effects-list div
+		// <div class="square" style="background-image: url('https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png')"> </div>
+		// status-effects-list
+		
+		function appendHtmlFromArray(container, arr) {
+			var currentIndex = 0;
+			while (currentIndex<arr.length) {
+				container.innerHTML += '<div class="square" id="effect-'+arr[currentIndex].name +'" style="background-image: url('+arr[currentIndex].icon+')"></div>';
+				currentIndex += 1;
+			
+			}
+		}
+		appendHtmlFromArray(document.getElementById('status-effects-container'), statusEffects)
 		
 		let selectedObjectId = null;
 		
