@@ -140,7 +140,12 @@ const statusEffects = [
 			const newSize = parseInt($(this).val(), 10);
 			if (!isNaN(newSize) && newSize > 0 && newSize !== gridSize) {
 				gridSize = newSize;
-				updateGridSize(gridSize, true); // Pass true to send updates
+				updateGridSize(gridSize);
+				const selectedId = $('#object-list li.selected').data('id');
+				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedId }"]`);
+				
+				// Send WebSocket message
+				console.log(gridSize);
 				websocket.send(JSON.stringify({
 					action: 'updateGridSize',
 					mapId: mapId,
@@ -148,6 +153,7 @@ const statusEffects = [
 				}));
 			}
 		});
+		
 		
 		//later change:
 		//$('.draggable-container').addClass('locked');
@@ -247,6 +253,7 @@ const statusEffects = [
 		// Modified initializeDraggables function
 		//The function always targets all .draggable-container elements unless specifically handling a selection (managed separately in click handler).
 		function initializeDraggables(gridSize, filterSelector ='.draggable-container') {
+			console.log("gridSize:"+gridSize+" filterSelector:"+filterSelector);
 			interact(filterSelector).draggable({
 				inertia: false,
 				modifiers: [
@@ -406,22 +413,6 @@ const statusEffects = [
 		}
 	};
 
-	
-
-	$('#grid-size-input').on('input', function() {
-		const newSize = parseInt($(this).val(), 10);
-		if (!isNaN(newSize) && newSize > 0 && newSize !== gridSize) {
-			gridSize = newSize;
-			updateGridSize(gridSize);
-			// Send WebSocket message
-			console.log(gridSize);
-			websocket.send(JSON.stringify({
-				action: 'updateGridSize',
-				mapId: mapId,
-				gridSize: newSize
-			}));
-		}
-	});
 });
 </script>
 
