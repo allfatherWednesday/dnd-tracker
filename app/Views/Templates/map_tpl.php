@@ -73,7 +73,7 @@ $mapId = $data['map']['id'] ?? 0;
 		
 		<!-- Right Sidebar -->
         <div class="col-md-2 col-md-2 sidebar_right sidebar_custom">
-			<div id="status-effects-container" ><!--style="display: none;"-->
+			<div id="status-effects-container" style="display: none;">
 				<h4>Status Effects</h4>
 			</div>
         </div>
@@ -117,12 +117,19 @@ const statusEffects = [
 		function appendHtmlFromArray(container, arr) {
 			var currentIndex = 0;
 			while (currentIndex<arr.length) {
-				container.innerHTML += '<div class="square" id="effect-'+arr[currentIndex].name +'" style="background-image: url('+arr[currentIndex].icon+')"></div>';
+				container.innerHTML += '<div class="square" id="effect-'+arr[currentIndex].name +'" style="background-image: url('+arr[currentIndex].icon+')" title="'+arr[currentIndex].name+'"></div>';
 				currentIndex += 1;
 			
 			}
 		}
 		appendHtmlFromArray(document.getElementById('status-effects-container'), statusEffects)
+		
+		// add an event listener for each of the effects to be implemented on the selected:
+		// $('#status-effects-container div').on('click', function() {
+		// identify the selected object, check if the selected  check if it already has effects, if number of effect is 0-2 add another effect div, if it's 3, add a "...", if more than 3, do nothing.
+		
+		
+		
 		
 		let selectedObjectId = null;
 		
@@ -360,11 +367,13 @@ const statusEffects = [
 			const objectId = $(this).data('id');
 			const isSelected = $(this).hasClass('selected');
 
+			//TO DO HIGHLIGHT THE SELECTED STATUS EFFECTS
 			if (isSelected) {
 				// Deselect
 				$('#object-list li').removeClass('selected');
 				$('.draggable-container').removeClass('selected');
 				interact('.draggable-container').draggable(true);
+				$('#status-effects-container').css('display', 'none');
 			} else {
 				// Select: Disable all except selected
 				selectedObjectId = objectId;
@@ -377,6 +386,7 @@ const statusEffects = [
 				interact('.draggable-container').draggable(false);
 				interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
 				initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
+				$('#status-effects-container').css('display', 'block');
 			}
 		});
 	
