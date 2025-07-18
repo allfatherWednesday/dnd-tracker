@@ -28,5 +28,5 @@ class MapObjectController extends Controller
     {
         $mapObjectModel = new MapObjectModel();
         return $mapObjectModel->getAllObjects();
-    }
+    } 
 }

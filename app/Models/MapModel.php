@@ -44,6 +44,12 @@ class MapModel extends Model
         }
     }
 	
+	public function getAllMaps(): ?array
+	{
+        $req = $this->db()->prepare("SELECT * FROM maps ORDER BY id DESC");
+        $req->execute();
+        return $req->fetchAll(PDO::FETCH_ASSOC);
+	}
 	
     public function updateGridSize(int $mapId, int $gridSize): bool
     {

@@ -1,13 +1,4 @@
-<?php include_once 'partials/editor_top_tpl.php'; 
-
-// Initialize controller and data
-$mapObjectController = new \app\Controllers\MapObjectController();
-$objects = $mapObjectController->getObjects();
-$gridSize = $data['map']['grid_size'] ?? 37;
-$mapImage = $data['map']['image'] ?? '';
-$mapId = $data['map']['id'] ?? 0;
-?>
-
+<?php include_once 'partials/editor_top_tpl.php'; ?>
 
 
 <link rel="stylesheet" href="<?= HOST ?>/public/css/maps.css">
@@ -20,11 +11,11 @@ $mapId = $data['map']['id'] ?? 0;
 				<div class="mb-3">
 					<label for="grid-size-input" class="form-label">Grid Size (px)</label>
 					<input type="number" class="form-control" id="grid-size-input" 
-						   name="grid-size" value="<?= $gridSize ?>">
+						   name="grid-size">
 				</div>
 				
 			<h3>Map Objects</h3>
-            <form action="<?= HOST ?>/add-object" method="post" class="mb-4">
+            <form action="" method="post" class="mb-4">
                 <div class="mb-3">
                     <label for="name" class="form-label">Object Name</label>
                     <input type="text" class="form-control" id="name" name="name" required>
@@ -38,35 +29,18 @@ $mapId = $data['map']['id'] ?? 0;
 
             <h4>Loaded Objects</h4>
             <ul id="object-list" class="list-group">
-                <?php
-                foreach ($objects as $object): ?>
-                    <li class="list-group-item" data-id="<?= $object['id'] ?>" data-url="<?= $object['image_url'] ?>">
-                        <?= $object['name'] ?>
-                    </li>
-                <?php endforeach; ?>
+                
             </ul>
         </div>
 
         <!-- Map Container -->
         <div class="col-md-8 col-lg-8" style="padding: 0">
             <div id="map-container">        
-				<img id="map-image" src="<?= $mapImage ?>" >
+				<img id="map-image">
 				
                 <!-- Grid Overlay Added Here -->
-                <div class="grid-overlay" style="background-size: <?= $gridSize ?>px <?= $gridSize ?>px;"></div>
+                <div class="grid-overlay"></div>
                 
-				<!-- Draggable Objects -->
-                <?php foreach ($objects as $object): ?>
-                    <div class="draggable-container" style="position: absolute; width: <?= $gridSize?>px; height: <?= $gridSize?>px; left: <?= $object['positionX'] ?>px; top: <?= $object['positionY'] ?>px;" data-id="<?= $object['id'] ?>">
-                        <img src="<?= $object['image_url'] ?>" 
-                             class="draggable" 
-                             data-id="<?= $object['id'] ?>" 
-                             style="width: 100%; height: 100%;">
-                        <!--<div class="position-text" style="position: absolute; top: 0; left: 0; width: 100%; text-align: center; color: white; background: rgba(0, 0, 0, 0.5); font-size: 10px;">
-                            < ?= $object['positionX'] ? >, < ?= $object['positionY'] ? >
-                        </div>-->
-                    </div>
-                <?php endforeach; ?>
             </div>
         </div>
 	
@@ -83,8 +57,6 @@ $mapId = $data['map']['id'] ?? 0;
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
-let mapId = <?= $mapId ?>;
-let gridSize = <?= $gridSize ?>;
 const statusEffects = [
     { name: 'Acid', icon: 'https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png' },
     { name: 'Bleeding', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Bleeding%20Out.png' },
@@ -106,10 +78,159 @@ const statusEffects = [
     { name: 'Unconscious', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Unconcious.png' }
 ];		
 				
+let gridSize;
+let mapId;
+let mapImage;
+let allObjects = [];		
+let selectedObjectId = null;
+var mapRect;
+var mapOffset;
 		
-
 		
     $(document).ready(function() {
+		
+		// Connect to WebSocket
+		const websocket = new WebSocket('ws://localhost:8080');
+		//const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
+		
+
+		websocket.onmessage = function(event) {
+			const data = JSON.parse(event.data);
+			switch (data.action){
+				case 'firstFetchReturn':
+					console.log(data);
+					
+					//Set variables to the new values
+					//change to select the map with a flag of active map, and to have a dropdown for all maps
+					gridSize = data['maps'][0].grid_size;
+					mapId = data['maps'][0].id;
+					mapImage = data['maps'][0].image;
+					allObjects = data['objects'];
+					
+					redrawMap();
+					redrawAllObjects();
+					break;
+				case 'positionUpdated':
+					const containers = document.querySelectorAll('.draggable-container');
+					containers.forEach(container => {
+						const img = container.querySelector('img');
+						if (img.dataset.id === data.objectId.toString()) {
+							// Update position (swap X/Y due to existing structure)
+							container.style.left = data.positionX + 'px';
+							container.style.top = data.positionY + 'px';
+							// Reset transform
+							container.style.transform = 'none';
+							container.setAttribute('data-x', 0);
+							container.setAttribute('data-y', 0);
+					}
+					});
+					break;
+				case 'gridSizeUpdated':
+					if (data.gridSize !== gridSize) {
+						gridSize = data.gridSize;
+						$('#grid-size-input').val(gridSize);
+						updateGridSize(gridSize, false); // Pass false to prevent sending updates
+					}
+					break;
+				default:
+					//do nothing
+			}
+		};
+		
+		websocket.onopen = () => websocket.send(JSON.stringify({
+					action: 'firstFetch',
+				}));
+		
+		
+		function redrawMap(){
+			$("#grid-size-input").val(gridSize);
+			$("#map-image").attr("src",mapImage);
+			$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px");
+			
+			adjustMapSize(gridSize);
+			// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
+			const mapContainer = document.getElementById('map-container');
+			mapRect = mapContainer.getBoundingClientRect();
+			mapOffset = {
+				left: mapRect.left,
+				top: mapRect.top
+			};
+		}
+		
+		
+		function redrawAllObjects(){
+							
+			// Creating a list of divs for objects
+			var currentIndex = 0;
+			while (currentIndex<allObjects.length) {
+				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[currentIndex].id +'" data-url="'+allObjects[currentIndex].image_url+'">'+allObjects[currentIndex].name+'</li>';
+				
+				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height: '+gridSize+'px; left: '+allObjects[currentIndex].positionX+'px; top: '+allObjects[currentIndex].positionY+'px;" data-id="'+allObjects[currentIndex].id+'"><img src="'+allObjects[currentIndex].image_url+'" class="draggable" data-id="'+allObjects[currentIndex].id+'" style="width: 100%; height: 100%;"></div>';
+				currentIndex += 1;
+			
+			}
+			
+			
+			initializeDraggables(gridSize);
+			
+			
+			// handler for grid size change
+			$('#grid-size-input').on('input', function() {
+				const newSize = parseInt($(this).val(), 10);
+				if (!isNaN(newSize) && newSize > 0 && newSize !== gridSize) {
+					gridSize = newSize;
+					updateGridSize(gridSize);
+					const selectedId = $('#object-list li.selected').data('id');
+					initializeDraggables(gridSize, `.draggable-container[data-id="${selectedId }"]`);
+					
+					// Send WebSocket message
+					console.log(gridSize);
+					websocket.send(JSON.stringify({
+						action: 'updateGridSize',
+						mapId: mapId,
+						gridSize: newSize
+					}));
+				}
+			});
+			
+			// Add click handler to lock all but one object from moving 
+			// When selecting an object, disable others after all are initialized.
+			$('#object-list li').on('click', function() {
+				const objectId = $(this).data('id');
+				const isSelected = $(this).hasClass('selected');
+
+				
+				//TO DO HIGHLIGHT THE SELECTED STATUS EFFECTS
+				if (isSelected) {
+					// Deselect
+					$('#object-list li').removeClass('selected');
+					$('.draggable-container').removeClass('selected');
+					//REMEMBER the selector for interact must match when setting it to false or true
+					interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
+					interact('.draggable-container').draggable(true);
+					$('#status-effects-container').css('display', 'none');
+				} else {
+					// Select: Disable all except selected
+					selectedObjectId = objectId;
+					$('#object-list li').removeClass('selected');
+					$(this).addClass('selected');
+					$('.draggable-container').removeClass('selected');
+					const selectedContainer = $(`.draggable-container[data-id="${objectId}"]`);
+					selectedContainer.addClass('selected');
+					
+					
+					interact('.draggable-container').draggable(false);
+					interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
+					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
+					$('#status-effects-container').css('display', 'block');
+				}
+			});
+		}
+		
+		
+		
+		
+		
 		// generate a grid with status effect in status-effects-list div
 		// <div class="square" style="background-image: url('https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png')"> </div>
 		// status-effects-list
@@ -130,38 +251,6 @@ const statusEffects = [
 		
 		
 		
-		
-		let selectedObjectId = null;
-		
-		adjustMapSize(gridSize);
-		// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
-		const mapContainer = document.getElementById('map-container');
-		var mapRect = mapContainer.getBoundingClientRect();
-        var mapOffset = {
-            left: mapRect.left,
-            top: mapRect.top
-        };
-		initializeDraggables(gridSize);
-		
-		$('#grid-size-input').on('input', function() {
-			const newSize = parseInt($(this).val(), 10);
-			if (!isNaN(newSize) && newSize > 0 && newSize !== gridSize) {
-				gridSize = newSize;
-				updateGridSize(gridSize);
-				const selectedId = $('#object-list li.selected').data('id');
-				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedId }"]`);
-				
-				// Send WebSocket message
-				console.log(gridSize);
-				websocket.send(JSON.stringify({
-					action: 'updateGridSize',
-					mapId: mapId,
-					gridSize: newSize
-				}));
-			}
-		});
-		
-		
 		//later change:
 		//$('.draggable-container').addClass('locked');
 		//$(`.draggable-container[data-id="${objectId}"]`).removeClass('locked');
@@ -176,12 +265,12 @@ const statusEffects = [
             target.setAttribute('data-y', y);
 			
 			// Update the position text relative to map-container
-			/*var positionText = target.querySelector('.position-text');
-			var originalLeft = parseFloat(target.style.left) || 0;
-			var originalTop = parseFloat(target.style.top) || 0;
-			var currentX = originalLeft + x;
-			var currentY = originalTop + y;
-			positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);*/
+			// var positionText = target.querySelector('.position-text');
+			// var originalLeft = parseFloat(target.style.left) || 0;
+			// var originalTop = parseFloat(target.style.top) || 0;
+			// var currentX = originalLeft + x;
+			// var currentY = originalTop + y;
+			// positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);
         }
 		
 		//Ensures map container dimensions are multiples of grid size
@@ -313,8 +402,8 @@ const statusEffects = [
 						target.style.transform = 'none';
 						target.setAttribute('data-x', 0);
 						target.setAttribute('data-y', 0);
-						/*target.querySelector('.position-text').textContent = 
-							`${Math.round(newLeft)}, ${Math.round(newTop)}`;*/
+						//target.querySelector('.position-text').textContent = 
+						//	`${Math.round(newLeft)}, ${Math.round(newTop)}`;
 					}
 				}
 			});
@@ -335,8 +424,8 @@ const statusEffects = [
 				container.style.left = snappedLeft + 'px';
 				container.style.top = snappedTop + 'px';
 				
-				/*const text = container.querySelector('.position-text');
-				text.textContent = `${snappedLeft}, ${snappedTop}`;*/
+				//const text = container.querySelector('.position-text');
+				//text.textContent = `${snappedLeft}, ${snappedTop}`;
 				
 				container.style.transform = 'none';
 				container.setAttribute('data-x', 0);
@@ -354,76 +443,8 @@ const statusEffects = [
 			});
 		}
 		
-		
-		
-		
-		
-		
-		
-	
-		// Add click handler to lock all but one object from moving 
-		// When selecting an object, disable others after all are initialized.
-		$('#object-list li').on('click', function() {
-			const objectId = $(this).data('id');
-			const isSelected = $(this).hasClass('selected');
 
-			//TO DO HIGHLIGHT THE SELECTED STATUS EFFECTS
-			if (isSelected) {
-				// Deselect
-				$('#object-list li').removeClass('selected');
-				$('.draggable-container').removeClass('selected');
-				interact('.draggable-container').draggable(true);
-				$('#status-effects-container').css('display', 'none');
-			} else {
-				// Select: Disable all except selected
-				selectedObjectId = objectId;
-				$('#object-list li').removeClass('selected');
-				$(this).addClass('selected');
-				$('.draggable-container').removeClass('selected');
-				const selectedContainer = $(`.draggable-container[data-id="${objectId}"]`);
-				selectedContainer.addClass('selected');
-				
-				interact('.draggable-container').draggable(false);
-				interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
-				initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
-				$('#status-effects-container').css('display', 'block');
-			}
-		});
-	
-	
-	// Connect to WebSocket
-	const websocket = new WebSocket('ws://localhost:8080');
-	//const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
-
-	websocket.onmessage = function(event) {
-		const data = JSON.parse(event.data);
-		if (data.action === 'positionUpdated') {
-			const containers = document.querySelectorAll('.draggable-container');
-			containers.forEach(container => {
-				const img = container.querySelector('img');
-				if (img.dataset.id === data.objectId.toString()) {
-					// Update position (swap X/Y due to existing structure)
-					container.style.left = data.positionX + 'px';
-					container.style.top = data.positionY + 'px';
-					// Update position text
-					/*const text = container.querySelector('.position-text');
-					text.textContent = `${data.positionX}, ${data.positionY}`;*/
-					// Reset transform
-					container.style.transform = 'none';
-					container.setAttribute('data-x', 0);
-					container.setAttribute('data-y', 0);
-				}
-			});
-		}else if (data.action === 'gridSizeUpdated') {
-			if (data.gridSize !== gridSize) {
-				gridSize = data.gridSize;
-				$('#grid-size-input').val(gridSize);
-				updateGridSize(gridSize, false); // Pass false to prevent sending updates
-			}
-		}
-	};
-
-});
+	});
 </script>
 
 <?php include_once 'partials/editor_bottom_tpl.php'; ?>
