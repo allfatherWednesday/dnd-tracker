@@ -197,11 +197,9 @@ var mapOffset;
 			// When selecting an object, disable others after all are initialized.
 			$('#object-list li').on('click', function() {
 				const objectId = $(this).data('id');
-				const isSelected = $(this).hasClass('selected');
+				const clickedObjAlreadySelected = $(this).hasClass('selected');
 
-				
-				//TO DO HIGHLIGHT THE SELECTED STATUS EFFECTS
-				if (isSelected) {
+				if (clickedObjAlreadySelected) {
 					// Deselect
 					$('#object-list li').removeClass('selected');
 					$('.draggable-container').removeClass('selected');
@@ -209,20 +207,27 @@ var mapOffset;
 					interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
 					interact('.draggable-container').draggable(true);
 					$('#status-effects-container').css('display', 'none');
-				} else {
-					// Select: Disable all except selected
+				} else {				
+					
+					
+					//if anything is already selected by
+					//checking if any $('#object-list li'). has a class selected
+					//switch the selection to another object
+					if ($('#object-list li').hasClass('selected')){
+						interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(false);
+						$('#object-list li').removeClass('selected');
+						$('.draggable-container').removeClass('selected');
+						
+					}else{
+						interact('.draggable-container').draggable(false);
+					}
 					selectedObjectId = objectId;
-					$('#object-list li').removeClass('selected');
-					$(this).addClass('selected');
-					$('.draggable-container').removeClass('selected');
-					const selectedContainer = $(`.draggable-container[data-id="${objectId}"]`);
-					selectedContainer.addClass('selected');
-					
-					
-					interact('.draggable-container').draggable(false);
 					interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
-					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
+					$(`.draggable-container[data-id="${objectId}"]`).addClass('selected');
+					$(this).addClass('selected');
 					$('#status-effects-container').css('display', 'block');
+					
+					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
 				}
 			});
 		}
