@@ -62,8 +62,8 @@ const statusEffects = [
     { name: 'Bleeding', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Bleeding%20Out.png' },
     { name: 'Blind', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Blinded.png' },
     { name: 'Burning', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/On%20Fire.png' },
-    { name: 'Electrocuted', icon: '' }, // Add actual URL
-    { name: 'Freezing', icon: '' }, // Add actual URL
+    { name: 'Electrocuted', icon: 'https://cdn-icons-png.flaticon.com/512/10746/10746618.png' }, // Add actual URL
+    { name: 'Freezing', icon: 'https://cdn-icons-png.flaticon.com/512/1796/1796536.png' }, // Add actual URL
     { name: 'Necrosis', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Ancenstral%20Protectors.png' },
     { name: 'Petrified', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Petrified.png' },
     { name: 'Poison', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Poisoned.png' },
