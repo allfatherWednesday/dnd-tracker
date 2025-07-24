@@ -133,14 +133,15 @@ body {
 }
 
 
-.square {
-  float: left;
-  position: relative;
-  width: 21%;
-  padding-bottom: 21%; /* = width for a 1:1 aspect ratio */
-  margin: 2%;
-  background-color: #489bd6;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: cover; /* you change this to "contain" if you don't want the images to be cropped */
+.square-effects-menu {
+	cursor: pointer;
+	float: left;
+	position: relative;
+	width: 21%;
+	padding-bottom: 21%; /* = width for a 1:1 aspect ratio */
+	margin: 2%;
+	background-color: #489bd6;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover; /* you change this to "contain" if you don't want the images to be cropped */
 }

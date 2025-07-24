@@ -81,8 +81,8 @@ const statusEffects = [
 let gridSize;
 let mapId;
 let mapImage;
-let allObjects = [];		
-let selectedObjectId = null;
+let allObjects = new Map();		
+let selectedObjectId = null; //if it breaks use this instead  const selectedObject = $('#object-list li.selected')[0].getAttribute('data-id');
 var mapRect;
 var mapOffset;
 		
@@ -105,8 +105,9 @@ var mapOffset;
 					gridSize = data['maps'][0].grid_size;
 					mapId = data['maps'][0].id;
 					mapImage = data['maps'][0].image;
-					allObjects = data['objects'];
 					
+					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: []}]));
+										
 					redrawMap();
 					redrawAllObjects();
 					break;
@@ -161,15 +162,23 @@ var mapOffset;
 		function redrawAllObjects(){
 							
 			// Creating a list of divs for objects
-			var currentIndex = 0;
-			while (currentIndex<allObjects.length) {
-				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[currentIndex].id +'" data-url="'+allObjects[currentIndex].image_url+'">'+allObjects[currentIndex].name+'</li>';
+			for (const key in allObjects) {
+				console.log(`${key}: ${allObjects[key]}`);
 				
-				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height: '+gridSize+'px; left: '+allObjects[currentIndex].positionX+'px; top: '+allObjects[currentIndex].positionY+'px;" data-id="'+allObjects[currentIndex].id+'"><img src="'+allObjects[currentIndex].image_url+'" class="draggable" data-id="'+allObjects[currentIndex].id+'" style="width: 100%; height: 100%;"></div>';
-				currentIndex += 1;
-			
+				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+'</li>';
+				
+				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height: '+gridSize+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'"><img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%;">                                                                                    <div class="status-effects-indicator" style="position: absolute;width: 140%;height: 40%;bottom: 100%;left: -20%;display: flex;gap: 10%;background: brown;"><div style="width: 100%; height: 100%;    background: yellow;"></div>        <div style="width: 100%;height: 100%;background-size: contain;background-image: url(https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Frightened.png);     background-color: yellow"></div><div style="width: 100%;height: 100%;background: yellow;"></div></div>                     </div>';
+				
 			}
 			
+			'<div class="status-effects-indicator" style="position: absolute;width: 140%;height: 40%;bottom: 100%;left: -20%;display: flex;gap: 10%;background: brown;"><div style="width: 100%; height: 100%;    background: yellow;"></div>        <div style="    width: 100%;    height: 100%;    background: yellow;"></div><div style="width: 100%;height: 100%;background: yellow;"></div></div>'
+			
+			
+			//<div class="status-effects-indicator" style="position: absolute;width: 100%;height: 50%;bottom: //100%;left: 0;display: flex;justify-content: center;gap: 2px;background: brown;">
+			<!-- Status effect icons will be added here programmatically -->
+			//</div>
+			
+			//<div class="status-effects-indicator" style="position: absolute;width: 140%;height: 40%;bottom: //100%;left: -20%;display: flex;justify-content: center;gap: 2px;background: brown;">
 			
 			initializeDraggables(gridSize);
 			
@@ -237,13 +246,13 @@ var mapOffset;
 		
 		
 		// generate a grid with status effect in status-effects-list div
-		// <div class="square" style="background-image: url('https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png')"> </div>
+		// <div class="square-effects-menu" style="background-image: url('https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png')"> </div>
 		// status-effects-list
 		
 		function appendHtmlFromArray(container, arr) {
 			var currentIndex = 0;
 			while (currentIndex<arr.length) {
-				container.innerHTML += '<div class="square" id="effect-'+arr[currentIndex].name +'" style="background-image: url('+arr[currentIndex].icon+')" title="'+arr[currentIndex].name+'"></div>';
+				container.innerHTML += '<div class="square-effects-menu" id="effect-'+arr[currentIndex].name +'" style="background-image: url('+arr[currentIndex].icon+')" title="'+arr[currentIndex].name+'"></div>';
 				currentIndex += 1;
 			
 			}
@@ -251,15 +260,23 @@ var mapOffset;
 		appendHtmlFromArray(document.getElementById('status-effects-container'), statusEffects)
 		
 		// add an event listener for each of the effects to be implemented on the selected:
-		// $('#status-effects-container div').on('click', function() {
+		$('#status-effects-container div').on('click', function() {
+			const clickedEffectId = (this).id.replace("effect-", "");
+			
+			console.log(selectedObjectId+ " " + clickedEffectId);
+			
+			if(allObjects[selectedObjectId].statusEffects.includes(clickedEffectId)){
+				allObjects[selectedObjectId].statusEffects = allObjects[selectedObjectId].statusEffects.filter(e => e !== clickedEffectId);
+			}else{
+				allObjects[selectedObjectId].statusEffects.push(clickedEffectId);
+			}
+			
+		});
 		// identify the selected object, check if the selected  check if it already has effects, if number of effect is 0-2 add another effect div, if it's 3, add a "...", if more than 3, do nothing.
+		// Then update to back end
 		
 		
 		
-		//later change:
-		//$('.draggable-container').addClass('locked');
-		//$(`.draggable-container[data-id="${objectId}"]`).removeClass('locked');
-		//if (event.target.classList.contains('locked')) return;
         function dragMoveListener(event) {
             var target = event.target;
             var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
@@ -328,7 +345,6 @@ var mapOffset;
 			container.style.height = roundDownToMultiple(mapRect.height, gridSize)+'px';
 		}
 		
-		// BROKEN FEATURE - THIS UNSETS nteract('.draggable-container').on('dragend', function(event)
 		// Modified updateGridSize function
 		// Reinitialize all draggables unconditionally, then adjust for selection.
 		function updateGridSize(newSize, sendUpdates = true) {
