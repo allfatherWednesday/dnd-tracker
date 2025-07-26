@@ -79,6 +79,7 @@ const statusEffects = [
 ];		
 		
 let temp;		
+let activeSocket;
 let gridSize;
 let mapId;
 let mapImage;
@@ -92,10 +93,12 @@ var mapOffset;
 		
 		// Connect to WebSocket
 		const websocket = new WebSocket('ws://localhost:8080');
+		activeSocket = websocket;
 		//const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
 		
 
 		websocket.onmessage = function(event) {
+			console.log(event.data);
 			const data = JSON.parse(event.data);
 			switch (data.action){
 				case 'firstFetchReturn':
@@ -107,7 +110,7 @@ var mapOffset;
 					mapId = data['maps'][0].id;
 					mapImage = data['maps'][0].image;
 					
-					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: []}]));
+					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: item.statusEffects}]));
 										
 					redrawMap();
 					redrawAllObjects();
@@ -281,16 +284,13 @@ var mapOffset;
 			
 			if(allObjects[selectedObjectId].statusEffects.includes(clickedEffectId)){
 				allObjects[selectedObjectId].statusEffects = allObjects[selectedObjectId].statusEffects.filter(e => e !== clickedEffectId);
-				//TODODODODODO
 				$(this).removeClass('selected-effects-box');
-				//this.style.outline = '';
-				//remove the highlight
 			}else{
 				allObjects[selectedObjectId].statusEffects.push(clickedEffectId);
-				//add highlight
-				//TODODODODODO
 				$(this).addClass('selected-effects-box');
 			}
+			
+			updateRemoteEffects(allObjects[selectedObjectId].statusEffects, selectedObjectId);
 			
 		});
 		// identify the selected object, check if the selected  check if it already has effects, if number of effect is 0-2 add another effect div, if it's 3, add a "...", if more than 3, do nothing.
@@ -483,6 +483,15 @@ var mapOffset;
 					}));
 				}
 			});
+		}
+		
+		function updateRemoteEffects(statusEffects, objectId){	
+				
+			websocket.send(JSON.stringify({
+				action: 'updateEffects',
+				objectId: objectId,
+				statusEffects: statusEffects
+			}));
 		}
 		
 

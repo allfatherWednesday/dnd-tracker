@@ -13,6 +13,7 @@ class MapWebSocket implements MessageComponentInterface {
 	protected $mapModel;
     
 	public function __construct() {
+		print_r('Yellow');
         $this->clients = new \SplObjectStorage;
 		$this->mapObjectModel = new MapObjectModel();
 		$this->mapModel = new MapModel();
@@ -29,6 +30,18 @@ class MapWebSocket implements MessageComponentInterface {
 		switch((string)$data['action']){
 			case 'firstFetch':
 				$allObjects = $this->mapObjectModel->getAllObjects();
+				
+				foreach ($allObjects as $key => $value) {
+					
+					
+					if (is_null($allObjects[$key]['statusEffects'])) {
+						$allObjects[$key]['statusEffects'] = [];
+					} else {
+						$allObjects[$key]['statusEffects'] = unserialize($allObjects[$key]['statusEffects']);
+					}
+				
+				}
+				print_r($allObjects);
 				$allMaps = $this->mapModel->getAllMaps();
 				foreach ($this->clients as $client)
 				{
@@ -82,6 +95,24 @@ class MapWebSocket implements MessageComponentInterface {
 						$client->send(json_encode([
 							'action' => 'gridSizeUpdated',
 							'gridSize' => $gridSize
+						]));
+					}
+				}
+				break;
+			case 'updateEffects':
+				$objectId = $data['objectId'];
+				$statusEffects = $data['statusEffects'];
+				
+				// Update database using MapModel
+				$this->mapObjectModel->updateEffects($objectId, $statusEffects);
+				
+				// Broadcast new grid size to all clients except sender
+				foreach ($this->clients as $client) {
+					if ($client !== $from) {
+						$client->send(json_encode([
+							'action' => 'effectsUpdated',
+							'objectId' => $objectId,
+							'statusEffects' => $statusEffects
 						]));
 					}
 				}

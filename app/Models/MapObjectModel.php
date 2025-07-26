@@ -30,4 +30,12 @@ class MapObjectModel extends Model
     $req->bindValue(':id', $id);
     return $req->execute();
 	}
+	
+	public function updateEffects($id, $statusEffects) {
+		$serialStatusEffects = serialize($statusEffects);
+		$req = $this->db()->prepare("UPDATE map_objects SET statusEffects = :serialStatusEffects WHERE id = :id");
+		$req->bindValue(':serialStatusEffects', $serialStatusEffects);
+		$req->bindValue(':id', $id);
+		return $req->execute();
+	}
 }
