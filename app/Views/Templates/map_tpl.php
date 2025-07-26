@@ -77,7 +77,8 @@ const statusEffects = [
     { name: 'Possessed', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Possessed.png' },
     { name: 'Unconscious', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Unconcious.png' }
 ];		
-				
+		
+let temp;		
 let gridSize;
 let mapId;
 let mapImage;
@@ -216,6 +217,9 @@ var mapOffset;
 					interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
 					interact('.draggable-container').draggable(true);
 					$('#status-effects-container').css('display', 'none');
+					//remove all highlighted
+					$('#status-effects-container div').removeClass('selected-effects-box');
+				
 				} else {				
 					
 					
@@ -237,6 +241,16 @@ var mapOffset;
 					$('#status-effects-container').css('display', 'block');
 					
 					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
+					
+					
+					$('#status-effects-container div').removeClass('selected-effects-box');
+					for (const effect of allObjects[selectedObjectId].statusEffects) {
+						const nameOfEffect = '#effect-'+effect;
+						console.log(nameOfEffect);
+						temp = nameOfEffect;
+						$(nameOfEffect).addClass('selected-effects-box');
+					}
+					
 				}
 			});
 		}
@@ -267,8 +281,15 @@ var mapOffset;
 			
 			if(allObjects[selectedObjectId].statusEffects.includes(clickedEffectId)){
 				allObjects[selectedObjectId].statusEffects = allObjects[selectedObjectId].statusEffects.filter(e => e !== clickedEffectId);
+				//TODODODODODO
+				$(this).removeClass('selected-effects-box');
+				//this.style.outline = '';
+				//remove the highlight
 			}else{
 				allObjects[selectedObjectId].statusEffects.push(clickedEffectId);
+				//add highlight
+				//TODODODODODO
+				$(this).addClass('selected-effects-box');
 			}
 			
 		});
