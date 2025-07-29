@@ -57,26 +57,26 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
-const statusEffects = [
-    { name: 'Acid', icon: 'https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png' },
-    { name: 'Bleeding', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Bleeding%20Out.png' },
-    { name: 'Blind', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Blinded.png' },
-    { name: 'Burning', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/On%20Fire.png' },
-    { name: 'Electrocuted', icon: 'https://cdn-icons-png.flaticon.com/512/10746/10746618.png' }, // Add actual URL
-    { name: 'Freezing', icon: 'https://cdn-icons-png.flaticon.com/512/1796/1796536.png' }, // Add actual URL
-    { name: 'Necrosis', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Ancenstral%20Protectors.png' },
-    { name: 'Petrified', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Petrified.png' },
-    { name: 'Poison', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Poisoned.png' },
-    { name: 'Prone', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Prone.png' },
-    { name: 'Radiant', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Highlighted.png' },
-    { name: 'Stunned', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Stunned.png' },
-    { name: 'Thunder', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Blur.png' },
-    { name: 'Wet', icon: 'https://static.thenounproject.com/png/2287944-200.png' },
-    { name: 'Confused', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Confused.png' },
-    { name: 'Frightened', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Frightened.png' },
-    { name: 'Possessed', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Possessed.png' },
-    { name: 'Unconscious', icon: 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Unconcious.png' }
-];		
+const statusEffectsLinks =
+    { 'Acid': 'https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png',
+    'Bleeding': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Bleeding%20Out.png',
+    'Blind': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Blinded.png',
+    'Burning': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/On%20Fire.png',
+    'Electrocuted': 'https://cdn-icons-png.flaticon.com/512/10746/10746618.png',
+    'Freezing': 'https://cdn-icons-png.flaticon.com/512/1796/1796536.png',
+    'Necrosis': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Ancenstral%20Protectors.png',
+    'Petrified': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Petrified.png',
+    'Poison': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Poisoned.png',
+    'Prone': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Prone.png',
+    'Radiant': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Highlighted.png',
+    'Stunned': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Stunned.png',
+    'Thunder': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Blur.png',
+    'Wet': 'https://static.thenounproject.com/png/2287944-200.png',
+    'Confused': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Confused.png',
+    'Frightened': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Frightened.png',
+    'Possessed': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Possessed.png',
+    'Unconscious': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Unconcious.png' 
+};		
 		
 let temp;		
 let activeSocket;
@@ -171,21 +171,12 @@ var mapOffset;
 				
 				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+'</li>';
 				
-				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height: '+gridSize+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'"><img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%;">                                                                                    <div class="status-effects-indicator" style="position: absolute;width: 140%;height: 40%;bottom: 100%;left: -20%;display: flex;gap: 10%;background: brown;"><div style="width: 100%; height: 100%;    background: yellow;"></div>        <div style="width: 100%;height: 100%;background-size: contain;background-image: url(https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Frightened.png);     background-color: yellow"></div><div style="width: 100%;height: 100%;background: yellow;"></div></div>                     </div>';
+				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height: '+gridSize+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'"><img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%;"><div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div></div>';
 				
 			}
 			
-			'<div class="status-effects-indicator" style="position: absolute;width: 140%;height: 40%;bottom: 100%;left: -20%;display: flex;gap: 10%;background: brown;"><div style="width: 100%; height: 100%;    background: yellow;"></div>        <div style="    width: 100%;    height: 100%;    background: yellow;"></div><div style="width: 100%;height: 100%;background: yellow;"></div></div>'
-			
-			
-			//<div class="status-effects-indicator" style="position: absolute;width: 100%;height: 50%;bottom: //100%;left: 0;display: flex;justify-content: center;gap: 2px;background: brown;">
-			<!-- Status effect icons will be added here programmatically -->
-			//</div>
-			
-			//<div class="status-effects-indicator" style="position: absolute;width: 140%;height: 40%;bottom: //100%;left: -20%;display: flex;justify-content: center;gap: 2px;background: brown;">
-			
 			initializeDraggables(gridSize);
-			
+			updateEffectsLegend(0, updateAll=true);
 			
 			// handler for grid size change
 			$('#grid-size-input').on('input', function() {
@@ -195,6 +186,7 @@ var mapOffset;
 					updateGridSize(gridSize);
 					const selectedId = $('#object-list li.selected').data('id');
 					initializeDraggables(gridSize, `.draggable-container[data-id="${selectedId }"]`);
+					updateEffectsLegend(0, updateAll=true);
 					
 					// Send WebSocket message
 					console.log(gridSize);
@@ -268,13 +260,16 @@ var mapOffset;
 		
 		function appendHtmlFromArray(container, arr) {
 			var currentIndex = 0;
+			for (const key in arr){
+				container.innerHTML += '<div class="square-effects-menu" id="effect-'+key +'" style="background-image: url('+arr[key]+')" title="'+key+'"></div>';
+			}
 			while (currentIndex<arr.length) {
 				container.innerHTML += '<div class="square-effects-menu" id="effect-'+arr[currentIndex].name +'" style="background-image: url('+arr[currentIndex].icon+')" title="'+arr[currentIndex].name+'"></div>';
 				currentIndex += 1;
 			
 			}
 		}
-		appendHtmlFromArray(document.getElementById('status-effects-container'), statusEffects)
+		appendHtmlFromArray(document.getElementById('status-effects-container'), statusEffectsLinks)
 		
 		// add an event listener for each of the effects to be implemented on the selected:
 		$('#status-effects-container div').on('click', function() {
@@ -291,11 +286,9 @@ var mapOffset;
 			}
 			
 			updateRemoteEffects(allObjects[selectedObjectId].statusEffects, selectedObjectId);
-			
+			updateEffectsLegend(selectedObjectId);
 		});
-		// identify the selected object, check if the selected  check if it already has effects, if number of effect is 0-2 add another effect div, if it's 3, add a "...", if more than 3, do nothing.
-		// Then update to back end
-		
+	
 		
 		
         function dragMoveListener(event) {
@@ -493,6 +486,77 @@ var mapOffset;
 				statusEffects: statusEffects
 			}));
 		}
+		
+		//todododod call this function from all needed places
+		function updateEffectsLegend(selectedID, updateAll=false){
+			let arrOfBoxes;
+			if (updateAll){
+				for (const id in allObjects){updateEffectsLegend(id);}
+			} else {
+				switch (allObjects[selectedID].statusEffects.length){
+					case 0:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "none";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = "";
+						break;
+						
+					case 1:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = $(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '35%';
+						//todododod
+						//statusEffectsLinks[allObjects[selectedID].statusEffects[0]] gives a link to image
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div>';
+						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
+						arrOfBoxes[0].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[0].style.height = Math.trunc(gridSize*0.3);
+						break;
+						
+					case 2:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '65%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div>';
+						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
+						arrOfBoxes[0].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[0].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes[1].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[1].style.height = Math.trunc(gridSize*0.3);
+						break;
+						
+					case 3:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '100%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '0%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>';
+						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
+						arrOfBoxes[0].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[0].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes[1].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[1].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes[2].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[2].style.height = Math.trunc(gridSize*0.3);
+						break;
+						
+					default:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '100%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '00%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>';
+						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
+						arrOfBoxes[0].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[0].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes[1].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[1].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes[2].style.width = Math.trunc(gridSize*0.3);
+						arrOfBoxes[2].style.height = Math.trunc(gridSize*0.3);
+						break;
+				}
+			}	
+		}
+		
 		
 
 	});
