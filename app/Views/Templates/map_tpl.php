@@ -98,10 +98,10 @@ var mapOffset;
 		
 
 		websocket.onmessage = function(event) {
-			console.log(event.data);
 			const data = JSON.parse(event.data);
 			switch (data.action){
 				case 'firstFetchReturn':
+					console.log('firstFetchReturn data: ');
 					console.log(data);
 					
 					//Set variables to the new values
@@ -160,6 +160,8 @@ var mapOffset;
 				left: mapRect.left,
 				top: mapRect.top
 			};
+			
+			console.log("Drew map with gridsize "+gridSize);
 		}
 		
 		
@@ -167,7 +169,6 @@ var mapOffset;
 							
 			// Creating a list of divs for objects
 			for (const key in allObjects) {
-				console.log(`${key}: ${allObjects[key]}`);
 				
 				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+'</li>';
 				
@@ -189,7 +190,6 @@ var mapOffset;
 					updateEffectsLegend(0, updateAll=true);
 					
 					// Send WebSocket message
-					console.log(gridSize);
 					websocket.send(JSON.stringify({
 						action: 'updateGridSize',
 						mapId: mapId,
@@ -384,7 +384,6 @@ var mapOffset;
 		// Modified initializeDraggables function
 		//The function always targets all .draggable-container elements unless specifically handling a selection (managed separately in click handler).
 		function initializeDraggables(gridSize, filterSelector ='.draggable-container') {
-			console.log("gridSize:"+gridSize+" filterSelector:"+filterSelector);
 			interact(filterSelector).draggable({
 				inertia: false,
 				modifiers: [
@@ -505,23 +504,19 @@ var mapOffset;
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '35%';
 						//todododod
 						//statusEffectsLinks[allObjects[selectedID].statusEffects[0]] gives a link to image
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div>';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div>';
 						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
-						arrOfBoxes[0].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[0].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
 						break;
 						
 					case 2:
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '65%';
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '30%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div>';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '17%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div>';
 						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
-						arrOfBoxes[0].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[0].style.height = Math.trunc(gridSize*0.3);
-						arrOfBoxes[1].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[1].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
 						break;
 						
 					case 3:
@@ -529,29 +524,19 @@ var mapOffset;
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '100%';
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '0%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>';
 						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
-						arrOfBoxes[0].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[0].style.height = Math.trunc(gridSize*0.3);
-						arrOfBoxes[1].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[1].style.height = Math.trunc(gridSize*0.3);
-						arrOfBoxes[2].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[2].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
 						break;
 						
 					default:
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '100%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '135%';
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '00%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: cover;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div><div><p>...</p></div>';
 						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
-						arrOfBoxes[0].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[0].style.height = Math.trunc(gridSize*0.3);
-						arrOfBoxes[1].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[1].style.height = Math.trunc(gridSize*0.3);
-						arrOfBoxes[2].style.width = Math.trunc(gridSize*0.3);
-						arrOfBoxes[2].style.height = Math.trunc(gridSize*0.3);
+						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
 						break;
 				}
 			}	

@@ -13,7 +13,7 @@ class MapWebSocket implements MessageComponentInterface {
 	protected $mapModel;
     
 	public function __construct() {
-		print_r('Yellow');
+		print_r("Running Socket \n");
         $this->clients = new \SplObjectStorage;
 		$this->mapObjectModel = new MapObjectModel();
 		$this->mapModel = new MapModel();
@@ -41,7 +41,6 @@ class MapWebSocket implements MessageComponentInterface {
 					}
 				
 				}
-				print_r($allObjects);
 				$allMaps = $this->mapModel->getAllMaps();
 				foreach ($this->clients as $client)
 				{
@@ -58,6 +57,7 @@ class MapWebSocket implements MessageComponentInterface {
 							])
 						);
 				}
+				print_r("firstFetch \n");
 				break;
 			case 'LoadNewMap':
 				//...MapModel\getMapById
