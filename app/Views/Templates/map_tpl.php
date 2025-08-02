@@ -152,16 +152,20 @@ var mapOffset;
 			$("#map-image").attr("src",mapImage);
 			$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px");
 			
-			adjustMapSize(gridSize);
-			// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
-			const mapContainer = document.getElementById('map-container');
-			mapRect = mapContainer.getBoundingClientRect();
-			mapOffset = {
-				left: mapRect.left,
-				top: mapRect.top
-			};
-			
-			console.log("Drew map with gridsize "+gridSize);
+			const mapImageElement = document.getElementById('map-image');
+			$( mapImageElement ).ready(function() {
+						
+				adjustMapSize(gridSize);
+				// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
+				const mapContainer = document.getElementById('map-container');
+				mapRect = mapContainer.getBoundingClientRect();
+				mapOffset = {
+					left: mapRect.left,
+					top: mapRect.top
+				};
+				
+				console.log("Drew map with gridsize "+gridSize);
+			});
 		}
 		
 		
@@ -176,8 +180,11 @@ var mapOffset;
 				
 			}
 			
-			initializeDraggables(gridSize);
-			updateEffectsLegend(0, updateAll=true);
+			const mapImageElement = document.getElementById('map-image');
+			$( mapImageElement ).ready(function() {
+				initializeDraggables(gridSize);
+				updateEffectsLegend(0, updateAll=true);
+			});
 			
 			// handler for grid size change
 			$('#grid-size-input').on('input', function() {
@@ -538,6 +545,8 @@ var mapOffset;
 						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
 						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
 						break;
+						
+						//$($(".draggable-container#"+1+" div.status-effects-indicator div")[0]).width(100)
 				}
 			}	
 		}
