@@ -232,6 +232,11 @@ var mapOffset;
 						interact('.draggable-container').draggable(false);
 					}
 					selectedObjectId = objectId;
+					// Reset all to default stacking
+					$('.draggable-container').css('z-index', 1);
+
+					// Bring selected to front
+					$(`.draggable-container[data-id="${objectId}"]`).css('z-index', 999);
 					interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
 					$(`.draggable-container[data-id="${objectId}"]`).addClass('selected');
 					$(this).addClass('selected');
