@@ -152,20 +152,15 @@ var mapOffset;
 			$("#map-image").attr("src",mapImage);
 			$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px");
 			
-			const mapImageElement = document.getElementById('map-image');
-			$( mapImageElement ).ready(function() {
-						
-				adjustMapSize(gridSize);
-				// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
-				const mapContainer = document.getElementById('map-container');
-				mapRect = mapContainer.getBoundingClientRect();
-				mapOffset = {
-					left: mapRect.left,
-					top: mapRect.top
-				};
-				
-				console.log("Drew map with gridsize "+gridSize);
-			});
+			$("#map-image")
+				.off("load") //this makes sure that it runs once
+				.on("load", function() {
+					adjustMapSize(gridSize);
+					const mapContainer = document.getElementById('map-container');
+					mapRect = mapContainer.getBoundingClientRect();
+					mapOffset = { left: mapRect.left, top: mapRect.top };
+				})
+			
 		}
 		
 		
