@@ -214,7 +214,7 @@ var mapOffset;
 				if (clickedObjAlreadySelected) {
 					// Deselect
 					$('#object-list li').removeClass('selected');
-					$('.draggable-container').removeClass('selected');
+					$('.draggable-container').removeClass('selected').css('z-index', 1);
 					//REMEMBER the selector for interact must match when setting it to false or true
 					interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
 					interact('.draggable-container').draggable(true);
@@ -231,14 +231,14 @@ var mapOffset;
 					if ($('#object-list li').hasClass('selected')){
 						interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(false);
 						$('#object-list li').removeClass('selected');
-						$('.draggable-container').removeClass('selected');
+						$('.draggable-container').removeClass('selected').css('z-index', 1);
 						
 					}else{
 						interact('.draggable-container').draggable(false);
 					}
 					selectedObjectId = objectId;
 					interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
-					$(`.draggable-container[data-id="${objectId}"]`).addClass('selected');
+					$(`.draggable-container[data-id="${objectId}"]`).addClass('selected').css('z-index', 9999);
 					$(this).addClass('selected');
 					$('#status-effects-container').css('display', 'block');
 					
