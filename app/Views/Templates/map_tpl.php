@@ -152,15 +152,19 @@ var mapOffset;
 			$("#map-image").attr("src",mapImage);
 			$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px");
 			
+			const mapImageElement = document.getElementById('map-image');
 			$("#map-image")
-				.off("load") //this makes sure that it runs once
-				.on("load", function() {
+				.off("load.redraw") //makes sure that handler runs once
+				.on("load.redraw", function() {
 					adjustMapSize(gridSize);
+					// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
 					const mapContainer = document.getElementById('map-container');
 					mapRect = mapContainer.getBoundingClientRect();
-					mapOffset = { left: mapRect.left, top: mapRect.top };
-				})
-			
+					mapOffset = {
+						left: mapRect.left,
+						top: mapRect.top
+					};
+			});
 		}
 		
 		
@@ -175,8 +179,9 @@ var mapOffset;
 				
 			}
 			
-			const mapImageElement = document.getElementById('map-image');
-			$( mapImageElement ).ready(function() {
+			$("#map-image")
+				.off("load.objects") //makes sure that handler runs once
+				.on("load.objects", function() {
 				initializeDraggables(gridSize);
 				updateEffectsLegend(0, updateAll=true);
 			});
@@ -232,11 +237,6 @@ var mapOffset;
 						interact('.draggable-container').draggable(false);
 					}
 					selectedObjectId = objectId;
-					// Reset all to default stacking
-					$('.draggable-container').css('z-index', 1);
-
-					// Bring selected to front
-					$(`.draggable-container[data-id="${objectId}"]`).css('z-index', 999);
 					interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
 					$(`.draggable-container[data-id="${objectId}"]`).addClass('selected');
 					$(this).addClass('selected');
