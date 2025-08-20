@@ -182,6 +182,11 @@ var mapOffset;
 			$("#map-image")
 				.off("load.objects") //makes sure that handler runs once
 				.on("load.objects", function() {
+					
+				const mapContainer = document.getElementById('map-container');
+				const rect = mapContainer.getBoundingClientRect();
+				mapOffset = { left: rect.left, top: rect.top };	
+
 				initializeDraggables(gridSize);
 				updateEffectsLegend(0, updateAll=true);
 			});
@@ -378,7 +383,17 @@ var mapOffset;
 			mapOffset = { left: mapRect.left, top: mapRect.top };
 
 			interact('.draggable-container').off('dragmove dragend');
-			initializeDraggables(gridSize);
+			
+			const mapImageEl = document.getElementById('map-image');			
+			if (mapImageEl.complete && mapImageEl.naturalWidth !== 0) {
+				initializeDraggables(gridSize);
+			} else {
+				$("#map-image")
+					.off("load.updateGrid") // prevent duplicate binding
+					.one("load.updateGrid", function () {
+						initializeDraggables(gridSize);
+					});
+			}
 			
 			if (selectedObjectId !== null) {
 				interact('.draggable-container').draggable(false);
@@ -541,7 +556,7 @@ var mapOffset;
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '135%';
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '00%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div><div><p>...</p></div>';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div><div style="fontSize:'+ Math.trunc(gridSize*0.2) + 'px">...</div>';
 						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
 						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
 						break;
