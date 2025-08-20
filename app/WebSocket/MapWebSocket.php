@@ -117,6 +117,29 @@ class MapWebSocket implements MessageComponentInterface {
 					}
 				}
 				break;
+			case 'addObject':
+				$name = $data['name'];
+				$imageUrl = $data['imageUrl'];
+				$positionX = $data['positionX'] ?? 0;
+				$positionY = $data['positionY'] ?? 0;
+
+				$newObject = $this->mapObjectModel->addObject($name, $imageUrl, $positionX, $positionY);
+
+				if (is_null($newObject['statusEffects'])) {
+						$newObject['statusEffects'] = [];
+					} else {
+						$newObject['statusEffects'] = unserialize($newObject['statusEffects']);
+					}
+
+				// Broadcast new object to all clients
+				foreach ($this->clients as $client) {
+					$client->send(json_encode([
+						'action' => 'objectAdded',
+						'object' => $newObject
+					]));
+				}
+				break;
+				
 		}
     }
 
