@@ -8,24 +8,24 @@ use app\Models\MapObjectModel;
 use app\Models\MapModel;
 
 class MapWebSocket implements MessageComponentInterface {
-    protected $clients;
+	protected $clients;
 	protected $mapObjectModel;
 	protected $mapModel;
-    
+	
 	public function __construct() {
 		print_r("Running Socket \n");
-        $this->clients = new \SplObjectStorage;
+		$this->clients = new \SplObjectStorage;
 		$this->mapObjectModel = new MapObjectModel();
 		$this->mapModel = new MapModel();
 	}
 
-    public function onOpen(ConnectionInterface $conn) {
-        $this->clients->attach($conn);
-    }
+	public function onOpen(ConnectionInterface $conn) {
+		$this->clients->attach($conn);
+	}
 	
 	// Options for messages: Load New Map, update position of an object, Update GridSize
-    public function onMessage(ConnectionInterface $from, $msg) {
-        $data = json_decode($msg, true);
+	public function onMessage(ConnectionInterface $from, $msg) {
+		$data = json_decode($msg, true);
 				
 		switch((string)$data['action']){
 			case 'firstFetch':
@@ -118,37 +118,40 @@ class MapWebSocket implements MessageComponentInterface {
 				}
 				break;
 			case 'addObject':
-				$name = $data['name'];
-				$imageUrl = $data['imageUrl'];
-				$positionX = $data['positionX'] ?? 0;
-				$positionY = $data['positionY'] ?? 0;
-
-				$newObject = $this->mapObjectModel->addObject($name, $imageUrl, $positionX, $positionY);
-
-				if (is_null($newObject['statusEffects'])) {
-						$newObject['statusEffects'] = [];
-					} else {
-						$newObject['statusEffects'] = unserialize($newObject['statusEffects']);
+				$name = $data['name'] ?? null;
+				$imageUrl = $data['image_url'] ?? null;
+				$positionX = 0;
+				$positionY = 0;
+				
+				if ($name && $imageUrl) {
+					
+					$newObject = $this->mapObjectModel->addObject($name, $imageUrl, $positionX, $positionY);
+											
+					if (is_null($newObject['statusEffects'])) {
+							$newObject['statusEffects'] = [];
+						} else {
+							$newObject['statusEffects'] = unserialize($newObject['statusEffects']);
+						}
+					
+					// Broadcast new object to all clients
+					foreach ($this->clients as $client) {
+						$client->send(json_encode([
+							'action' => 'objectAdded',
+							'object' => $newObject
+						]));
 					}
-
-				// Broadcast new object to all clients
-				foreach ($this->clients as $client) {
-					$client->send(json_encode([
-						'action' => 'objectAdded',
-						'object' => $newObject
-					]));
 				}
 				break;
 				
 		}
-    }
+	}
 
-    public function onClose(ConnectionInterface $conn) {
-        $this->clients->detach($conn);
-    }
+	public function onClose(ConnectionInterface $conn) {
+		$this->clients->detach($conn);
+	}
 
-    public function onError(ConnectionInterface $conn, \Exception $e) {
-        echo "Error: {$e->getMessage()}\n";
-        $conn->close();
-    }
+	public function onError(ConnectionInterface $conn, \Exception $e) {
+		echo "Error: {$e->getMessage()}\n";
+		$conn->close();
+	}
 }

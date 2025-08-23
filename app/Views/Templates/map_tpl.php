@@ -15,16 +15,16 @@
 				</div>
 				
 			<h3>Map Objects</h3>
-            <form action="" method="post" class="mb-4">
+            <form id="addObjectForm" class="mb-4">
                 <div class="mb-3">
                     <label for="name" class="form-label">Object Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    <input type="text" class="form-control" id="form_name" name="form_name" required>
                 </div>
                 <div class="mb-3">
-                    <label for="image_url" class="form-label">Image URL</label>
-                    <input type="url" class="form-control" id="image_url" name="image_url" required>
+                    <label for="form_image_url" class="form-label">Image URL</label>
+                    <input type="url" class="form-control" id="form_image_url" name="form_image_url" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Object</button>
+                <button class="btn btn-primary">Add Object</button>
             </form>
 
             <h4>Loaded Objects</h4>
@@ -137,6 +137,28 @@ var mapOffset;
 						updateGridSize(gridSize, false); // Pass false to prevent sending updates
 					}
 					break;
+				case 'objectAdded':
+					const obj = data.object;
+					console.log("New object:", obj);
+
+					allObjects[obj.id] = {
+						id: obj.id,
+						name: obj.name,
+						image_url: obj.image_url,
+						positionX: obj.positionX || 0,
+						positionY: obj.positionY || 0,
+						statusEffects: obj.statusEffects || []
+					};
+					
+					//sidebar
+					document.getElementById('object-list').innerHTML += ('<li class="list-group-item" data-id="'+obj.id+'" data-url="'+obj.image_url+'">'+obj.name+'</li>');
+					//on the map
+					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height:'+gridSize+'px; left:'+obj.positionX+'px; top:'+obj.positionY+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%;"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
+					
+					//!@#$
+					addClickHandlersOnObjectList();
+					initializeDraggables(gridSize, `.draggable-container[data-id="${obj.id}"]`);
+					break;
 				default:
 					//do nothing
 			}
@@ -210,8 +232,14 @@ var mapOffset;
 				}
 			});
 			
+			addClickHandlersOnObjectList();
+		}
+		
+		
+		function addClickHandlersOnObjectList(){
 			// Add click handler to lock all but one object from moving 
 			// When selecting an object, disable others after all are initialized.
+			$('#object-list li').off('click');
 			$('#object-list li').on('click', function() {
 				const objectId = $(this).data('id');
 				const clickedObjAlreadySelected = $(this).hasClass('selected');
@@ -261,9 +289,6 @@ var mapOffset;
 				}
 			});
 		}
-		
-		
-		
 		
 		
 		// generate a grid with status effect in status-effects-list div
@@ -566,7 +591,26 @@ var mapOffset;
 			}	
 		}
 		
-		
+		document.getElementById("addObjectForm").addEventListener("submit", function (e) {
+			e.preventDefault();
+
+			const name = document.getElementById("form_name").value;
+			const imageUrl = document.getElementById("form_image_url").value;
+
+			console.log("Sent");
+			console.log(name);
+			console.log(form_image_url);
+			
+			// Send addObject request to WebSocket
+			websocket.send(JSON.stringify({
+				action: "addObject",
+				name: name,
+				image_url: imageUrl
+			}));
+
+			// clear inputs
+			this.reset();
+		});
 
 	});
 </script>

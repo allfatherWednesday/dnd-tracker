@@ -15,19 +15,23 @@ class MapObjectModel extends Model
 
     public function addObject($name, $imageUrl, $positionX, $positionY)
     {
-        $req = $this->db()->prepare("INSERT INTO map_objects (name, image_url, positionX, positionY, statusEffects) VALUES (:name, :image_url, 0, 0, NULL)");
-        $req->bindValue(':name', $name);
-        $req->bindValue(':image_url', $imageUrl);
-		$req->bindValue(':positionX', $positionX);
-		$req->bindValue(':positionY', $positionY);
-        return $req->execute();
+		$DB1 = $this->db();
+        $req1 = $DB1->prepare("INSERT INTO map_objects (name, image_url, positionX, positionY, statusEffects) VALUES (:name, :image_url, 0, 0, NULL)");
+        $req1->bindValue(':name', $name);
+        $req1->bindValue(':image_url', $imageUrl);
+		$success = $req1->execute();    
+		if (!$success) {
+			error_log("Database error: " . print_r($req1->errorInfo(), true));
+			return false;
+		}
 		
 		// return the inserted row with id
-		$id = $this->db()->lastInsertId();
-		$req = $this->db()->prepare("SELECT * FROM map_objects WHERE id = :id");
-		$req->bindValue(':id', $id);
-		$req->execute();
-		return $req->fetch(PDO::FETCH_ASSOC);
+		$id = $DB1->lastInsertId();
+		$req2 = $DB1->prepare("SELECT * FROM map_objects WHERE id = :id");
+		$req2->bindValue(':id', $id);
+		$req2->execute();
+		$result = $req2->fetch(PDO::FETCH_ASSOC);
+		return $result;
     }
 	
 	public function updatePosition($id, $positionX, $positionY) {
