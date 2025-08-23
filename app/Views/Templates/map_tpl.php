@@ -494,95 +494,63 @@ var mapOffset;
 		}
 		
 		//todododod call this function from all needed places
-function updateEffectsLegend(selectedID, updateAll=false) {
-    let arrOfBoxes;
-    if (updateAll) {
-        for (const id in allObjects) {
-            updateEffectsLegend(id);
-        }
-    } else {
-        const container = $(`.draggable-container#${selectedID} div.status-effects-indicator`)[0];
-        const effectsCount = allObjects[selectedID].statusEffects.length;
-        
-        if (effectsCount === 0) {
-            container.style.display = "none";
-            container.innerHTML = "";
-            return;
-        }
-
-        // Always show container
-        container.style.display = "flex";
-        container.style.background = "brown";
-        container.style.bottom = "100%";
-        container.style.justifyContent = "space-between";
-        
-        // Calculate size based on gridSize with minimum constraints
-        const baseSize = Math.max(20, gridSize * 0.3); // Minimum 20px
-        const ellipsisSize = Math.max(12, gridSize * 0.25); // Smaller than icons
-        
-        switch (effectsCount) {
-            case 1:
-                container.style.width = baseSize + "px";
-                container.style.height = baseSize + "px";
-                container.style.left = "50%";
-                container.style.marginLeft = `-${baseSize/2}px`; // Center horizontally
-                container.innerHTML = `<div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[0]]});"></div>`;
-                break;
-                
-            case 2:
-                container.style.width = (baseSize * 2) + "px";
-                container.style.height = baseSize + "px";
-                container.style.left = "50%";
-                container.style.marginLeft = `-${baseSize}px`; // Center horizontally
-                container.innerHTML = `
-                    <div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[0]]});"></div>
-                    <div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[1]]});"></div>
-                `;
-                break;
-                
-            case 3:
-                container.style.width = (baseSize * 3) + "px";
-                container.style.height = baseSize + "px";
-                container.style.left = "0";
-                container.innerHTML = `
-                    <div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[0]]});"></div>
-                    <div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[1]]});"></div>
-                    <div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[2]]});"></div>
-                `;
-                break;
-                
-            default:
-                container.style.width = "100%";
-                container.style.height = baseSize + "px";
-                container.style.left = "0";
-                container.innerHTML = `
-                    <div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[0]]});"></div>
-                    <div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[1]]});"></div>
-                    <div style="width:100%;height:100%;background-size:contain;background-position:center;background-image:url(${statusEffectsLinks[allObjects[selectedID].statusEffects[2]]});"></div>
-                    <div style="display:flex;justify-content:center;align-items:center;width:100%;height:100%;">
-                        <div style="
-                            width:${ellipsisSize}px;
-                            height:${ellipsisSize}px;
-                            background:white;
-                            border-radius:50%;
-                            display:flex;
-                            justify-content:center;
-                            align-items:center;
-                            font-size:${ellipsisSize * 0.6}px;
-                        ">...</div>
-                    </div>
-                `;
-        }
-        
-        // Apply consistent styles to all child divs
-        arrOfBoxes = $(container).find('div');
-        arrOfBoxes.css({
-            'background-repeat': 'no-repeat',
-            'flex-shrink': '1',
-            'min-width': '0' // Prevent overflow
-        });
-    }
-}
+		function updateEffectsLegend(selectedID, updateAll=false){
+			let arrOfBoxes;
+			if (updateAll){
+				for (const id in allObjects){updateEffectsLegend(id);}
+			} else {
+				switch (allObjects[selectedID].statusEffects.length){
+					case 0:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "none";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = "";
+						break;
+						
+					case 1:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = $(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '35%';
+						//todododod
+						//statusEffectsLinks[allObjects[selectedID].statusEffects[0]] gives a link to image
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div>';
+						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
+						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
+						break;
+						
+					case 2:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '65%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '17%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div>';
+						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
+						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
+						break;
+						
+					case 3:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '100%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '0%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>';
+						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
+						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
+						break;
+						
+					default:
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '135%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '00%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div><div><p>...</p></div>';
+						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
+						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
+						break;
+						
+						//$($(".draggable-container#"+1+" div.status-effects-indicator div")[0]).width(100)
+				}
+			}	
+		}
+		
 		
 
 	});
