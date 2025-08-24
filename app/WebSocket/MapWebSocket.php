@@ -142,7 +142,36 @@ class MapWebSocket implements MessageComponentInterface {
 					}
 				}
 				break;
-				
+			case "removeObject":
+				/*if (!isset($data['id'])) {
+					$from->send(json_encode([
+						"action" => "error",
+						"message" => "Missing object ID for removal"
+					]));
+					break;
+				}*/
+
+				$id = $data['id'];
+
+				$success = $this->mapObjectModel->->removeObject($id);
+
+				if ($success) {
+					//broadcast to all clients about removal
+					foreach ($this->clients as $client) {
+						$client->send(json_encode([
+							"action" => "removeObject",
+							"id" => $id
+						]));
+					}
+					
+				} else {
+					//fail handling
+					$from->send(json_encode([
+						"action" => "error",
+						"message" => "Failed to remove object {$id}"
+					]));
+				}
+				break;
 		}
 	}
 

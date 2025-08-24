@@ -34,6 +34,19 @@ class MapObjectModel extends Model
 		return $result;
     }
 	
+	public function removeObject($id) {
+		$req = $this->db()->prepare("DELETE FROM map_objects WHERE id = :id");
+		$req->bindValue(':id', $id, PDO::PARAM_INT);
+		$success = $req->execute();
+
+		if (!$success) {
+			error_log("Database error while removing object: " . print_r($req->errorInfo(), true));
+			return false;
+		}
+
+		return true;
+	}
+	
 	public function updatePosition($id, $positionX, $positionY) {
     $req = $this->db()->prepare("UPDATE map_objects SET positionX = :positionX, positionY = :positionY WHERE id = :id");
     $req->bindValue(':positionX', $positionX);
