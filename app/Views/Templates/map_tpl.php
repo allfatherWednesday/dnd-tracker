@@ -50,6 +50,11 @@
 			<div id="status-effects-container" style="display: none;">
 				<h4>Status Effects</h4>
 			</div>
+			<div id="delete-button-container" style="display: none;">
+				<button id="remove-object-btn" class="btn btn-danger mt-2" >
+					Remove Object
+				</button>
+			</div>
         </div>
     </div>
 </div>
@@ -155,9 +160,32 @@ var mapOffset;
 					//on the map
 					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height:'+gridSize+'px; left:'+obj.positionX+'px; top:'+obj.positionY+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%;"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
 					
-					//!@#$
 					addClickHandlersOnObjectList();
 					initializeDraggables(gridSize, `.draggable-container[data-id="${obj.id}"]`);
+					break;
+				//!@#$
+				case "ObjectRemoved":
+					//removes both 
+					console.log("Received confirmation of deletion");
+					console.log(data);
+					$(`.list-group-item[data-id=${data.id}]`).replaceWith(); 
+					$(`.draggable-container[data-id=${data.id}]`).replaceWith(); 
+					
+					
+					//TODO should be put in a separate method later
+					// Deselect
+					$('#object-list li').removeClass('selected');
+					$('.draggable-container').removeClass('selected').css('z-index', 1);
+					//REMEMBER the selector for interact must match when setting it to false or true
+					interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
+					interact('.draggable-container').draggable(true);
+					$('#status-effects-container').css('display', 'none');
+					$('#delete-button-container').css('display', 'none');
+					//remove all highlighted
+					$('#status-effects-container div').removeClass('selected-effects-box');
+					break;
+				//!@#$
+				case "effectsUpdated":
 					break;
 				default:
 					//do nothing
@@ -252,6 +280,7 @@ var mapOffset;
 					interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
 					interact('.draggable-container').draggable(true);
 					$('#status-effects-container').css('display', 'none');
+					$('#delete-button-container').css('display', 'none');
 					//remove all highlighted
 					$('#status-effects-container div').removeClass('selected-effects-box');
 				
@@ -274,6 +303,7 @@ var mapOffset;
 					$(`.draggable-container[data-id="${objectId}"]`).addClass('selected').css('z-index', 9999);
 					$(this).addClass('selected');
 					$('#status-effects-container').css('display', 'block');
+					$('#delete-button-container').css('display', 'block');
 					
 					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
 					
@@ -325,8 +355,29 @@ var mapOffset;
 			updateRemoteEffects(allObjects[selectedObjectId].statusEffects, selectedObjectId);
 			updateEffectsLegend(selectedObjectId);
 		});
-	
 		
+		$('#remove-object-btn').on('click', function() {
+			const objectId = selectedObjectId;
+			if (!objectId) return;
+			
+			websocket.send(JSON.stringify({
+				action: "removeObject",
+				id: objectId
+			}));
+			console.log(`Deleted ${objectId}`);
+			
+			//TODO should be put in a separate method later
+			// Deselect
+			$('#object-list li').removeClass('selected');
+			$('.draggable-container').removeClass('selected').css('z-index', 1);
+			//REMEMBER the selector for interact must match when setting it to false or true
+			interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
+			interact('.draggable-container').draggable(true);
+			$('#status-effects-container').css('display', 'none');
+			$('#delete-button-container').css('display', 'none');
+			//remove all highlighted
+			$('#status-effects-container div').removeClass('selected-effects-box');
+		});
 		
         function dragMoveListener(event) {
             var target = event.target;

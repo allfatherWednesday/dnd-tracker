@@ -152,14 +152,16 @@ class MapWebSocket implements MessageComponentInterface {
 				}*/
 
 				$id = $data['id'];
+				print_r("Requesting to delete {$id}\n");
 
-				$success = $this->mapObjectModel->->removeObject($id);
+
+				$success = $this->mapObjectModel->removeObject($id);
 
 				if ($success) {
 					//broadcast to all clients about removal
 					foreach ($this->clients as $client) {
 						$client->send(json_encode([
-							"action" => "removeObject",
+							"action" => "ObjectRemoved",
 							"id" => $id
 						]));
 					}
