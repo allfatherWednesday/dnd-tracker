@@ -163,7 +163,7 @@ var mapOffset;
 					addClickHandlersOnObjectList();
 					initializeDraggables(gridSize, `.draggable-container[data-id="${obj.id}"]`);
 					break;
-				//!@#$
+				
 				case "ObjectRemoved":
 					//removes both 
 					console.log("Received confirmation of deletion");
@@ -177,7 +177,7 @@ var mapOffset;
 					$('#object-list li').removeClass('selected');
 					$('.draggable-container').removeClass('selected').css('z-index', 1);
 					//REMEMBER the selector for interact must match when setting it to false or true
-					interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
+					interact(`.draggable-container[data-id="${data.id}"]`).draggable(false);
 					interact('.draggable-container').draggable(true);
 					$('#status-effects-container').css('display', 'none');
 					$('#delete-button-container').css('display', 'none');
@@ -186,6 +186,14 @@ var mapOffset;
 					break;
 				//!@#$
 				case "effectsUpdated":
+					console.log(data);
+					//'objectId' => $objectId,
+					//'statusEffects' => $statusEffects
+					
+					
+					allObjects[data.objectId].statusEffects = data.statusEffects;
+					updateEffectsLegend(data.objectId);
+					
 					break;
 				default:
 					//do nothing
