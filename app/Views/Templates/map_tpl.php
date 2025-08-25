@@ -171,6 +171,7 @@ var mapOffset;
 					$(`.list-group-item[data-id=${data.id}]`).replaceWith(); 
 					$(`.draggable-container[data-id=${data.id}]`).replaceWith(); 
 					
+					delete allObjects[data.id];
 					
 					//TODO should be put in a separate method later
 					// Deselect
