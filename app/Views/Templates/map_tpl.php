@@ -8,29 +8,53 @@
         <!-- Left Sidebar -->
         <div class="col-md-2 col-md-2 sidebar_left sidebar_custom">
             <h3>Grid Settings</h3>
-				<div class="mb-3">
-					<label for="grid-size-input" class="form-label">Grid Size (px)</label>
-					<input type="number" class="form-control" id="grid-size-input" 
-						   name="grid-size">
-				</div>
-				
-			<h3>Map Objects</h3>
-            <form id="addObjectForm" class="mb-4">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Object Name</label>
-                    <input type="text" class="form-control" id="form_name" name="form_name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="form_image_url" class="form-label">Image URL</label>
-                    <input type="url" class="form-control" id="form_image_url" name="form_image_url" required>
-                </div>
-                <button class="btn btn-primary">Add Object</button>
-            </form>
+			<div class="mb-3">
+				<label for="grid-size-input" class="form-label">Grid Size (px)</label>
+				<input type="number" class="form-control" id="grid-size-input" 
+					   name="grid-size">
+			</div>
+			<div style="display: flex; justify-content: start;">
+				<div class="selected-blue-button" id="objects-menu-button"><h4>Objects</h4></div>
+				<div class="unselected-blue-button" id="maps-menu-button"><h4>Maps</h4></div>
+			</div>
+			<div style="display: flex">
+				<div id="objects-menu-body">
+					<h3>Map Objects</h3>
+					<form id="addObjectForm" class="mb-4">
+						<div class="mb-3">
+							<label for="name" class="form-label">Object Name</label>
+							<input type="text" class="form-control" id="form_object_name" name="form_object_name" required>
+						</div>
+						<div class="mb-3">
+							<label for="form_object_image_url" class="form-label">Object Image URL</label>
+							<input type="url" class="form-control" id="form_object_image_url" name="form_object_image_url" required>
+						</div>
+						<button class="btn btn-primary">Add Object</button>
+					</form>
 
-            <h4>Loaded Objects</h4>
-            <ul id="object-list" class="list-group">
-                
-            </ul>
+					<h4>Loaded Objects</h4>
+					<ul id="object-list" class="list-group">		
+					</ul>
+				</div>
+				<div id="maps-menu-body">
+					<h3>Map Backgrounds</h3>
+					<form id="addMapForm" class="mb-4">
+						<div class="mb-3">
+							<label for="name" class="form-label">Map Name</label>
+							<input type="text" class="form-control" id="form_map_name" name="form_map_name" required>
+						</div>
+						<div class="mb-3">
+							<label for="form_map_image_url" class="form-label">Map Image URL</label>
+							<input type="url" class="form-control" id="form_map_image_url" name="form_map_image_url" required>
+						</div>
+						<button class="btn btn-primary">Add Object</button>
+					</form>
+
+					<h4>Loaded Objects</h4>
+					<ul id="object-list" class="list-group">		
+					</ul>
+				</div>
+			</div>
         </div>
 
         <!-- Map Container -->
@@ -651,15 +675,50 @@ var mapOffset;
 			}	
 		}
 		
+		// Function to toggle menu visibility
+		function toggleMapObjectMenu(selectedMenu) {
+			const isObjectsMenu = selectedMenu === 'objects';
+			
+			// Toggle button classes
+			if (isObjectsMenu) {
+				$('#objects-menu-button').removeClass('unselected-blue-button').addClass('selected-blue-button');
+				$('#maps-menu-button').removeClass('selected-blue-button').addClass('unselected-blue-button');
+			} else {
+				$('#maps-menu-button').removeClass('unselected-blue-button').addClass('selected-blue-button');
+				$('#objects-menu-button').removeClass('selected-blue-button').addClass('unselected-blue-button');
+			}
+			
+			// Toggle menu visibility
+			if (isObjectsMenu) {
+				$('#objects-menu-body').css('display', 'block');
+				$('#maps-menu-body').css('display', 'none');
+			} else {
+				$('#maps-menu-body').css('display', 'block');
+				$('#objects-menu-body').css('display', 'none');
+			}
+		}
+		
+		
+		$('#objects-menu-button').on('click', function() {
+			toggleMapObjectMenu('objects');
+		});
+
+		$('#maps-menu-button').on('click', function() {
+			toggleMapObjectMenu('maps');
+		});
+
+		toggleMapObjectMenu('objects');
+	
+		
 		document.getElementById("addObjectForm").addEventListener("submit", function (e) {
 			e.preventDefault();
 
-			const name = document.getElementById("form_name").value;
-			const imageUrl = document.getElementById("form_image_url").value;
+			const name = document.getElementById("form_object_name").value;
+			const imageUrl = document.getElementById("form_object_image_url").value;
 
 			console.log("Sent");
 			console.log(name);
-			console.log(form_image_url);
+			console.log(form_object_image_url);
 			
 			// Send addObject request to WebSocket
 			websocket.send(JSON.stringify({

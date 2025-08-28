@@ -149,3 +149,19 @@ body {
 .selected-effects-box {
 	outline: 4px solid red;
 }
+
+.selected-blue-button {
+	background-color: #0d6efd;
+	border-radius: 8px;
+    color: white;
+    padding: 12px;
+	margin: 0 3px;
+}
+
+.unselected-blue-button{
+	background-color: #ccc;
+	border-radius: 8px;
+    color: black;
+    padding: 12px;
+    margin: 0 3px;
+}
