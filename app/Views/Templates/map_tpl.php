@@ -51,7 +51,7 @@
 					</form>
 
 					<h4>Loaded Maps</h4>
-					<ul id="object-list" class="list-group">		
+					<ul id="maps-list" class="list-group">		
 					</ul>
 				</div>
 			</div>
@@ -140,6 +140,8 @@ var mapOffset;
 					mapId = data['maps'][0].id;
 					mapImage = data['maps'][0].image;
 					
+					allMaps = Object.fromEntries(data['maps'].map(item => [item.id, {image: item.image, name: item.name,grid_size : item.grid_size}]));
+					
 					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: item.statusEffects}]));
 										
 					redrawMap();
@@ -223,6 +225,15 @@ var mapOffset;
 					break;
 				case "MapAdded":
 					console.log(data);
+					
+					const obj1 = data.object;
+					
+					allMaps[obj1.id] = {
+						image: obj1.image,
+						name: obj1.name,
+						grid_size: obj1.grid_size
+					};
+					
 					break;
 				
 				default:
@@ -239,6 +250,12 @@ var mapOffset;
 			$("#grid-size-input").val(gridSize);
 			$("#map-image").attr("src",mapImage);
 			$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px");
+			
+			for (const key in allMaps) {
+				
+				document.getElementById('maps-list').innerHTML += '<li class="list-group-item"" data-id="'+key +'" data-url="'+allMaps[key].image+'">'+allMaps[key].name+'</li>';
+				
+			}
 			
 			const mapImageElement = document.getElementById('map-image');
 			$("#map-image")
