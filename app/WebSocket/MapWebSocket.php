@@ -155,7 +155,7 @@ class MapWebSocket implements MessageComponentInterface {
 				print_r("Requesting to delete {$id}\n");
 
 
-				$success = $this->mapObjectModel->removeObject($id);
+				$newObject = $this->mapObjectModel->removeObject($id);
 
 				if ($success) {
 					//broadcast to all clients about removal
@@ -173,6 +173,23 @@ class MapWebSocket implements MessageComponentInterface {
 						"message" => "Failed to remove object {$id}"
 					]));
 				}
+				break;
+			case "addMap":
+				$added_map_name = $data['name'];
+				$added_map_image_url = $data['image_url'];
+				$grid_size = $data['grid_size'];
+				print_r("Added map: {$added_map_name}\n");
+				
+				$newMap = $this->mapModel->addMap($added_map_name, $added_map_image_url, $grid_size);
+				
+				// Broadcast new object to all clients
+				foreach ($this->clients as $client) {
+					$client->send(json_encode([
+						'action' => 'MapAdded',
+						'object' => $newMap
+					]));
+				}
+				
 				break;
 		}
 	}

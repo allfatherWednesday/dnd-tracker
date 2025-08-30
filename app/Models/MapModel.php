@@ -51,6 +51,27 @@ class MapModel extends Model
         return $req->fetchAll(PDO::FETCH_ASSOC);
 	}
 	
+	public function addMap($name, $image, $grid_size){
+		$DB1 = $this->db();
+        $req1 = $DB1->prepare("INSERT INTO maps (name, image, grid_size) VALUES (:name, :image, :grid_size)");
+        $req1->bindValue(':name', $name);
+        $req1->bindValue(':image', $image);
+        $req1->bindValue(':grid_size', $grid_size);
+		$success = $req1->execute();    
+		if (!$success) {
+			error_log("Database error: " . print_r($req1->errorInfo(), true));
+			return false;
+		}
+		
+		// return the inserted row with id
+		$id = $DB1->lastInsertId();
+		$req2 = $DB1->prepare("SELECT * FROM maps WHERE id = :id");
+		$req2->bindValue(':id', $id);
+		$req2->execute();
+		$result = $req2->fetch(PDO::FETCH_ASSOC);
+		return $result;
+	}
+	
     public function updateGridSize(int $mapId, int $gridSize): bool
     {
         try {

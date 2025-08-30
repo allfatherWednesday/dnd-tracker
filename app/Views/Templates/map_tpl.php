@@ -50,7 +50,7 @@
 						<button class="btn btn-primary">Add Object</button>
 					</form>
 
-					<h4>Loaded Objects</h4>
+					<h4>Loaded Maps</h4>
 					<ul id="object-list" class="list-group">		
 					</ul>
 				</div>
@@ -112,6 +112,7 @@ let activeSocket;
 let gridSize;
 let mapId;
 let mapImage;
+let allMaps = new Map();
 let allObjects = new Map();		
 let selectedObjectId = null; //if it breaks use this instead  const selectedObject = $('#object-list li.selected')[0].getAttribute('data-id');
 var mapRect;
@@ -220,6 +221,10 @@ var mapOffset;
 					updateEffectsLegend(data.objectId);
 					
 					break;
+				case "MapAdded":
+					console.log(data);
+					break;
+				
 				default:
 					//do nothing
 			}
@@ -718,13 +723,34 @@ var mapOffset;
 
 			console.log("Sent");
 			console.log(name);
-			console.log(form_object_image_url);
+			console.log(imageUrl);
 			
 			// Send addObject request to WebSocket
 			websocket.send(JSON.stringify({
 				action: "addObject",
 				name: name,
 				image_url: imageUrl
+			}));
+
+			// clear inputs
+			this.reset();
+		});
+		
+		document.getElementById("addMapForm").addEventListener("submit", function (e) {
+			e.preventDefault();
+
+			const name = document.getElementById("form_map_name").value;
+			const imageUrl = document.getElementById("form_map_image_url").value;
+
+			console.log(`Sent ${name}`);
+			console.log(imageUrl);
+			
+			// Send addObject request to WebSocket
+			websocket.send(JSON.stringify({
+				action: "addMap",
+				name: name,
+				image_url: imageUrl,
+				grid_size: gridSize
 			}));
 
 			// clear inputs
