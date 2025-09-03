@@ -47,7 +47,7 @@
 							<label for="form_map_image_url" class="form-label">Map Image URL</label>
 							<input type="url" class="form-control" id="form_map_image_url" name="form_map_image_url" required>
 						</div>
-						<button class="btn btn-primary">Add Object</button>
+						<button class="btn btn-primary">Add Map</button>
 					</form>
 
 					<h4>Loaded Maps</h4>
@@ -212,7 +212,7 @@ var mapOffset;
 					//remove all highlighted
 					$('#status-effects-container div').removeClass('selected-effects-box');
 					break;
-				//!@#$
+				
 				case "effectsUpdated":
 					console.log(data);
 					//'objectId' => $objectId,
@@ -226,16 +226,36 @@ var mapOffset;
 				case "MapAdded":
 					console.log(data);
 					
-					const obj1 = data.object;
+					const map1 = data.map1;
 					
-					allMaps[obj1.id] = {
-						image: obj1.image,
-						name: obj1.name,
-						grid_size: obj1.grid_size
+					allMaps[map1.id] = {
+						image: map1.image,
+						name: map1.name,
+						grid_size: map1.grid_size
 					};
 					
+					gridSize = map1.grid_size;
+					mapId = map1.id;
+					mapImage = map1.image;
+					
+					redrawMap();
+					updateGridSize(gridSize);
+					
+					// show the correct map
+					//Recalc dimentions of the map
+					
 					break;
+					
+				case "mapSwitched":
+					temp = data;
+					mapId = data.selected_map_id;;
+					gridSize = allMaps[mapId].grid_size;
+					mapImage = allMaps[mapId].image;
+					
+					redrawMap();
+					updateGridSize(gridSize);
 				
+					break;
 				default:
 					//do nothing
 			}
@@ -251,10 +271,15 @@ var mapOffset;
 			$("#map-image").attr("src",mapImage);
 			$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px");
 			
+			document.getElementById('maps-list').innerHTML = "";
+			
 			for (const key in allMaps) {
 				
-				document.getElementById('maps-list').innerHTML += '<li class="list-group-item"" data-id="'+key +'" data-url="'+allMaps[key].image+'">'+allMaps[key].name+'</li>';
-				
+				if(mapId == key){
+					document.getElementById('maps-list').innerHTML += '<li class="list-group-item selected" data-id="'+key +'" data-url="'+allMaps[key].image+'">'+allMaps[key].name+'</li>';
+				}else{
+					document.getElementById('maps-list').innerHTML += '<li class="list-group-item" data-id="'+key +'" data-url="'+allMaps[key].image+'">'+allMaps[key].name+'</li>';	
+				}
 			}
 			
 			const mapImageElement = document.getElementById('map-image');
@@ -270,6 +295,8 @@ var mapOffset;
 						top: mapRect.top
 					};
 			});
+			
+			addClickHandlersOnMapsList();
 		}
 		
 		
@@ -366,8 +393,6 @@ var mapOffset;
 					$('#status-effects-container div').removeClass('selected-effects-box');
 					for (const effect of allObjects[selectedObjectId].statusEffects) {
 						const nameOfEffect = '#effect-'+effect;
-						console.log(nameOfEffect);
-						temp = nameOfEffect;
 						$(nameOfEffect).addClass('selected-effects-box');
 					}
 					
@@ -375,6 +400,31 @@ var mapOffset;
 			});
 		}
 		
+		function addClickHandlersOnMapsList(){
+			$('#maps-list li').off('click');
+			$('#maps-list li').on('click', function() {
+				const selectedMapId = $(this).data('id');
+				const clickedMapNotYetSelected = !($(this).hasClass('selected'));	
+				
+				
+				if(clickedMapNotYetSelected){		
+					
+					//!@#$
+					//Change to do so on the receiving websocket
+					$('#maps-list li').removeClass('selected');
+					console.log($(this).addClass('selected'));
+					
+					console.log(`Sending update - Map changed to ${allMaps[selectedMapId].name}`);
+					
+					// Send addObject request to WebSocket
+					websocket.send(JSON.stringify({
+						action: "switchMap",
+						selectedId: selectedMapId
+					}));
+				
+				}
+			});
+		}
 		
 		// generate a grid with status effect in status-effects-list div
 		// <div class="square-effects-menu" style="background-image: url('https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png')"> </div>
@@ -506,6 +556,7 @@ var mapOffset;
 		// Reinitialize all draggables unconditionally, then adjust for selection.
 		function updateGridSize(newSize, sendUpdates = true) {
 			gridSize = newSize;
+			allMaps[mapId].grid_size = newSize;
 			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
 			$('.draggable-container').css({ width: `${gridSize}px`, height: `${gridSize}px` });
 			adjustMapSize(gridSize);

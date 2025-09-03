@@ -186,10 +186,18 @@ class MapWebSocket implements MessageComponentInterface {
 				foreach ($this->clients as $client) {
 					$client->send(json_encode([
 						'action' => 'MapAdded',
-						'object' => $newMap
+						'map1' => $newMap
 					]));
 				}
-				
+				break;
+			case "switchMap":
+				$selected_map_id = $data['selectedId'];
+				foreach ($this->clients as $client) {
+					$client->send(json_encode([
+						'action' => 'mapSwitched',
+						'selected_map_id' => $selected_map_id
+					]));
+				}
 				break;
 		}
 	}
