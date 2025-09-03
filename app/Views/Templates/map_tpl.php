@@ -122,12 +122,17 @@ var mapOffset;
     $(document).ready(function() {
 		
 		// Connect to WebSocket
-		const websocket = new WebSocket('ws://localhost:8080');
-		activeSocket = websocket;
+		activeSocket = getActiveSocket();
 		//const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
+		function getActiveSocket (){
+			if (!activeSocket || activeSocket.readyState === 3){
+				activeSocket = new WebSocket('ws://localhost:8080');
+			}
+			return activeSocket;
+		}
 		
 
-		websocket.onmessage = function(event) {
+		getActiveSocket().onmessage = function(event) {
 			const data = JSON.parse(event.data);
 			switch (data.action){
 				case 'firstFetchReturn':
@@ -261,7 +266,7 @@ var mapOffset;
 			}
 		};
 		
-		websocket.onopen = () => websocket.send(JSON.stringify({
+		getActiveSocket().onopen = () => getActiveSocket().send(JSON.stringify({
 					action: 'firstFetch',
 				}));
 		
@@ -334,7 +339,7 @@ var mapOffset;
 					updateEffectsLegend(0, updateAll=true);
 					
 					// Send WebSocket message
-					websocket.send(JSON.stringify({
+					getActiveSocket().send(JSON.stringify({
 						action: 'updateGridSize',
 						mapId: mapId,
 						gridSize: newSize
@@ -417,7 +422,7 @@ var mapOffset;
 					console.log(`Sending update - Map changed to ${allMaps[selectedMapId].name}`);
 					
 					// Send addObject request to WebSocket
-					websocket.send(JSON.stringify({
+					getActiveSocket().send(JSON.stringify({
 						action: "switchMap",
 						selectedId: selectedMapId
 					}));
@@ -465,7 +470,7 @@ var mapOffset;
 			const objectId = selectedObjectId;
 			if (!objectId) return;
 			
-			websocket.send(JSON.stringify({
+			getActiveSocket().send(JSON.stringify({
 				action: "removeObject",
 				id: objectId
 			}));
@@ -627,7 +632,7 @@ var mapOffset;
 						const newTop = originalTop + translateY;
 
 						// Send update to WebSocket server
-						websocket.send(JSON.stringify({
+						getActiveSocket().send(JSON.stringify({
 							action: 'updatePosition',
 							objectId: objectId,
 							positionX: newLeft,
@@ -671,7 +676,7 @@ var mapOffset;
 				
 				if (sendUpdates) {
 					const objectId = container.getAttribute('data-id');
-					websocket.send(JSON.stringify({
+					getActiveSocket().send(JSON.stringify({
 						action: 'updatePosition',
 						objectId: objectId,
 						positionX: snappedLeft,
@@ -683,7 +688,7 @@ var mapOffset;
 		
 		function updateRemoteEffects(statusEffects, objectId){	
 				
-			websocket.send(JSON.stringify({
+			getActiveSocket().send(JSON.stringify({
 				action: 'updateEffects',
 				objectId: objectId,
 				statusEffects: statusEffects
@@ -794,7 +799,7 @@ var mapOffset;
 			console.log(imageUrl);
 			
 			// Send addObject request to WebSocket
-			websocket.send(JSON.stringify({
+			getActiveSocket().send(JSON.stringify({
 				action: "addObject",
 				name: name,
 				image_url: imageUrl
@@ -814,7 +819,7 @@ var mapOffset;
 			console.log(imageUrl);
 			
 			// Send addObject request to WebSocket
-			websocket.send(JSON.stringify({
+			getActiveSocket().send(JSON.stringify({
 				action: "addMap",
 				name: name,
 				image_url: imageUrl,
