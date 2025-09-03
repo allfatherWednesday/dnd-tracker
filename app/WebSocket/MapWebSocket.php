@@ -157,7 +157,7 @@ class MapWebSocket implements MessageComponentInterface {
 
 				$newObject = $this->mapObjectModel->removeObject($id);
 
-				if ($success) {
+				if ($newObject) {
 					//broadcast to all clients about removal
 					foreach ($this->clients as $client) {
 						$client->send(json_encode([
