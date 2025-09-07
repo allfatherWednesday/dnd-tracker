@@ -1,6 +1,5 @@
 <?php include_once 'partials/editor_top_tpl.php'; ?>
 
-
 <link rel="stylesheet" href="<?= HOST ?>/public/css/maps.css">
 
 <div class="container-fluid no-select" style="padding-top: 4px;">
@@ -739,16 +738,17 @@ var mapOffset;
 						break;
 						
 					default:
+						// For 4 or more effects, show 3 icons and ellipsis on the same line
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '135%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '100%';
 						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '00%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div><div style="fontSize:'+ Math.trunc(gridSize*0.2) + 'px">...</div>';
-						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
-						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '0%';
+						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = 
+							'<div style="flex: 1; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div>' +
+							'<div style="flex: 1; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div>' +
+							'<div style="flex: 1; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>' +
+							'<div style="flex: 1; height: 100%; display: flex; justify-content: center; align-items: center; font-size: ' + Math.trunc(gridSize*0.2) + 'px;">...</div>';
 						break;
-						
-						//$($(".draggable-container#"+1+" div.status-effects-indicator div")[0]).width(100)
 				}
 			}	
 		}
