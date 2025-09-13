@@ -1,6 +1,5 @@
 <?php include_once 'partials/editor_top_tpl.php'; ?>
 
-
 <link rel="stylesheet" href="<?= HOST ?>/public/css/maps.css">
 
 <div class="container-fluid no-select" style="padding-top: 4px;">
@@ -78,14 +77,6 @@
 				<button id="remove-object-btn" class="btn btn-danger mt-2" >
 					Remove Object
 				</button>
-			</div>
-			<div id="visual-changes-container" style="display: none; ">
-				<div id="vc-rotate-left" class="vc-menu-item" style="background-image: url('https://uxwing.com/wp-content/themes/uxwing/download/arrow-direction/rotate-left-arrow-icon.png')"></div>
-				<div id="vc-rotate-right" class="vc-menu-item; background-image: url('')"></div>
-				<div id="vc-increase-scale" class="vc-menu-item; background-image: url('')"></div>
-				<div id="vc-decrease-scale" class="vc-menu-item; background-image: url('')"></div>
-				<div id="vc-make-wider" class="vc-menu-item; background-image: url('')"></div>
-				<div id="vc-make-taller" class="vc-menu-item; background-image: url('')"></div>
 			</div>
         </div>
     </div>
