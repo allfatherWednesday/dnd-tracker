@@ -165,3 +165,9 @@ body {
     padding: 12px;
     margin: 0 3px;
 }
+
+.vc-menu-item{
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
