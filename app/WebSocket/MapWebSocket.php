@@ -117,6 +117,24 @@ class MapWebSocket implements MessageComponentInterface {
 					}
 				}
 				break;
+			case 'updateSize':
+				$objectId = $data['objectId'];
+				$newSize = $data['newSize'];
+				
+				// Update database using MapModel
+				$this->mapObjectModel->updateSize($objectId, $newSize);
+				
+				// Broadcast new grid size to all clients except sender
+				foreach ($this->clients as $client) {
+					if ($client !== $from) {
+						$client->send(json_encode([
+							'action' => 'sizeUpdated',
+							'objectId' => $objectId,
+							'newSize' => $newSize
+						]));
+					}
+				}
+				break;	
 			case 'addObject':
 				$name = $data['name'] ?? null;
 				$imageUrl = $data['image_url'] ?? null;

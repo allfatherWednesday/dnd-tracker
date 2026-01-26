@@ -16,7 +16,7 @@ class MapObjectModel extends Model
     public function addObject($name, $imageUrl, $positionX, $positionY)
     {
 		$DB1 = $this->db();
-        $req1 = $DB1->prepare("INSERT INTO map_objects (name, image_url, positionX, positionY, statusEffects) VALUES (:name, :image_url, 0, 0, NULL)");
+        $req1 = $DB1->prepare("INSERT INTO map_objects (name, image_url, positionX, positionY, statusEffects, size) VALUES (:name, :image_url, 0, 0, NULL, 1)");
         $req1->bindValue(':name', $name);
         $req1->bindValue(':image_url', $imageUrl);
 		$success = $req1->execute();    
@@ -59,6 +59,13 @@ class MapObjectModel extends Model
 		$serialStatusEffects = serialize($statusEffects);
 		$req = $this->db()->prepare("UPDATE map_objects SET statusEffects = :serialStatusEffects WHERE id = :id");
 		$req->bindValue(':serialStatusEffects', $serialStatusEffects);
+		$req->bindValue(':id', $id);
+		return $req->execute();
+	}
+	
+	public function updateSize($id, $size) {
+		$req = $this->db()->prepare("UPDATE map_objects SET size = :size WHERE id = :id");
+		$req->bindValue(':size', $size);
 		$req->bindValue(':id', $id);
 		return $req->execute();
 	}

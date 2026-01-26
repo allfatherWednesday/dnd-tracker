@@ -78,13 +78,13 @@
 					Remove Object
 				</button>
 			</div>
-			<div id="visual-changes-container" style="display: none; ">
-				<div id="vc-rotate-left" class="vc-menu-item" style="background-image: url('https://uxwing.com/wp-content/themes/uxwing/download/arrow-direction/rotate-left-arrow-icon.png')"></div>
-				<div id="vc-rotate-right" class="vc-menu-item; background-image: url('')"></div>
-				<div id="vc-increase-scale" class="vc-menu-item; background-image: url('')"></div>
-				<div id="vc-decrease-scale" class="vc-menu-item; background-image: url('')"></div>
-				<div id="vc-make-wider" class="vc-menu-item; background-image: url('')"></div>
-				<div id="vc-make-taller" class="vc-menu-item; background-image: url('')"></div>
+			<div id="size-button-container" style="display: none;">
+				<button id="increase-size-btn" class="btn btn-danger mt-2" >
+					Size+
+				</button>
+				<button id="decrease-size-btn" class="btn btn-danger mt-2" >
+					Size-
+				</button>
 			</div>
         </div>
     </div>
@@ -154,7 +154,7 @@ var mapOffset;
 					
 					allMaps = Object.fromEntries(data['maps'].map(item => [item.id, {image: item.image, name: item.name,grid_size : item.grid_size}]));
 					
-					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: item.statusEffects}]));
+					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: item.statusEffects, size:item.size}]));
 										
 					redrawMap();
 					redrawAllObjects();
@@ -171,7 +171,7 @@ var mapOffset;
 							container.style.transform = 'none';
 							container.setAttribute('data-x', 0);
 							container.setAttribute('data-y', 0);
-					}
+						}
 					});
 					break;
 				case 'gridSizeUpdated':
@@ -180,6 +180,25 @@ var mapOffset;
 						$('#grid-size-input').val(gridSize);
 						updateGridSize(gridSize, false); // Pass false to prevent sending updates
 					}
+					break;
+				case 'sizeUpdated':
+					console.log("sizeUpdated", data);
+					allObjects[data.objectId].size = data.newSize;
+					const containers1 = document.querySelectorAll('.draggable-container');
+					containers1.forEach(container => {
+						const img = container.querySelector('img');
+						if (container.id === data.objectId.toString()) {
+							// Update position (swap X/Y due to existing structure)
+							container.style.width = gridSize*data.newSize + 'px';
+							container.style.height = gridSize*data.newSize + 'px';
+							// Reset transform
+							container.style.transform = 'none';
+							container.setAttribute('data-x', 0);
+							container.setAttribute('data-y', 0);
+						}	
+					});
+					console.log("Received new size:", data);
+					
 					break;
 				case 'objectAdded':
 					const obj = data.object;
@@ -191,13 +210,15 @@ var mapOffset;
 						image_url: obj.image_url,
 						positionX: obj.positionX || 0,
 						positionY: obj.positionY || 0,
-						statusEffects: obj.statusEffects || []
+						statusEffects: obj.statusEffects || [],
+						size: obj.size || 1
 					};
 					
 					//sidebar
 					document.getElementById('object-list').innerHTML += ('<li class="list-group-item" data-id="'+obj.id+'" data-url="'+obj.image_url+'">'+obj.name+'</li>');
 					//on the map
-					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height:'+gridSize+'px; left:'+obj.positionX+'px; top:'+obj.positionY+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%;"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
+					//currentlyworking change to individual object's size
+					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize*obj.size+'px; height:'+gridSize*obj.size+'px; left:'+obj.positionX+'px; top:'+obj.positionY+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%;"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
 					
 					addClickHandlersOnObjectList();
 					initializeDraggables(gridSize, `.draggable-container[data-id="${obj.id}"]`);
@@ -221,6 +242,7 @@ var mapOffset;
 					interact('.draggable-container').draggable(true);
 					$('#status-effects-container').css('display', 'none');
 					$('#delete-button-container').css('display', 'none');
+					$('#size-button-container').css('display', 'none');
 					//remove all highlighted
 					$('#status-effects-container div').removeClass('selected-effects-box');
 					break;
@@ -318,8 +340,7 @@ var mapOffset;
 			for (const key in allObjects) {
 				
 				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+'</li>';
-				
-				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize+'px; height: '+gridSize+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'"><img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%;"><div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div></div>';
+				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'"><img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%;"><div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div></div>';
 				
 			}
 			
@@ -375,6 +396,7 @@ var mapOffset;
 					interact('.draggable-container').draggable(true);
 					$('#status-effects-container').css('display', 'none');
 					$('#delete-button-container').css('display', 'none');
+					$('#size-button-container').css('display', 'none');
 					//remove all highlighted
 					$('#status-effects-container div').removeClass('selected-effects-box');
 				
@@ -398,6 +420,7 @@ var mapOffset;
 					$(this).addClass('selected');
 					$('#status-effects-container').css('display', 'block');
 					$('#delete-button-container').css('display', 'block');
+					$('#size-button-container').css('display', 'block');
 					
 					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
 					
@@ -492,8 +515,44 @@ var mapOffset;
 			interact('.draggable-container').draggable(true);
 			$('#status-effects-container').css('display', 'none');
 			$('#delete-button-container').css('display', 'none');
+			$('#size-button-container').css('display', 'none');
 			//remove all highlighted
 			$('#status-effects-container div').removeClass('selected-effects-box');
+		});
+		
+		//////////////////////////////currentlyworking
+		$('#increase-size-btn').on('click', function(){
+			const objectId = selectedObjectId;
+			if (!objectId) return;
+			const tempSize = +allObjects[objectId].size+1;
+			allObjects[objectId].size = `${tempSize}`;
+			
+			getActiveSocket().send(JSON.stringify({
+				action: "updateSize",
+				objectId: objectId,
+				newSize: tempSize
+			}));
+			console.log(`Increased ${objectId} to ${tempSize}`);
+			
+			$(`.draggable-container[data-id="${objectId}"]`).css({ width: `${gridSize*tempSize}px`, height: `${gridSize*tempSize}px` });
+			
+		});
+		
+		$('#decrease-size-btn').on('click', function(){
+			const objectId = selectedObjectId;
+			if (!objectId) return;
+			const tempSize = +allObjects[objectId].size-1;
+			if (tempSize<1) return;
+			allObjects[objectId].size = `${tempSize}`;
+			
+			getActiveSocket().send(JSON.stringify({
+				action: "updateSize",
+				objectId: objectId,
+				newSize: tempSize
+			}));
+			console.log(`Decreased ${objectId} to ${tempSize}`);
+			
+			$(`.draggable-container[data-id="${objectId}"]`).css({ width: `${gridSize*tempSize}px`, height: `${gridSize*tempSize}px` });
 		});
 		
         function dragMoveListener(event) {
@@ -570,7 +629,16 @@ var mapOffset;
 			gridSize = newSize;
 			allMaps[mapId].grid_size = newSize;
 			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
-			$('.draggable-container').css({ width: `${gridSize}px`, height: `${gridSize}px` });
+			
+			//before different sizes were introduced: 
+			//$('.draggable-container').css({ width: `${gridSize}px`, height: `${gridSize}px` });
+			//currentlyworking change to individual object's size
+			document.querySelectorAll('.draggable-container').forEach(container => {
+				const tempID = parseFloat(container.id);
+				container.style.width = gridSize*allObjects[tempID].size+"px";
+				container.style.height = gridSize*allObjects[tempID].size+"px";
+			});
+			
 			adjustMapSize(gridSize);
 			const mc = document.getElementById('map-container');
 			const mapRect = mc.getBoundingClientRect();
