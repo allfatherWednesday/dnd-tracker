@@ -86,6 +86,12 @@
 					Size-
 				</button>
 			</div>
+				<button id="rotate-left-btn" class="btn btn-danger mt-2">
+					Rotate -90°
+				</button>
+				<button id="rotate-right-btn" class="btn btn-danger mt-2">
+					Rotate +90°
+				</button>
         </div>
     </div>
 </div>
@@ -154,7 +160,7 @@ var mapOffset;
 					
 					allMaps = Object.fromEntries(data['maps'].map(item => [item.id, {image: item.image, name: item.name,grid_size : item.grid_size}]));
 					
-					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: item.statusEffects, size:item.size}]));
+					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: item.statusEffects,rotation: item.rotation || 0 , size:item.size}]));
 										
 					redrawMap();
 					redrawAllObjects();
@@ -200,6 +206,10 @@ var mapOffset;
 					console.log("Received new size:", data);
 					
 					break;
+				case 'rotationUpdated':
+					allObjects[data.objectId].rotation = data.newRotation;
+					$(`#${data.objectId} img`).css('transform', `rotate(${data.newRotation}deg)`);
+					break;
 				case 'objectAdded':
 					const obj = data.object;
 					console.log("New object:", obj);
@@ -218,7 +228,7 @@ var mapOffset;
 					document.getElementById('object-list').innerHTML += ('<li class="list-group-item" data-id="'+obj.id+'" data-url="'+obj.image_url+'">'+obj.name+'</li>');
 					//on the map
 					//currentlyworking change to individual object's size
-					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize*obj.size+'px; height:'+gridSize*obj.size+'px; left:'+obj.positionX+'px; top:'+obj.positionY+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%;"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
+					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize*obj.size+'px; height:'+gridSize*obj.size+'px; left:'+obj.positionX+'px; top:'+obj.positionY+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%; transform: rotate(' + (obj.rotation || 0) + 'deg);"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
 					
 					addClickHandlersOnObjectList();
 					initializeDraggables(gridSize, `.draggable-container[data-id="${obj.id}"]`);
@@ -243,6 +253,7 @@ var mapOffset;
 					$('#status-effects-container').css('display', 'none');
 					$('#delete-button-container').css('display', 'none');
 					$('#size-button-container').css('display', 'none');
+					$('#rotation-button-container').css('display', 'none');
 					//remove all highlighted
 					$('#status-effects-container div').removeClass('selected-effects-box');
 					break;
@@ -340,8 +351,7 @@ var mapOffset;
 			for (const key in allObjects) {
 				
 				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+'</li>';
-				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'"><img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%;"><div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div></div>';
-				
+				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'"><img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%; transform: rotate(' + (allObjects[key].rotation || 0) + 'deg);"><div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div></div>';
 			}
 			
 			$("#map-image")
@@ -397,6 +407,7 @@ var mapOffset;
 					$('#status-effects-container').css('display', 'none');
 					$('#delete-button-container').css('display', 'none');
 					$('#size-button-container').css('display', 'none');
+					$('#rotation-button-container').css('display', 'none');
 					//remove all highlighted
 					$('#status-effects-container div').removeClass('selected-effects-box');
 				
@@ -421,6 +432,7 @@ var mapOffset;
 					$('#status-effects-container').css('display', 'block');
 					$('#delete-button-container').css('display', 'block');
 					$('#size-button-container').css('display', 'block');
+					$('#rotation-button-container').css('display', 'block');
 					
 					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
 					
@@ -516,6 +528,7 @@ var mapOffset;
 			$('#status-effects-container').css('display', 'none');
 			$('#delete-button-container').css('display', 'none');
 			$('#size-button-container').css('display', 'none');
+			$('#rotation-button-container').css('display', 'none');
 			//remove all highlighted
 			$('#status-effects-container div').removeClass('selected-effects-box');
 		});
@@ -553,6 +566,36 @@ var mapOffset;
 			console.log(`Decreased ${objectId} to ${tempSize}`);
 			
 			$(`.draggable-container[data-id="${objectId}"]`).css({ width: `${gridSize*tempSize}px`, height: `${gridSize*tempSize}px` });
+		});
+
+		$('#rotate-left-btn').on('click', function(){
+    const objectId = selectedObjectId;
+    if (!objectId) return;
+    const newRotation = (+allObjects[objectId].rotation - 90) % 360;
+    allObjects[objectId].rotation = newRotation;
+    
+    getActiveSocket().send(JSON.stringify({
+        action: "updateRotation",
+        objectId: objectId,
+        newRotation: newRotation
+    }));
+    
+    $(`#${objectId} img`).css('transform', `rotate(${newRotation}deg)`);
+		});
+
+		$('#rotate-right-btn').on('click', function(){
+				const objectId = selectedObjectId;
+				if (!objectId) return;
+				const newRotation = (+allObjects[objectId].rotation + 90) % 360;
+				allObjects[objectId].rotation = newRotation;
+				
+				getActiveSocket().send(JSON.stringify({
+					action: "updateRotation",
+					objectId: objectId,
+					newRotation: newRotation
+    		}));
+				
+				$(`#${objectId} img`).css('transform', `rotate(${newRotation}deg)`);
 		});
 		
         function dragMoveListener(event) {

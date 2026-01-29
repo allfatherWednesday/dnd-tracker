@@ -134,6 +134,22 @@ class MapWebSocket implements MessageComponentInterface {
 						]));
 					}
 				}
+				break; 
+			case 'updateRotation':
+				$objectId = $data['objectId'];
+				$newRotation = $data['newRotation'];
+				
+				$this->mapObjectModel->updateRotation($objectId, $newRotation);
+				
+				foreach ($this->clients as $client) {
+						if ($client !== $from) {
+								$client->send(json_encode([
+										'action' => 'rotationUpdated',
+										'objectId' => $objectId,
+										'newRotation' => $newRotation
+								]));
+						}
+				}
 				break;	
 			case 'addObject':
 				$name = $data['name'] ?? null;

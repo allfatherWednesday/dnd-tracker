@@ -16,9 +16,9 @@ class MapObjectModel extends Model
     public function addObject($name, $imageUrl, $positionX, $positionY)
     {
 		$DB1 = $this->db();
-        $req1 = $DB1->prepare("INSERT INTO map_objects (name, image_url, positionX, positionY, statusEffects, size) VALUES (:name, :image_url, 0, 0, NULL, 1)");
-        $req1->bindValue(':name', $name);
-        $req1->bindValue(':image_url', $imageUrl);
+		$req1 = $DB1->prepare("INSERT INTO map_objects (name, image_url, positionX, positionY, statusEffects, size, rotation) VALUES (:name, :image_url, 0, 0, NULL, 1, 0)");
+		$req1->bindValue(':name', $name);
+		$req1->bindValue(':image_url', $imageUrl);
 		$success = $req1->execute();    
 		if (!$success) {
 			error_log("Database error: " . print_r($req1->errorInfo(), true));
@@ -62,7 +62,12 @@ class MapObjectModel extends Model
 		$req->bindValue(':id', $id);
 		return $req->execute();
 	}
-	
+	public function updateRotation($id, $rotation) {
+    $req = $this->db()->prepare("UPDATE map_objects SET rotation = :rotation WHERE id = :id");
+    $req->bindValue(':rotation', $rotation);
+    $req->bindValue(':id', $id);
+    return $req->execute();
+}
 	public function updateSize($id, $size) {
 		$req = $this->db()->prepare("UPDATE map_objects SET size = :size WHERE id = :id");
 		$req->bindValue(':size', $size);
