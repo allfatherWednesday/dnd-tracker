@@ -150,7 +150,25 @@ class MapWebSocket implements MessageComponentInterface {
 								]));
 						}
 				}
-				break;	
+				break;
+				case 'updateDuplicateCount':
+						$objectId = $data['objectId'];
+						$duplicateCount = $data['duplicateCount'];
+						
+						// Update database
+						$this->mapObjectModel->updateDuplicateCount($objectId, $duplicateCount);
+						
+						// Broadcast to all clients except sender
+						foreach ($this->clients as $client) {
+								if ($client !== $from) {
+										$client->send(json_encode([
+												'action' => 'duplicateCountUpdated',
+												'objectId' => $objectId,
+												'duplicateCount' => $duplicateCount
+										]));
+								}
+						}
+						break;
 			case 'addObject':
 				$name = $data['name'] ?? null;
 				$imageUrl = $data['image_url'] ?? null;

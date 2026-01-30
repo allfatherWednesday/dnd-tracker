@@ -85,14 +85,23 @@
 				<button id="decrease-size-btn" class="btn btn-danger mt-2" >
 					Size-
 				</button>
-			</div>
+			</div> 
+			<div id="rotation-button-container" style="display: none;">
 				<button id="rotate-left-btn" class="btn btn-danger mt-2">
 					Rotate -90°
 				</button>
 				<button id="rotate-right-btn" class="btn btn-danger mt-2">
 					Rotate +90°
 				</button>
-        </div>
+       </div>
+			<div id="counter-container" style="display: none;">
+					<h4>Duplicate Counter</h4>
+					<div class="counter-controls">
+							<button id="decrease-counter-btn" class="btn btn-secondary mt-2">-</button>
+							<span id="counter-display" class="mx-3" style="font-size: 1.5rem;">1</span>
+							<button id="increase-counter-btn" class="btn btn-secondary mt-2">+</button>
+					</div>
+			</div>
     </div>
 </div>
 
@@ -160,8 +169,17 @@ var mapOffset;
 					
 					allMaps = Object.fromEntries(data['maps'].map(item => [item.id, {image: item.image, name: item.name,grid_size : item.grid_size}]));
 					
-					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {image_url: item.image_url, name: item.name, positionX : item.positionX, positionY : item.positionY, id : item.id, statusEffects: item.statusEffects,rotation: item.rotation || 0 , size:item.size}]));
-										
+					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {
+											image_url: item.image_url, 
+											name: item.name, 
+											positionX: item.positionX, 
+											positionY: item.positionY, 
+											id: item.id, 
+											statusEffects: item.statusEffects,
+											rotation: item.rotation || 0, 
+											size: item.size,
+											duplicate_count: item.duplicate_count || 1  
+									}]));
 					redrawMap();
 					redrawAllObjects();
 					break;
@@ -210,6 +228,10 @@ var mapOffset;
 					allObjects[data.objectId].rotation = data.newRotation;
 					$(`#${data.objectId} img`).css('transform', `rotate(${data.newRotation}deg)`);
 					break;
+				case 'duplicateCountUpdated':
+					allObjects[data.objectId].duplicate_count = data.duplicateCount;
+					updateCounterDisplay(data.objectId, data.duplicateCount);
+					break;
 				case 'objectAdded':
 					const obj = data.object;
 					console.log("New object:", obj);
@@ -221,7 +243,8 @@ var mapOffset;
 						positionX: obj.positionX || 0,
 						positionY: obj.positionY || 0,
 						statusEffects: obj.statusEffects || [],
-						size: obj.size || 1
+						size: obj.size || 1,
+						duplicate_count: item.duplicate_count || 1
 					};
 					
 					//sidebar
@@ -351,7 +374,15 @@ var mapOffset;
 			for (const key in allObjects) {
 				
 				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+'</li>';
-				document.getElementById('map-container').innerHTML += '<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'"><img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%; transform: rotate(' + (allObjects[key].rotation || 0) + 'deg);"><div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div></div>';
+				
+				document.getElementById('map-container').innerHTML += 
+						'<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'">' +
+						'  <img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%; transform: rotate(' + (allObjects[key].rotation || 0) + 'deg);">' +
+						'  <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div>' +
+						'  <div class="duplicate-counter" style="position: absolute; top: 100%; left: 0; right: 0; text-align: center; background: rgba(0,0,0,0.7); color: white; font-size: 12px; font-weight: bold; border-radius: 0 0 5px 5px; display: none;">' +
+						'    x<span class="count">' + (allObjects[key].duplicate_count || 1) + '</span>' +
+						'  </div>' +
+						'</div>';
 			}
 			
 			$("#map-image")
@@ -408,6 +439,7 @@ var mapOffset;
 					$('#delete-button-container').css('display', 'none');
 					$('#size-button-container').css('display', 'none');
 					$('#rotation-button-container').css('display', 'none');
+					$('#counter-container').css('display', 'none');
 					//remove all highlighted
 					$('#status-effects-container div').removeClass('selected-effects-box');
 				
@@ -433,6 +465,8 @@ var mapOffset;
 					$('#delete-button-container').css('display', 'block');
 					$('#size-button-container').css('display', 'block');
 					$('#rotation-button-container').css('display', 'block');
+					$('#counter-container').css('display', 'block');
+					$('#counter-display').text(allObjects[selectedObjectId].duplicate_count || 1);
 					
 					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
 					
@@ -529,6 +563,7 @@ var mapOffset;
 			$('#delete-button-container').css('display', 'none');
 			$('#size-button-container').css('display', 'none');
 			$('#rotation-button-container').css('display', 'none');
+			$('#counter-container').css('display', 'none');
 			//remove all highlighted
 			$('#status-effects-container div').removeClass('selected-effects-box');
 		});
@@ -598,6 +633,43 @@ var mapOffset;
 				$(`#${objectId} img`).css('transform', `rotate(${newRotation}deg)`);
 		});
 		
+		
+$('#increase-counter-btn').on('click', function() {
+    const objectId = selectedObjectId;
+    if (!objectId) return;
+    const currentCount = allObjects[objectId].duplicate_count || 1;
+    const newCount = currentCount + 1;
+    allObjects[objectId].duplicate_count = newCount;
+    
+    // Send to server
+    getActiveSocket().send(JSON.stringify({
+        action: "updateDuplicateCount",
+        objectId: objectId,
+        duplicateCount: newCount
+    }));
+    
+    // Update UI immediately
+    updateCounterDisplay(objectId, newCount);
+});
+
+$('#decrease-counter-btn').on('click', function() {
+    const objectId = selectedObjectId;
+    if (!objectId) return;
+    const currentCount = allObjects[objectId].duplicate_count || 1;
+    if (currentCount <= 1) return; // Minimum 1
+    const newCount = currentCount - 1;
+    allObjects[objectId].duplicate_count = newCount;
+    
+    // Send to server
+    getActiveSocket().send(JSON.stringify({
+        action: "updateDuplicateCount",
+        objectId: objectId,
+        duplicateCount: newCount
+    }));
+    
+    // Update UI immediately
+    updateCounterDisplay(objectId, newCount);
+});
         function dragMoveListener(event) {
             var target = event.target;
             var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
@@ -871,7 +943,24 @@ var mapOffset;
 				}
 			}	
 		}
-		
+		function updateCounterDisplay(objectId, count) {
+			const counterElement = $(`#${objectId} .duplicate-counter .count`);
+			const container = $(`#${objectId} .duplicate-counter`);
+			
+			counterElement.text(count);
+			
+			// Show counter only if count > 1
+			if (count > 1) {
+					container.css('display', 'block');
+			} else {
+					container.css('display', 'none');
+			}
+			
+			// Update sidebar display if this object is selected
+			if (objectId === selectedObjectId) {
+					$('#counter-display').text(count);
+			}
+}
 		// Function to toggle menu visibility
 		function toggleMapObjectMenu(selectedMenu) {
 			const isObjectsMenu = selectedMenu === 'objects';

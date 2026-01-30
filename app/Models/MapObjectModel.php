@@ -74,4 +74,10 @@ class MapObjectModel extends Model
 		$req->bindValue(':id', $id);
 		return $req->execute();
 	}
+	public function updateDuplicateCount($id, $duplicateCount) {
+        $req = $this->db()->prepare("UPDATE map_objects SET duplicate_count = :duplicateCount WHERE id = :id");
+        $req->bindValue(':duplicateCount', $duplicateCount);
+        $req->bindValue(':id', $id);
+        return $req->execute();
+    }
 }
