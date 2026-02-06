@@ -57,7 +57,7 @@
         </div>
 
         <!-- Map Container -->
-        <div class="col-md-8 col-lg-8" style="padding: 0">
+        <div class="col-md-8 col-lg-8" id="map-parent-container" style="padding: 0">
             <div id="map-container">        
 				<img id="map-image">
 				
@@ -638,7 +638,7 @@ $('#increase-counter-btn').on('click', function() {
     const objectId = selectedObjectId;
     if (!objectId) return;
     const currentCount = allObjects[objectId].duplicate_count || 1;
-    const newCount = currentCount + 1;
+    const newCount = +currentCount + 1;
     allObjects[objectId].duplicate_count = newCount;
     
     // Send to server
@@ -1036,6 +1036,61 @@ $('#decrease-counter-btn').on('click', function() {
 
 			// clear inputs
 			this.reset();
+		});
+		
+		
+		
+		let scale = 1;
+		const minZoom = 0.5; // Minimum zoom level
+		const maxZoom = 3;   // Maximum zoom level
+		const zoomStep = 0.1; // Zoom step amount
+        let offsetX = 0;
+        let offsetY = 0;
+
+		const zoomElement = document.getElementById("map-container");
+		const zoomContainer = document.getElementById("map-parent-container");
+
+		// Add event listener to the container
+		zoomContainer.addEventListener("wheel", function(event) {
+			// Prevent default scroll behavior
+			event.preventDefault();
+			
+			// Get container bounds
+            const containerRect = zoomContainer.getBoundingClientRect();
+            
+            // Mouse position relative to container
+            const mouseX = event.clientX - containerRect.left;
+            const mouseY = event.clientY - containerRect.top;
+			
+			const direction = event.deltaY > 0 ? -1 : 1;
+			
+			console.log(mouseX+" "+mouseY);
+			
+			// Calculate zoom direction and factor
+            const zoomFactor = 1 + direction * zoomStep;
+            const newScale = scale * zoomFactor;
+            
+            // Clamp to min/max
+            if (newScale < minZoom || newScale > maxZoom) {
+                lastEventEl.textContent = `Zoom clamped: ${newScale.toFixed(2)}`;
+                return;
+            }
+			
+            // Calculate mouse position in the unscaled coordinate space
+            const mouseXUnscaled = (mouseX - offsetX) / scale;
+            const mouseYUnscaled = (mouseY - offsetY) / scale;
+            
+            // Calculate new offset to keep mouse position fixed
+            offsetX = mouseX - mouseXUnscaled * newScale;
+            offsetY = mouseY - mouseYUnscaled * newScale;
+            
+            // Update scale
+            scale = newScale;
+			 
+            // Apply transformation
+            zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+            zoomElement.style.transformOrigin = '0 0';
+			
 		});
 
 	});

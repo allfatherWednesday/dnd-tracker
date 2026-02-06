@@ -36,10 +36,11 @@ body {
 
 
 #map-container {
-    position:relative;
+    /*position:relative; 
+    transform: translate(-50%, -50%);
+	*/
 	top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     width: 100%;
     height: calc(100vh - 60px); /* Full height minus navbar */
     display: flex;
@@ -47,6 +48,10 @@ body {
     align-items: center;
     overflow: hidden;
     background-color: #f0f0f0; /* Optional: Add a background color */
+}
+
+#map-parent-container {
+	overflow: hidden;
 }
  
 #map-image {
