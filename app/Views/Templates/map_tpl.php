@@ -837,6 +837,8 @@ $('#decrease-counter-btn').on('click', function() {
 						target.setAttribute('data-y', 0);
 						//target.querySelector('.position-text').textContent = 
 						//	`${Math.round(newLeft)}, ${Math.round(newTop)}`;
+						
+						
 					}
 				}
 			});
@@ -1072,7 +1074,7 @@ $('#decrease-counter-btn').on('click', function() {
             
             // Clamp to min/max
             if (newScale < minZoom || newScale > maxZoom) {
-                lastEventEl.textContent = `Zoom clamped: ${newScale.toFixed(2)}`;
+                console.log(`Zoom clamped: ${newScale.toFixed(2)}`);
                 return;
             }
 			
@@ -1092,6 +1094,51 @@ $('#decrease-counter-btn').on('click', function() {
             zoomElement.style.transformOrigin = '0 0';
 			
 		});
+		
+		let isPanning = false;
+        let initialOffsetX, initialOffsetY;
+		// Pan functionality
+        zoomContainer.addEventListener('mousedown', (event) => {
+            if (event.target.closest('.draggable-container') || event.target.closest('.draggable')) {
+				console.log('Clicked on object, not starting pan');
+				return; // Don't start panning if clicking on an object
+			}
+            
+            isPanning = true;
+            startX = event.clientX;
+            startY = event.clientY;
+            initialOffsetX = offsetX;
+            initialOffsetY = offsetY;
+            
+            zoomContainer.style.cursor = 'grabbing';
+            console.log('Pan started');
+        });
+		
+        
+        zoomContainer.addEventListener('mousemove', (event) => {
+            if (!isPanning) return;
+            
+            const dx = event.clientX - startX;
+            const dy = event.clientY - startY;
+            
+            offsetX = initialOffsetX + dx;
+            offsetY = initialOffsetY + dy;
+            
+            zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+            
+            updateDisplay();
+            console.log(`Panning: ${dx.toFixed(0)}, ${dy.toFixed(0)}`);
+        });
+        
+        zoomContainer.addEventListener('mouseup', () => {
+            if (isPanning) {
+                isPanning = false;
+                zoomContainer.style.cursor = 'grab';
+				console.log('Pan ended');
+            }
+        });
+        
+		
 
 	});
 </script>

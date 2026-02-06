@@ -48,6 +48,8 @@ body {
     align-items: center;
     overflow: hidden;
     background-color: #f0f0f0; /* Optional: Add a background color */
+	
+	
 }
 
 #map-parent-container {
@@ -67,7 +69,12 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%); /* Centers the image */
+	
+    -webkit-user-drag: none;  /* Safari */
+    user-drag: none;           /* Standard */
+    pointer-events: none;      /* Prevents mouse events on images */
 }
+
 
 .draggable {
     position: absolute;
@@ -75,6 +82,9 @@ body {
     height: 50px;
     cursor: grab;
     transition: transform 0.1s ease;
+	
+	-webkit-user-drag: none;
+    user-drag: none;
 }
 
 .draggable:active {
