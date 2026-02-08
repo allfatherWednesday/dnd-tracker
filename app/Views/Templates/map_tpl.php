@@ -8,7 +8,7 @@
         <div class="col-md-2 col-md-2 sidebar_left sidebar_custom">
             <h3>Grid Settings</h3>
 			<div class="mb-3">
-				<label for="grid-size-input" class="form-label">Grid Size (px)</label>
+				<label for="grid-size-input" class="form-label">Vertical Grid Cell Number</label>
 				<input type="number" class="form-control" id="grid-size-input" 
 					   name="grid-size">
 			</div>
@@ -132,6 +132,7 @@ const statusEffectsLinks =
 let temp;		
 let activeSocket;
 let gridSize;
+let vGridCellNumber;
 let mapId;
 let mapImage;
 let allMaps = new Map();
@@ -139,6 +140,12 @@ let allObjects = new Map();
 let selectedObjectId = null; //if it breaks use this instead  const selectedObject = $('#object-list li.selected')[0].getAttribute('data-id');
 var mapRect;
 var mapOffset;
+let scale = 1;
+const minZoom = 0.5; // Minimum zoom level
+const maxZoom = 3;   // Maximum zoom level
+const zoomStep = 0.1; // Zoom step amount
+let offsetX = 0;
+let offsetY = 0;
 		
 		
     $(document).ready(function() {
@@ -163,7 +170,8 @@ var mapOffset;
 					
 					//Set variables to the new values
 					//change to select the map with a flag of active map, and to have a dropdown for all maps
-					gridSize = data['maps'][0].grid_size;
+					vGridCellNumber = data['maps'][0].grid_size;
+					gridSize = vGridCellNumber;
 					mapId = data['maps'][0].id;
 					mapImage = data['maps'][0].image;
 					
@@ -181,6 +189,7 @@ var mapOffset;
 											duplicate_count: item.duplicate_count || 1  
 									}]));
 					redrawMap();
+					adjustMapSize(gridSize);
 					redrawAllObjects();
 					break;
 				case 'positionUpdated':
@@ -672,8 +681,8 @@ $('#decrease-counter-btn').on('click', function() {
 });
         function dragMoveListener(event) {
             var target = event.target;
-            var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-            var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+			var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+			var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
             target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
             target.setAttribute('data-x', x);
@@ -691,26 +700,87 @@ $('#decrease-counter-btn').on('click', function() {
 		//Ensures map container dimensions are multiples of grid size
 		//Handles image fitting using contain/cover strategies
 		function adjustMapSize(gridSize){
-			// We make the container take maximum available space within parent and be the multiple of the grid
+			const mapContainer = document.getElementById('map-container');
+			const mapImage = document.getElementById('map-image');
+			const parentContainer = document.getElementById('map-parent-container');
+			
+			// Get parent container dimensions
+			const parentWidth = parentContainer.clientWidth;
+			const parentHeight = parentContainer.clientHeight;
+			
+			// Get image natural dimensions
+			const imgWidth = mapImage.naturalWidth;
+			const imgHeight = mapImage.naturalHeight;
+			
+			
+			const imgAspect = imgWidth / imgHeight;
+			const parentAspect = parentWidth / parentHeight;
+			
+			let containerWidth, containerHeight;
+			
+			// Determine which dimension limits the image display
+			if (imgAspect > parentAspect) {
+				// Image is wider relative to its height than parent
+				// Width becomes the limiting factor
+				containerWidth = parentWidth;
+				containerHeight = containerWidth / imgAspect;
+			} else {
+				// Image is taller relative to its width than parent
+				// Height becomes the limiting factor
+				containerHeight = parentHeight;
+				containerWidth = containerHeight * imgAspect;
+			}
+			
+			
+			// Round down to nearest grid multiple for width
+			containerWidth = Math.floor(containerWidth / gridSize) * gridSize;
+			
+			// Set map container dimensions
+			mapContainer.style.width = containerWidth + 'px';
+			mapContainer.style.height = 'auto'; // Let height adjust naturally
+			
+			// Set image to fill container (will be cropped vertically later)
+			mapImage.style.width = '100%';
+			mapImage.style.height = 'auto';
+			
+			// Now calculate the cropped height to be multiple of grid size
+			const actualImageHeight = (containerWidth / imgAspect);
+			const croppedHeight = Math.floor(actualImageHeight / gridSize) * gridSize;
+			
+			// Apply cropping by setting container height
+			mapContainer.style.height = croppedHeight + 'px';
+			
+			// Recalculate mapOffset for grid snapping
+			const mapRect = mapContainer.getBoundingClientRect();
+			mapOffset = {
+				left: mapRect.left,
+				top: mapRect.top
+			};
+			
+			console.log(`Adjusted map: ${containerWidth}x${croppedHeight} (grid: ${gridSize})`);
+			
+			
+			/*
+			//// We make the container take maximum available space within parent and be the multiple of the grid
 			const mapContainer = document.getElementById('map-container');
 			mapContainer.style.width = '100%';
 			mapContainer.style.height = 'calc(100vh - 60px)';
 			makeElementAMultipleOfGridSize(mapContainer, gridSize);
 			
-			//We set image to take the maximum space within the container, without cropping it or stretching it, the whole image is within the container, plus white margins only on L+R or T+B
+			////We set image to take the maximum space within the container, without cropping it or stretching it, the whole image is within the container, plus white margins only on L+R or T+B
 			const mapImage = document.getElementById('map-image');
 			mapImage.style.objectFit = "contain";
 			takeMaxSpaceWithoutCropping(mapImage);
 			
-			// Get dimensions of the map-image contained in map-container
+			//// Get dimensions of the map-image contained in map-container
 			const mapImageRect = mapImage.getBoundingClientRect();
-			// Adjust the container to hug the image from all sides, the smaller of the width and height might not be the multiple of the grid-size
+			//// Adjust the container to hug the image from all sides, the smaller of the width and height might not be the multiple of the grid-size
 			mapContainer.style.width = mapImageRect.width+'px';
 			mapContainer.style.height = mapImageRect.height+'px';
-			// Adjust the container and crop the image to be multiple of the grid size
+			//// Adjust the container and crop the image to be multiple of the grid size
 			makeElementAMultipleOfGridSize(mapContainer, gridSize);
-			// Remove white margins from the Image
-			mapImage.style.objectFit="cover";
+			//// Remove white margins from the Image
+			mapImage.style.objectFit="cover";*/
 		}
 		
 		// Take the images natural W and H,
@@ -796,8 +866,8 @@ $('#decrease-counter-btn').on('click', function() {
 								x: gridSize, 
 								y: gridSize,
 								offset: {
-									x: mapOffset.left,
-									y: mapOffset.top
+									x: mapOffset.left + offsetX,
+									y: mapOffset.top + offsetY
 								}	
 							})
 						],
@@ -818,20 +888,28 @@ $('#decrease-counter-btn').on('click', function() {
 						const translateX = parseFloat(target.getAttribute('data-x')) || 0;
 						const translateY = parseFloat(target.getAttribute('data-y')) || 0;
 
-						const newLeft = originalLeft + translateX;
-						const newTop = originalTop + translateY;
+						const scaledTranslateX = translateX / scale;
+						const scaledTranslateY = translateY / scale;
+						
+						const newLeft = originalLeft + scaledTranslateX;
+						const newTop = originalTop + scaledTranslateY;
 
+						// Snap to grid independent of zoom
+						const snappedLeft = Math.round(newLeft / gridSize) * gridSize;
+						const snappedTop = Math.round(newTop / gridSize) * gridSize;
+
+						//TODO change to absolute terms
 						// Send update to WebSocket server
 						getActiveSocket().send(JSON.stringify({
 							action: 'updatePosition',
 							objectId: objectId,
-							positionX: newLeft,
-							positionY: newTop
+							positionX: snappedLeft,
+							positionY: snappedTop
 						}));
 
 						// Update local position
-						target.style.left = newLeft + 'px';
-						target.style.top = newTop + 'px';
+						target.style.left = snappedLeft + 'px';
+						target.style.top = snappedTop + 'px';
 						target.style.transform = 'none';
 						target.setAttribute('data-x', 0);
 						target.setAttribute('data-y', 0);
@@ -1042,12 +1120,7 @@ $('#decrease-counter-btn').on('click', function() {
 		
 		
 		
-		let scale = 1;
-		const minZoom = 0.5; // Minimum zoom level
-		const maxZoom = 3;   // Maximum zoom level
-		const zoomStep = 0.1; // Zoom step amount
-        let offsetX = 0;
-        let offsetY = 0;
+		
 
 		const zoomElement = document.getElementById("map-container");
 		const zoomContainer = document.getElementById("map-parent-container");
@@ -1093,6 +1166,14 @@ $('#decrease-counter-btn').on('click', function() {
             zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
             zoomElement.style.transformOrigin = '0 0';
 			
+			//TODO
+			// Reinitialize draggables with updated offsets for grid snapping
+			if (selectedObjectId !== null) {
+				interact('.draggable-container').draggable(false);
+				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(true);
+				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
+			}
+			
 		});
 		
 		let isPanning = false;
@@ -1126,7 +1207,13 @@ $('#decrease-counter-btn').on('click', function() {
             
             zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
             
-            updateDisplay();
+			// Update draggable grid snapping during pan
+			if (selectedObjectId !== null) {
+				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(false);
+				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(true);
+				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
+			}
+			
             console.log(`Panning: ${dx.toFixed(0)}, ${dy.toFixed(0)}`);
         });
         

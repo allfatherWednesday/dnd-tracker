@@ -48,7 +48,7 @@ body {
     align-items: center;
     overflow: hidden;
     background-color: #f0f0f0; /* Optional: Add a background color */
-	
+	transform: scale(1);
 	
 }
 
