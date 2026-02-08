@@ -867,11 +867,11 @@ $('#decrease-counter-btn').on('click', function() {
 					interact.modifiers.snap({
 						targets: [
 							interact.createSnapGrid({ 
-								x: gridSize, 
-								y: gridSize,
+								x: gridSize / scale, 
+								y: gridSize / scale,
 								offset: {
-									x: mapOffset.left + scaledOffsetX,
-									y: mapOffset.top + scaledOffsetY
+									x: (mapOffset.left + scaledOffsetX) / scale,
+									y: (mapOffset.top + scaledOffsetY) / scale
 								}	
 							})
 						],
@@ -892,11 +892,14 @@ $('#decrease-counter-btn').on('click', function() {
 						const translateX = parseFloat(target.getAttribute('data-x')) || 0;
 						const translateY = parseFloat(target.getAttribute('data-y')) || 0;
 
-						const scaledTranslateX = translateX / scale;
-						const scaledTranslateY = translateY / scale;
+						// const scaledTranslateX = translateX / scale;
+						// const scaledTranslateY = translateY / scale;
 						
-						const newLeft = originalLeft + scaledTranslateX;
-						const newTop = originalTop + scaledTranslateY;
+						// const newLeft = originalLeft + scaledTranslateX;
+						// const newTop = originalTop + scaledTranslateY;
+						
+						const newLeft = originalLeft + translateX;
+						const newTop = originalTop + translateY;
 
 						// Snap to grid independent of zoom
 						const snappedLeft = Math.round(newLeft / gridSize) * gridSize;
