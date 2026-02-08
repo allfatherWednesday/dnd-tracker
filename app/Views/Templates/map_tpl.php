@@ -1173,14 +1173,6 @@ $('#decrease-counter-btn').on('click', function() {
             zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
             zoomElement.style.transformOrigin = '0 0';
 			
-			// Reinitialize draggables with updated scale
-			if (selectedObjectId !== null) {
-				interact('.draggable-container').draggable(false);
-				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
-			} else {
-				interact('.draggable-container').draggable(false);
-				initializeDraggables(gridSize);
-			}
 			
 		});
 		
@@ -1215,14 +1207,6 @@ $('#decrease-counter-btn').on('click', function() {
             
             zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
             
-			// Reinitialize draggables with updated offset
-			if (selectedObjectId !== null) {
-				interact('.draggable-container').draggable(false);
-				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
-			} else {
-				interact('.draggable-container').draggable(false);
-				initializeDraggables(gridSize);
-			}
 			
             console.log(`Panning: ${dx.toFixed(0)}, ${dy.toFixed(0)}`);
         });
