@@ -681,8 +681,8 @@ $('#decrease-counter-btn').on('click', function() {
 });
         function dragMoveListener(event) {
             var target = event.target;
-			var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-			var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+			var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx/ scale;
+			var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy/ scale;
 
             target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
             target.setAttribute('data-x', x);
@@ -853,6 +853,10 @@ $('#decrease-counter-btn').on('click', function() {
 		// Modified initializeDraggables function
 		//The function always targets all .draggable-container elements unless specifically handling a selection (managed separately in click handler).
 		function initializeDraggables(gridSize, filterSelector ='.draggable-container') {
+			 // Calculate scaled offset for snap grid
+			const scaledOffsetX = offsetX / scale;
+			const scaledOffsetY = offsetY / scale;
+			
 			interact(filterSelector).draggable({
 				inertia: false,
 				modifiers: [
@@ -866,8 +870,8 @@ $('#decrease-counter-btn').on('click', function() {
 								x: gridSize, 
 								y: gridSize,
 								offset: {
-									x: mapOffset.left + offsetX,
-									y: mapOffset.top + offsetY
+									x: mapOffset.left + scaledOffsetX,
+									y: mapOffset.top + scaledOffsetY
 								}	
 							})
 						],
@@ -1166,12 +1170,13 @@ $('#decrease-counter-btn').on('click', function() {
             zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
             zoomElement.style.transformOrigin = '0 0';
 			
-			//TODO
-			// Reinitialize draggables with updated offsets for grid snapping
+			// Reinitialize draggables with updated scale
 			if (selectedObjectId !== null) {
 				interact('.draggable-container').draggable(false);
-				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(true);
 				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
+			} else {
+				interact('.draggable-container').draggable(false);
+				initializeDraggables(gridSize);
 			}
 			
 		});
@@ -1207,11 +1212,13 @@ $('#decrease-counter-btn').on('click', function() {
             
             zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
             
-			// Update draggable grid snapping during pan
+			// Reinitialize draggables with updated offset
 			if (selectedObjectId !== null) {
-				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(false);
-				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(true);
+				interact('.draggable-container').draggable(false);
 				initializeDraggables(gridSize, `.draggable-container[data-id="${selectedObjectId}"]`);
+			} else {
+				interact('.draggable-container').draggable(false);
+				initializeDraggables(gridSize);
 			}
 			
             console.log(`Panning: ${dx.toFixed(0)}, ${dy.toFixed(0)}`);
