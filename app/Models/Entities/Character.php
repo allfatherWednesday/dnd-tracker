@@ -111,6 +111,13 @@ class Character
         return $this->owner;
     }
 
+    public function setHP(int $current, int $max)
+    {
+        $this->maxHealth = $max;
+        $this->curHealth = $current;
+        return $this;
+    }
+
     public function setCharModifiers(array $content)
     {
         $this->charModifiers = $content;

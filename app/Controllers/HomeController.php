@@ -22,9 +22,27 @@ class HomeController extends Controller
         $turn = $this->getCurrentTurn();
 
         // Get my character image and description
-        $myCharacter = $abilities = $modifiers = $about = $spellsByLevel = $skills = [];
+        $myCharacter = $abilities = $modifiers = $about = $spellsByLevel = $skills = $inventory = [];
         if (isset($_SESSION['character'])) {
             $myCharacter = $_SESSION['character'];
+
+            // HP
+            $curHealth = $myCharacter->getCurHealth();
+            $maxHealth = $myCharacter->getMaxHealth();
+            $possibleColors = ['success', 'warning', 'danger'];
+            $percent = $curHealth/$maxHealth *100;
+            $currentColor = $possibleColors[0];
+            if ($percent < 50 && $percent > 10) {
+                $currentColor = $possibleColors[1];
+            } else if ($percent <= 10) {
+                $currentColor = $possibleColors[2];
+            }
+            $hpData = [
+                'curHealth' => $curHealth,
+                'maxHealth' => $maxHealth,
+                'percent' => $percent,
+                'currentColor' => $currentColor,
+            ];
 
             // Abilities and modifiers
             $abilities = (array_key_exists('abilities', $myCharacter->getCharModifiers())) ? $myCharacter->getCharModifiers()['abilities'] : [];
@@ -42,23 +60,28 @@ class HomeController extends Controller
             $spellsList = (array_key_exists('spells', $myCharacter->getCharModifiers())) ? $myCharacter->getCharModifiers()['spells'] : [];
             $spellsByLevel = [];
             foreach ($spellsList as $spellId) {
-                $thisSpell = $characterModel->getSpellById($spellId);
+                $thisSpell = $characterModel->getSpellById((int) $spellId);
                 $level = ($thisSpell['level'] === 0) ? 'Cantrips' : 'Level '.$thisSpell['level'];
                 $spellsByLevel[$level][] = $thisSpell;
             }
             // Skills
             $skills = (array_key_exists('skills', $myCharacter->getCharModifiers())) ? $myCharacter->getCharModifiers()['skills'] : [];
+
+            // Inventory
+            $inventory = $characterModel->getInventoryFromCharacter($_SESSION['character']->getId());
         }
 
         $this->view->load($homeTpl, [
             'character_list' => $characterList,
             'turn' => $turn,
             'my_character' => $myCharacter,
+            'hpData' => $hpData,
             'abilities' => $abilities,
             'modifiers' => $modifiers,
             'about' => $about,
             'spells_by_level' => $spellsByLevel,
-            'skills' => $skills
+            'skills' => $skills,
+            'inventory' => $inventory,
         ]);
 
         //-Aside fields:

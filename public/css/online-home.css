@@ -104,6 +104,12 @@ body {
     drop-shadow(20px 15px 5px rgba(0, 0, 0, 0.2));
     z-index: 1;
 }
+.equipment-btn {
+    position: absolute;
+    left: 35px;
+    bottom: 40px;
+    height: 40px;
+}
 .turns {
     height: 80px;
     overflow-x: auto;
