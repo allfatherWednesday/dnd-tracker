@@ -171,9 +171,11 @@ let offsetY = 0;
 					//Set variables to the new values
 					//change to select the map with a flag of active map, and to have a dropdown for all maps
 					vGridCellNumber = data['maps'][0].grid_size;
-					gridSize = vGridCellNumber;
+					
+					
 					mapId = data['maps'][0].id;
 					mapImage = data['maps'][0].image;
+				
 					
 					allMaps = Object.fromEntries(data['maps'].map(item => [item.id, {image: item.image, name: item.name,grid_size : item.grid_size}]));
 					
@@ -189,7 +191,7 @@ let offsetY = 0;
 											duplicate_count: item.duplicate_count || 1  
 									}]));
 					redrawMap();
-					adjustMapSize(gridSize);
+					adjustMapSize(vGridCellNumber);
 					redrawAllObjects();
 					break;
 				case 'positionUpdated':
@@ -208,10 +210,10 @@ let offsetY = 0;
 					});
 					break;
 				case 'gridSizeUpdated':
-					if (data.gridSize !== gridSize) {
-						gridSize = data.gridSize;
-						$('#grid-size-input').val(gridSize);
-						updateGridSize(gridSize, false); // Pass false to prevent sending updates
+					if (data.gridSize !== vGridCellNumber) {
+						vGridCellNumber = data.gridSize;
+						$('#grid-size-input').val(vGridCellNumber);
+						updateGridSize(vGridCellNumber, false); // Pass false to prevent sending updates
 					}
 					break;
 				case 'sizeUpdated':
@@ -344,14 +346,13 @@ let offsetY = 0;
 		
 		
 		function redrawMap(){
-			$("#grid-size-input").val(gridSize);
+			$("#grid-size-input").val(vGridCellNumber);
 			$("#map-image").attr("src",mapImage);
-			$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px");
+			//$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px"); //Moving this to adjustMapSize
 			
 			document.getElementById('maps-list').innerHTML = "";
 			
 			for (const key in allMaps) {
-				
 				if(mapId == key){
 					document.getElementById('maps-list').innerHTML += '<li class="list-group-item selected" data-id="'+key +'" data-url="'+allMaps[key].image+'">'+allMaps[key].name+'</li>';
 				}else{
@@ -363,7 +364,7 @@ let offsetY = 0;
 			$("#map-image")
 				.off("load.redraw") //makes sure that handler runs once
 				.on("load.redraw", function() {
-					adjustMapSize(gridSize);
+					adjustMapSize(vGridCellNumber);
 					// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
 					const mapContainer = document.getElementById('map-container');
 					mapRect = mapContainer.getBoundingClientRect();
@@ -375,6 +376,7 @@ let offsetY = 0;
 			
 			addClickHandlersOnMapsList();
 		}
+		
 		
 		
 		function redrawAllObjects(){
@@ -408,19 +410,19 @@ let offsetY = 0;
 			
 			// handler for grid size change
 			$('#grid-size-input').on('input', function() {
-				const newSize = parseInt($(this).val(), 10);
-				if (!isNaN(newSize) && newSize > 0 && newSize !== gridSize) {
-					gridSize = newSize;
-					updateGridSize(gridSize);
-					const selectedId = $('#object-list li.selected').data('id');
-					initializeDraggables(gridSize, `.draggable-container[data-id="${selectedId }"]`);
-					updateEffectsLegend(0, updateAll=true);
-					
-					// Send WebSocket message
+				const newCellCount = parseInt($(this).val(), 10);
+				if (!isNaN(newCellCount) && newCellCount > 0 && newCellCount !== vGridCellNumber) {
+					vGridCellNumber = newCellCount;
+					// Recalculate container and grid size
+					adjustMapSize();
+
+					snapAllObjectsToGrid(true);
+
+					// Send update to server
 					getActiveSocket().send(JSON.stringify({
 						action: 'updateGridSize',
 						mapId: mapId,
-						gridSize: newSize
+						gridSize: vGridCellNumber
 					}));
 				}
 			});
@@ -699,89 +701,78 @@ $('#decrease-counter-btn').on('click', function() {
 		
 		//Ensures map container dimensions are multiples of grid size
 		//Handles image fitting using contain/cover strategies
-		function adjustMapSize(gridSize){
+		function adjustMapSize() {
 			const mapContainer = document.getElementById('map-container');
 			const mapImage = document.getElementById('map-image');
 			const parentContainer = document.getElementById('map-parent-container');
-			
-			// Get parent container dimensions
+
+			// Ensure the image has loaded
+			if (!mapImage.complete || mapImage.naturalWidth === 0) {
+				mapImage.addEventListener('load', adjustMapSize, { once: true });
+				return;
+			}
+
 			const parentWidth = parentContainer.clientWidth;
 			const parentHeight = parentContainer.clientHeight;
-			
-			// Get image natural dimensions
 			const imgWidth = mapImage.naturalWidth;
 			const imgHeight = mapImage.naturalHeight;
-			
-			
 			const imgAspect = imgWidth / imgHeight;
-			const parentAspect = parentWidth / parentHeight;
-			
+
+			// Determine the maximum container size that fits in the parent while preserving aspect ratio
 			let containerWidth, containerHeight;
-			
-			// Determine which dimension limits the image display
-			if (imgAspect > parentAspect) {
-				// Image is wider relative to its height than parent
-				// Width becomes the limiting factor
+			if (imgAspect > parentWidth / parentHeight) {
 				containerWidth = parentWidth;
 				containerHeight = containerWidth / imgAspect;
 			} else {
-				// Image is taller relative to its width than parent
-				// Height becomes the limiting factor
 				containerHeight = parentHeight;
 				containerWidth = containerHeight * imgAspect;
 			}
-			
-			
-			// Round down to nearest grid multiple for width
-			containerWidth = Math.floor(containerWidth / gridSize) * gridSize;
-			
-			// Set map container dimensions
+
+			// Now adjust so that height is exactly cellCountY * gridPixelSize
+			// gridPixelSize must be an integer, and height must be a multiple of it
+			const cellCountY = vGridCellNumber; // use the user-defined cell count
+			let gridPixelSize = Math.floor(containerHeight / cellCountY);
+			if (gridPixelSize < 1) gridPixelSize = 1;
+
+			// New container height exactly cellCountY * gridPixelSize
+			containerHeight = gridPixelSize * cellCountY;
+			// Scale width to maintain aspect ratio
+			containerWidth = containerHeight * imgAspect;
+
+			// Make width also a multiple of gridPixelSize (by rounding down)
+			containerWidth = Math.floor(containerWidth / gridPixelSize) * gridPixelSize;
+				
+			// Apply dimensions to container
 			mapContainer.style.width = containerWidth + 'px';
-			mapContainer.style.height = 'auto'; // Let height adjust naturally
-			
-			// Set image to fill container (will be cropped vertically later)
+			mapContainer.style.height = containerHeight + 'px';
+
+			// Update the image to fill the container (will be cropped if aspect differs)
 			mapImage.style.width = '100%';
-			mapImage.style.height = 'auto';
-			
-			// Now calculate the cropped height to be multiple of grid size
-			const actualImageHeight = (containerWidth / imgAspect);
-			const croppedHeight = Math.floor(actualImageHeight / gridSize) * gridSize;
-			
-			// Apply cropping by setting container height
-			mapContainer.style.height = croppedHeight + 'px';
-			
-			// Recalculate mapOffset for grid snapping
+			mapImage.style.height = '100%';
+			mapImage.style.objectFit = 'cover'; // Ensures image fills container, cropping excess
+
+			// Store the final pixel grid size
+			gridSize = gridPixelSize; // now used for all grid-related calculations
+
+			// Update the overlay
+			document.querySelector('.grid-overlay').style.backgroundSize = gridSize + 'px ' + gridSize + 'px';
+
+			// Recompute offset for snapping
 			const mapRect = mapContainer.getBoundingClientRect();
-			mapOffset = {
-				left: mapRect.left,
-				top: mapRect.top
-			};
-			
-			console.log(`Adjusted map: ${containerWidth}x${croppedHeight} (grid: ${gridSize})`);
-			
-			
-			/*
-			//// We make the container take maximum available space within parent and be the multiple of the grid
-			const mapContainer = document.getElementById('map-container');
-			mapContainer.style.width = '100%';
-			mapContainer.style.height = 'calc(100vh - 60px)';
-			makeElementAMultipleOfGridSize(mapContainer, gridSize);
-			
-			////We set image to take the maximum space within the container, without cropping it or stretching it, the whole image is within the container, plus white margins only on L+R or T+B
-			const mapImage = document.getElementById('map-image');
-			mapImage.style.objectFit = "contain";
-			takeMaxSpaceWithoutCropping(mapImage);
-			
-			//// Get dimensions of the map-image contained in map-container
-			const mapImageRect = mapImage.getBoundingClientRect();
-			//// Adjust the container to hug the image from all sides, the smaller of the width and height might not be the multiple of the grid-size
-			mapContainer.style.width = mapImageRect.width+'px';
-			mapContainer.style.height = mapImageRect.height+'px';
-			//// Adjust the container and crop the image to be multiple of the grid size
-			makeElementAMultipleOfGridSize(mapContainer, gridSize);
-			//// Remove white margins from the Image
-			mapImage.style.objectFit="cover";*/
-		}
+			mapOffset = { left: mapRect.left, top: mapRect.top };
+
+			// Re-initialize draggables with the new grid size
+			initializeDraggables(gridSize);
+			// Update object sizes (they are multiples of gridSize)
+			document.querySelectorAll('.draggable-container').forEach(container => {
+				const objId = container.dataset.id;
+				const obj = allObjects[objId];
+				if (obj) {
+					container.style.width = gridSize * obj.size + 'px';
+					container.style.height = gridSize * obj.size + 'px';
+				}
+			});
+		}	
 		
 		// Take the images natural W and H,
 		//set image to take the maximum space within the container, without cropping it or stretching it, the whole image is within the container, plus white margins only on L+R or only T+B
@@ -810,24 +801,25 @@ $('#decrease-counter-btn').on('click', function() {
 		
 		// Modified updateGridSize function
 		// Reinitialize all draggables unconditionally, then adjust for selection.
+		// Modified updateGridSize function
 		function updateGridSize(newSize, sendUpdates = true) {
 			gridSize = newSize;
 			allMaps[mapId].grid_size = newSize;
 			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
 			
-			//before different sizes were introduced: 
-			//$('.draggable-container').css({ width: `${gridSize}px`, height: `${gridSize}px` });
-			//currentlyworking change to individual object's size
+			// Update container sizes
 			document.querySelectorAll('.draggable-container').forEach(container => {
 				const tempID = parseFloat(container.id);
-				container.style.width = gridSize*allObjects[tempID].size+"px";
-				container.style.height = gridSize*allObjects[tempID].size+"px";
+				container.style.width = gridSize * allObjects[tempID].size + "px";
+				container.style.height = gridSize * allObjects[tempID].size + "px";
 			});
 			
 			adjustMapSize(gridSize);
 			const mc = document.getElementById('map-container');
 			const mapRect = mc.getBoundingClientRect();
 			mapOffset = { left: mapRect.left, top: mapRect.top };
+
+			snapAllObjectsToGrid(sendUpdates);
 
 			interact('.draggable-container').off('dragmove dragend');
 			
@@ -836,7 +828,7 @@ $('#decrease-counter-btn').on('click', function() {
 				initializeDraggables(gridSize);
 			} else {
 				$("#map-image")
-					.off("load.updateGrid") // prevent duplicate binding
+					.off("load.updateGrid")
 					.one("load.updateGrid", function () {
 						initializeDraggables(gridSize);
 					});
@@ -846,17 +838,52 @@ $('#decrease-counter-btn').on('click', function() {
 				interact('.draggable-container').draggable(false);
 				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(true);
 			}
-			updateDraggableObjects(gridSize, sendUpdates);
 		}
 		
+		// Add this new function to snap all objects to the current grid
+		function snapAllObjectsToGrid(sendUpdates = true) {
+			document.querySelectorAll('.draggable-container').forEach(container => {
+				const objectId = container.dataset.id;
+				if (!objectId) return;
+				
+				// Get current position
+				const currentLeft = parseFloat(container.style.left) || 0;
+				const currentTop = parseFloat(container.style.top) || 0;
+				
+				// Snap to grid
+				const snappedLeft = Math.round(currentLeft / gridSize) * gridSize;
+				const snappedTop = Math.round(currentTop / gridSize) * gridSize;
+				
+				// Apply snapped position
+				container.style.left = snappedLeft + 'px';
+				container.style.top = snappedTop + 'px';
+				
+				// Reset transform
+				container.style.transform = 'none';
+				container.setAttribute('data-x', 0);
+				container.setAttribute('data-y', 0);
+				
+				// Update allObjects data
+				if (allObjects[objectId]) {
+					allObjects[objectId].positionX = snappedLeft;
+					allObjects[objectId].positionY = snappedTop;
+				}
+				
+				// Send update to server if requested
+				if (sendUpdates) {
+					getActiveSocket().send(JSON.stringify({
+						action: 'updatePosition',
+						objectId: objectId,
+						positionX: snappedLeft,
+						positionY: snappedTop
+					}));
+				}
+			});
+		}
 	
 		// Modified initializeDraggables function
 		//The function always targets all .draggable-container elements unless specifically handling a selection (managed separately in click handler).
-		function initializeDraggables(gridSize, filterSelector ='.draggable-container') {
-			 // Calculate scaled offset for snap grid
-			const scaledOffsetX = offsetX / scale;
-			const scaledOffsetY = offsetY / scale;
-			
+		function initializeDraggables(gridSize, filterSelector = '.draggable-container') {
 			interact(filterSelector).draggable({
 				inertia: false,
 				modifiers: [
@@ -866,23 +893,24 @@ $('#decrease-counter-btn').on('click', function() {
 					}),
 					interact.modifiers.snap({
 						targets: [
-							interact.createSnapGrid({ 
-								x: gridSize / scale, 
-								y: gridSize / scale,
-								offset: {
-									x: (mapOffset.left + scaledOffsetX) / scale,
-									y: (mapOffset.top + scaledOffsetY) / scale
-								}	
-							})
+							(x, y) => {
+								// Get current container screen position and spacing
+								const rect = document.getElementById('map-container').getBoundingClientRect();
+								const spacing = gridSize * scale;
+								// Snap to nearest grid line in screen coordinates
+								const snapX = Math.round((x - rect.left) / spacing) * spacing + rect.left;
+								const snapY = Math.round((y - rect.top) / spacing) * spacing + rect.top;
+								return { x: snapX, y: snapY };
+							}
 						],
 						range: Infinity,
-						relativePoints: [ { x: 0, y: 0 } ]
+						relativePoints: [{ x: 0, y: 0 }]
 					})
 				],
 				autoScroll: true,
 				listeners: {
 					move: dragMoveListener,
-					end: function(event) { // Added end listener here
+					end: function(event) {
 						const target = event.target;
 						const img = target.querySelector('img');
 						const objectId = img.dataset.id;
@@ -892,21 +920,14 @@ $('#decrease-counter-btn').on('click', function() {
 						const translateX = parseFloat(target.getAttribute('data-x')) || 0;
 						const translateY = parseFloat(target.getAttribute('data-y')) || 0;
 
-						// const scaledTranslateX = translateX / scale;
-						// const scaledTranslateY = translateY / scale;
-						
-						// const newLeft = originalLeft + scaledTranslateX;
-						// const newTop = originalTop + scaledTranslateY;
-						
 						const newLeft = originalLeft + translateX;
 						const newTop = originalTop + translateY;
 
-						// Snap to grid independent of zoom
+						// Snap to grid in container coordinates
 						const snappedLeft = Math.round(newLeft / gridSize) * gridSize;
 						const snappedTop = Math.round(newTop / gridSize) * gridSize;
 
-						//TODO change to absolute terms
-						// Send update to WebSocket server
+						// Send update to server
 						getActiveSocket().send(JSON.stringify({
 							action: 'updatePosition',
 							objectId: objectId,
@@ -914,16 +935,12 @@ $('#decrease-counter-btn').on('click', function() {
 							positionY: snappedTop
 						}));
 
-						// Update local position
+						// Update local position and reset transform
 						target.style.left = snappedLeft + 'px';
 						target.style.top = snappedTop + 'px';
 						target.style.transform = 'none';
 						target.setAttribute('data-x', 0);
 						target.setAttribute('data-y', 0);
-						//target.querySelector('.position-text').textContent = 
-						//	`${Math.round(newLeft)}, ${Math.round(newTop)}`;
-						
-						
 					}
 				}
 			});
