@@ -729,30 +729,25 @@ $('#decrease-counter-btn').on('click', function() {
 			}
 
 			// Now adjust so that height is exactly cellCountY * gridPixelSize
-			// gridPixelSize must be an integer, and height must be a multiple of it
-			const cellCountY = vGridCellNumber; // use the user-defined cell count
+			const cellCountY = vGridCellNumber;
 			let gridPixelSize = Math.floor(containerHeight / cellCountY);
 			if (gridPixelSize < 1) gridPixelSize = 1;
 
-			// New container height exactly cellCountY * gridPixelSize
 			containerHeight = gridPixelSize * cellCountY;
-			// Scale width to maintain aspect ratio
 			containerWidth = containerHeight * imgAspect;
-
-			// Make width also a multiple of gridPixelSize (by rounding down)
 			containerWidth = Math.floor(containerWidth / gridPixelSize) * gridPixelSize;
-				
+
 			// Apply dimensions to container
 			mapContainer.style.width = containerWidth + 'px';
 			mapContainer.style.height = containerHeight + 'px';
 
-			// Update the image to fill the container (will be cropped if aspect differs)
+			// Update the image to fill the container
 			mapImage.style.width = '100%';
 			mapImage.style.height = '100%';
-			mapImage.style.objectFit = 'cover'; // Ensures image fills container, cropping excess
+			mapImage.style.objectFit = 'cover';
 
 			// Store the final pixel grid size
-			gridSize = gridPixelSize; // now used for all grid-related calculations
+			gridSize = gridPixelSize;
 
 			// Update the overlay
 			document.querySelector('.grid-overlay').style.backgroundSize = gridSize + 'px ' + gridSize + 'px';
@@ -761,8 +756,6 @@ $('#decrease-counter-btn').on('click', function() {
 			const mapRect = mapContainer.getBoundingClientRect();
 			mapOffset = { left: mapRect.left, top: mapRect.top };
 
-			// Re-initialize draggables with the new grid size
-			initializeDraggables(gridSize);
 			// Update object sizes (they are multiples of gridSize)
 			document.querySelectorAll('.draggable-container').forEach(container => {
 				const objId = container.dataset.id;
@@ -772,7 +765,13 @@ $('#decrease-counter-btn').on('click', function() {
 					container.style.height = gridSize * obj.size + 'px';
 				}
 			});
-		}	
+
+			// Re-initialize draggables with the new grid size
+			initializeDraggables(gridSize);
+
+			// Snap all objects to grid (which now also clamps to container bounds)
+			snapAllObjectsToGrid(true);
+		}
 		
 		// Take the images natural W and H,
 		//set image to take the maximum space within the container, without cropping it or stretching it, the whole image is within the container, plus white margins only on L+R or only T+B
@@ -842,33 +841,43 @@ $('#decrease-counter-btn').on('click', function() {
 		
 		// Add this new function to snap all objects to the current grid
 		function snapAllObjectsToGrid(sendUpdates = true) {
+			const mapContainer = document.getElementById('map-container');
+			const containerWidth = mapContainer.clientWidth;
+			const containerHeight = mapContainer.clientHeight;
+
 			document.querySelectorAll('.draggable-container').forEach(container => {
 				const objectId = container.dataset.id;
-				if (!objectId) return;
-				
-				// Get current position
+				if (!objectId || !allObjects[objectId]) return;
+
+				const objSize = allObjects[objectId].size;
+				const objectWidth = gridSize * objSize;
+				const objectHeight = gridSize * objSize;
+
+				// Get current position (absolute left/top)
 				const currentLeft = parseFloat(container.style.left) || 0;
 				const currentTop = parseFloat(container.style.top) || 0;
-				
+
 				// Snap to grid
-				const snappedLeft = Math.round(currentLeft / gridSize) * gridSize;
-				const snappedTop = Math.round(currentTop / gridSize) * gridSize;
-				
-				// Apply snapped position
+				let snappedLeft = Math.round(currentLeft / gridSize) * gridSize;
+				let snappedTop = Math.round(currentTop / gridSize) * gridSize;
+
+				// Clamp to container boundaries
+				const maxLeft = Math.max(0, containerWidth - objectWidth);
+				const maxTop = Math.max(0, containerHeight - objectHeight);
+				snappedLeft = Math.min(Math.max(snappedLeft, 0), maxLeft);
+				snappedTop = Math.min(Math.max(snappedTop, 0), maxTop);
+
+				// Apply clamped & snapped position
 				container.style.left = snappedLeft + 'px';
 				container.style.top = snappedTop + 'px';
-				
-				// Reset transform
 				container.style.transform = 'none';
 				container.setAttribute('data-x', 0);
 				container.setAttribute('data-y', 0);
-				
+
 				// Update allObjects data
-				if (allObjects[objectId]) {
-					allObjects[objectId].positionX = snappedLeft;
-					allObjects[objectId].positionY = snappedTop;
-				}
-				
+				allObjects[objectId].positionX = snappedLeft;
+				allObjects[objectId].positionY = snappedTop;
+
 				// Send update to server if requested
 				if (sendUpdates) {
 					getActiveSocket().send(JSON.stringify({
