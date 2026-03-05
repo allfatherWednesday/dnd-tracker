@@ -291,7 +291,7 @@ let offsetY = 0;
 						positionY: obj.positionY || 0,
 						statusEffects: obj.statusEffects || [],
 						size: obj.size || 1,
-						duplicate_count: item.duplicate_count || 1
+						duplicate_count: obj.duplicate_count || 1
 					};
 					
 					//sidebar
