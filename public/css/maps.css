@@ -14,12 +14,12 @@ body {
     background-color: #f8f9fa;
     padding: 20px;
     overflow-y: auto;
-	z-index: 1020;
+	z-index: 2000;
 	
 }
 
 .sidebar_left{
-	
+	background: rgba(0,0,0,0.5);
 	/*
 	top: 60px;
     left: 0;
@@ -27,6 +27,7 @@ body {
 }
 
 .sidebar_right{
+    background: rgba(0,0,0,0.5);
     /*
     top: 60px;
     right: 0;
@@ -53,7 +54,7 @@ body {
 }
 
 #map-parent-container {
-	overflow: hidden;
+	overflow: visible;
 }
  
 #map-image {

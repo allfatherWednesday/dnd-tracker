@@ -34,6 +34,7 @@
 					<h4>Loaded Objects</h4>
 					<ul id="object-list" class="list-group">		
 					</ul>
+					<button id="show-bin-btn" class="btn btn-info mt-3">Show Bin</button>
 				</div>
 				<div id="maps-menu-body">
 					<h3>Map Backgrounds</h3>
@@ -103,6 +104,41 @@
 					</div>
 			</div>
     </div>
+<!-- Bin Modal -->
+<div class="modal fade" id="binModal" tabindex="-1" aria-labelledby="binModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="binModalLabel">Binned Objects</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <button id="restore-selected-bin" class="btn btn-success">Restore Selected</button>
+          <button id="delete-selected-bin" class="btn btn-danger">Delete Selected</button>
+          <button id="select-all-bin" class="btn btn-secondary">Select All</button>
+        </div>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="select-all-bin-checkbox"></th>
+              <th>Name</th>
+              <th>Position (X, Y)</th>
+              <th>Size</th>
+              <th>Duplicate Count</th>
+            </tr>
+          </thead>
+          <tbody id="bin-list-body">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -259,7 +295,12 @@ let offsetY = 0;
 					};
 					
 					//sidebar
-					document.getElementById('object-list').innerHTML += ('<li class="list-group-item" data-id="'+obj.id+'" data-url="'+obj.image_url+'">'+obj.name+'</li>');
+					document.getElementById('object-list').innerHTML += 
+    '<li class="list-group-item" data-id="' + obj.id + '" data-url="' + obj.image_url + '">' + 
+        obj.name + 
+        ' <span class="bin-object" data-id="' + obj.id + '" style="float:right; cursor:pointer;">🗑️</span>' +
+    '</li>';
+					
 					//on the map
 					//currentlyworking change to individual object's size
 					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize*obj.size+'px; height:'+gridSize*obj.size+'px; left:'+obj.positionX+'px; top:'+obj.positionY+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%; transform: rotate(' + (obj.rotation || 0) + 'deg);"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
@@ -324,6 +365,39 @@ let offsetY = 0;
 					//Recalc dimentions of the map
 					
 					break;
+				
+				case 'mapDeleted':
+					const deletedMapId = data.id;
+					console.log('Map deleted:', deletedMapId);
+
+					// Remove from allMaps object
+					delete allMaps[deletedMapId];
+
+					// Remove the corresponding <li> from the maps list
+					$(`#maps-list li[data-id="${deletedMapId}"]`).remove();
+
+					// If the deleted map was the currently active map, switch to another one (if any)
+					if (deletedMapId == mapId) {
+							const remainingMapIds = Object.keys(allMaps);
+							if (remainingMapIds.length > 0) {
+									// Automatically select the first remaining map
+									const newMapId = remainingMapIds[0];
+									// Trigger map switch (same as clicking on it)
+									getActiveSocket().send(JSON.stringify({
+											action: 'switchMap',
+											selectedId: newMapId
+									}));
+							} else {
+									// No maps left – clear the map view
+									$('#map-image').attr('src', '');
+									$('.grid-overlay').css('background-size', '0 0');
+									$('#grid-size-input').val('');
+									mapId = null;
+									mapImage = '';
+									gridSize = 0;
+							}
+					}
+					break;
 					
 				case "mapSwitched":
 					temp = data;
@@ -334,6 +408,24 @@ let offsetY = 0;
 					redrawMap();
 					updateGridSize(gridSize);
 				
+					break;
+				case 'binList':
+					console.log('binList', data);
+					const tbody = $('#bin-list-body');
+					tbody.empty();
+					data.objects.forEach(item => {
+							const state = item.object_state; // already parsed
+							tbody.append(`
+									<tr data-bin-id="${item.id}">
+											<td><input type="checkbox" class="bin-select" value="${item.id}"></td>
+											<td>${state.name}</td>
+											<td>(${state.positionX}, ${state.positionY})</td>
+											<td>${state.size}</td>
+											<td>${state.duplicate_count}</td>
+									</tr>
+							`);
+					});
+					$('#binModal').modal('show');
 					break;
 				default:
 					//do nothing
@@ -353,12 +445,13 @@ let offsetY = 0;
 			document.getElementById('maps-list').innerHTML = "";
 			
 			for (const key in allMaps) {
-				if(mapId == key){
-					document.getElementById('maps-list').innerHTML += '<li class="list-group-item selected" data-id="'+key +'" data-url="'+allMaps[key].image+'">'+allMaps[key].name+'</li>';
-				}else{
-					document.getElementById('maps-list').innerHTML += '<li class="list-group-item" data-id="'+key +'" data-url="'+allMaps[key].image+'">'+allMaps[key].name+'</li>';	
+					const selectedClass = (mapId == key) ? 'selected' : '';
+					document.getElementById('maps-list').innerHTML += 
+							'<li class="list-group-item ' + selectedClass + '" data-id="' + key + '" data-url="' + allMaps[key].image + '">' +
+									allMaps[key].name + 
+									' <span class="delete-map" data-id="' + key + '" style="float:right; cursor:pointer;">🗑️</span>' +
+							'</li>';
 				}
-			}
 			
 			const mapImageElement = document.getElementById('map-image');
 			$("#map-image")
@@ -384,8 +477,7 @@ let offsetY = 0;
 			// Creating a list of divs for objects
 			for (const key in allObjects) {
 				
-				document.getElementById('object-list').innerHTML += '<li class="list-group-item"" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+'</li>';
-				
+				document.getElementById('object-list').innerHTML += '<li class="list-group-item" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+' <span class="bin-object" data-id="'+allObjects[key].id+'" style="float:right; cursor:pointer;">🗑️</span></li>';
 				document.getElementById('map-container').innerHTML += 
 						'<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'">' +
 						'  <img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%; transform: rotate(' + (allObjects[key].rotation || 0) + 'deg);">' +
@@ -1246,6 +1338,94 @@ $('#decrease-counter-btn').on('click', function() {
         });
         
 		
+// Bin icon click handler
+$('#object-list').on('click', '.bin-object', function(e) {
+    e.stopPropagation(); // prevent selecting the object
+    const objectId = $(this).data('id');
+    if (confirm('Move this object to the bin? It will be removed from the map.')) {
+        getActiveSocket().send(JSON.stringify({
+            action: 'binObject',
+            id: objectId
+        }));
+    }
+});
+
+$('#show-bin-btn').on('click', function() {
+    getActiveSocket().send(JSON.stringify({
+        action: 'fetchBinList'
+    }));
+});
+
+
+// Handle "Select All" checkbox in table header
+$('#select-all-bin-checkbox').on('change', function() {
+    $('.bin-select').prop('checked', $(this).is(':checked'));
+});
+
+// Keep the header checkbox in sync with individual ones
+$('#bin-list-body').on('change', '.bin-select', function() {
+    const allChecked = $('.bin-select:checked').length === $('.bin-select').length;
+    $('#select-all-bin-checkbox').prop('checked', allChecked);
+});
+
+// Select All button (same as checkbox)
+$('#select-all-bin').on('click', function() {
+    const check = !$('#select-all-bin-checkbox').is(':checked');
+    $('.bin-select').prop('checked', check);
+    $('#select-all-bin-checkbox').prop('checked', check);
+});
+
+$('#restore-selected-bin').on('click', function() {
+    const selectedIds = $('.bin-select:checked').map(function() {
+        return $(this).val();
+    }).get();
+    if (selectedIds.length === 0) {
+        alert('Select at least one object to restore.');
+        return;
+    }
+    if (confirm(`Restore ${selectedIds.length} object(s)?`)) {
+        getActiveSocket().send(JSON.stringify({
+            action: 'restoreBinObjects',
+            ids: selectedIds
+        }));
+        // Optionally close modal or wait for confirmation
+        $('#binModal').modal('hide');
+    }
+});
+
+$('#delete-selected-bin').on('click', function() {
+    const selectedIds = $('.bin-select:checked').map(function() {
+        return $(this).val();
+    }).get();
+    if (selectedIds.length === 0) {
+        alert('Select at least one object to delete.');
+        return;
+    }
+    if (confirm(`Permanently delete ${selectedIds.length} object(s) from bin?`)) {
+        getActiveSocket().send(JSON.stringify({
+            action: 'deleteBinObjects',
+            ids: selectedIds
+        }));
+        // Remove rows immediately (optimistic) or refresh after response
+        selectedIds.forEach(id => {
+            $(`tr[data-bin-id="${id}"]`).remove();
+        });
+        // If you prefer to refresh after response, handle binDeleteComplete
+    }
+});
+
+
+// Delete map icon click handler
+$('#maps-list').on('click', '.delete-map', function(e) {
+    e.stopPropagation(); // prevent selecting the map
+    const mapId = $(this).data('id');
+    if (confirm('Are you sure you want to delete this map? This action cannot be undone.')) {
+        getActiveSocket().send(JSON.stringify({
+            action: 'deleteMap',
+            id: mapId
+        }));
+    }
+});
 
 	});
 </script>

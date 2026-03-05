@@ -3,7 +3,7 @@
 namespace app\Models;
 
 use PDO;
-
+use app\Controllers\NotFoundException;
 class MapModel extends Model
 {
     /*public function getMap()
@@ -24,25 +24,20 @@ class MapModel extends Model
     }*/
 	
 	
-    public function getMapById(int $mapId): ?array
-    {
-        try {
-            $stmt = $this->db()->prepare("
-                SELECT * 
-                FROM maps 
-                WHERE id = :id
-            ");
-            
-            $stmt->bindValue(':id', $mapId, PDO::PARAM_INT);
-            $stmt->execute();
-            
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-            
-        } catch (PDOException $e) {
-            // Log error here if needed
-            throw $e;
-        }
+   public function getMapById(int $mapId): ?array
+{
+    try {
+        $stmt = $this->db()->prepare("SELECT * FROM maps WHERE id = :id");
+        $stmt->bindValue(':id', $mapId, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Return null if no result, otherwise the array
+        return $result ?: null;
+    } catch (PDOException $e) {
+        error_log("Error in getMapById: " . $e->getMessage());
+        return null;
     }
+}
 	
 	public function getAllMaps(): ?array
 	{
@@ -90,6 +85,23 @@ class MapModel extends Model
             // Log error here if needed
             throw $e;
         }
+    }
+
+    /**
+     * Delete a map by ID
+     * @param int $id
+     * @return bool
+     */
+    public function deleteMap(int $id): bool
+    {
+    try {
+        $stmt = $this->db()->prepare("DELETE FROM maps WHERE id = :id");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        error_log("Error deleting map: " . $e->getMessage());
+        return false;
+    }
     }
 
 }

@@ -242,6 +242,26 @@ class MapWebSocket implements MessageComponentInterface {
 					]));
 				}
 				break;
+			case 'deleteMap':
+				$mapId = $data['id'] ?? null;
+				if ($mapId) {
+						$success = $this->mapModel->deleteMap($mapId);
+						if ($success) {
+								// Broadcast map deletion to all clients
+								foreach ($this->clients as $client) {
+										$client->send(json_encode([
+												'action' => 'mapDeleted',
+												'id' => $mapId
+										]));
+								}
+						} else {
+								$from->send(json_encode([
+										'action' => 'error',
+										'message' => "Failed to delete map {$mapId}"
+								]));
+						}
+				}
+				break;
 			case "switchMap":
 				$selected_map_id = $data['selectedId'];
 				foreach ($this->clients as $client) {
@@ -251,7 +271,73 @@ class MapWebSocket implements MessageComponentInterface {
 					]));
 				}
 				break;
-		}
+			case 'binObject':
+				$id = $data['id'] ?? null;
+				if ($id) {
+						$success = $this->mapObjectModel->moveObjectToBin($id);
+						if ($success) {
+								// Broadcast removal to all clients (including sender – sender will handle it)
+								foreach ($this->clients as $client) {
+										$client->send(json_encode([
+												'action' => 'ObjectRemoved',
+												'id' => $id
+										]));
+								}
+						} else {
+								// Send error only to the requesting client
+								$from->send(json_encode([
+										'action' => 'error',
+										'message' => "Failed to bin object {$id}"
+								]));
+						}
+				}
+				break;
+
+			case 'fetchBinList':
+					$binned = $this->mapObjectModel->getBinnedObjects();
+					$from->send(json_encode([
+							'action' => 'binList',
+							'objects' => $binned
+					]));
+					break;
+			case 'restoreBinObjects':
+					$binIds = $data['ids'] ?? [];
+					$restoredObjects = [];
+					foreach ($binIds as $binId) {
+							$obj = $this->mapObjectModel->restoreFromBin($binId);
+							if ($obj) {
+									$restoredObjects[] = $obj;
+									// Broadcast each restored object to all clients
+									foreach ($this->clients as $client) {
+											$client->send(json_encode([
+													'action' => 'objectAdded',
+													'object' => $obj
+											]));
+									}
+							}
+					}
+					// Send confirmation to the requesting client (optional)
+					$from->send(json_encode([
+							'action' => 'binRestoreComplete',
+							'count' => count($restoredObjects)
+					]));
+					break;
+
+				case 'deleteBinObjects':
+						$binIds = $data['ids'] ?? [];
+						$deletedCount = 0;
+						foreach ($binIds as $binId) {
+								if ($this->mapObjectModel->deleteFromBin($binId)) {
+										$deletedCount++;
+								}
+						}
+						// Notify the client to refresh the bin list
+						$from->send(json_encode([
+								'action' => 'binDeleteComplete',
+								'count' => $deletedCount
+						]));
+						break;				
+					}
 	}
 
 	public function onClose(ConnectionInterface $conn) {
