@@ -236,12 +236,17 @@ let offsetY = 0;
 						const img = container.querySelector('img');
 						if (img.dataset.id === data.objectId.toString()) {
 							// Update position (swap X/Y due to existing structure)
-							container.style.left = data.positionX + 'px';
-							container.style.top = data.positionY + 'px';
+							container.style.left = (gridSize *data.positionX) + 'px';
+							container.style.top = (gridSize *data.positionY) + 'px';
 							// Reset transform
 							container.style.transform = 'none';
 							container.setAttribute('data-x', 0);
 							container.setAttribute('data-y', 0);
+							
+							if (allObjects[data.objectId]) {
+								allObjects[data.objectId].positionX = data.positionX;
+								allObjects[data.objectId].positionY = data.positionY;
+							}
 						}
 					});
 					break;
@@ -303,7 +308,7 @@ let offsetY = 0;
 					
 					//on the map
 					//currentlyworking change to individual object's size
-					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize*obj.size+'px; height:'+gridSize*obj.size+'px; left:'+obj.positionX+'px; top:'+obj.positionY+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%; transform: rotate(' + (obj.rotation || 0) + 'deg);"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
+					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize*obj.size+'px; height:'+gridSize*obj.size+'px; left:'+(gridSize *obj.positionX)+'px; top:'+(gridSize *obj.positionY)	+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%; transform: rotate(' + (obj.rotation || 0) + 'deg);"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
 					
 					addClickHandlersOnObjectList();
 					initializeDraggables(gridSize, `.draggable-container[data-id="${obj.id}"]`);
@@ -479,7 +484,7 @@ let offsetY = 0;
 				
 				document.getElementById('object-list').innerHTML += '<li class="list-group-item" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+' <span class="bin-object" data-id="'+allObjects[key].id+'" style="float:right; cursor:pointer;">🗑️</span></li>';
 				document.getElementById('map-container').innerHTML += 
-						'<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+allObjects[key].positionX+'px; top: '+allObjects[key].positionY+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'">' +
+						'<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+(gridSize *allObjects[key].positionX)+'px; top: '+(gridSize *allObjects[key].positionY)+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'">' +
 						'  <img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%; transform: rotate(' + (allObjects[key].rotation || 0) + 'deg);">' +
 						'  <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div>' +
 						'  <div class="duplicate-counter" style="position: absolute; top: 100%; left: 0; right: 0; text-align: center; background: rgba(0,0,0,0.7); color: white; font-size: 12px; font-weight: bold; border-radius: 0 0 5px 5px; display: none;">' +
@@ -944,41 +949,40 @@ $('#decrease-counter-btn').on('click', function() {
 				const objSize = allObjects[objectId].size;
 				const objectWidth = gridSize * objSize;
 				const objectHeight = gridSize * objSize;
+				const sizeInCells = allObjects[objectId].size;   
+				let cellX = allObjects[objectId].positionX;
+				let cellY = allObjects[objectId].positionY;
 
-				// Get current position (absolute left/top)
-				const currentLeft = parseFloat(container.style.left) || 0;
-				const currentTop = parseFloat(container.style.top) || 0;
+				// Maximum allowed cell index (0‑based)
+				const maxCellX = Math.floor(containerWidth / gridSize) - sizeInCells;
+				const maxCellY = Math.floor(containerHeight / gridSize) - sizeInCells;
 
-				// Snap to grid
-				let snappedLeft = Math.round(currentLeft / gridSize) * gridSize;
-				let snappedTop = Math.round(currentTop / gridSize) * gridSize;
+				// Clamp cell coordinates
+				let newCellX = Math.min(Math.max(cellX, 0), maxCellX);
+				let newCellY = Math.min(Math.max(cellY, 0), maxCellY);
+				
+				// If clamping changed the cell, update allObjects and (optionally) the server
+				if (newCellX !== cellX || newCellY !== cellY) {
+					allObjects[objectId].positionX = newCellX;
+					allObjects[objectId].positionY = newCellY;
+					if (sendUpdates) {
+						getActiveSocket().send(JSON.stringify({
+							action: 'updatePosition',
+							objectId: objectId,
+							positionX: newCellX,
+							positionY: newCellY
+						}));
+					}
+				}
 
-				// Clamp to container boundaries
-				const maxLeft = Math.max(0, containerWidth - objectWidth);
-				const maxTop = Math.max(0, containerHeight - objectHeight);
-				snappedLeft = Math.min(Math.max(snappedLeft, 0), maxLeft);
-				snappedTop = Math.min(Math.max(snappedTop, 0), maxTop);
-
-				// Apply clamped & snapped position
-				container.style.left = snappedLeft + 'px';
-				container.style.top = snappedTop + 'px';
+				// Set pixel position
+				container.style.left = (newCellX * gridSize) + 'px';
+				container.style.top  = (newCellY * gridSize) + 'px';
 				container.style.transform = 'none';
 				container.setAttribute('data-x', 0);
 				container.setAttribute('data-y', 0);
-
-				// Update allObjects data
-				allObjects[objectId].positionX = snappedLeft;
-				allObjects[objectId].positionY = snappedTop;
-
-				// Send update to server if requested
-				if (sendUpdates) {
-					getActiveSocket().send(JSON.stringify({
-						action: 'updatePosition',
-						objectId: objectId,
-						positionX: snappedLeft,
-						positionY: snappedTop
-					}));
-				}
+		
+		
 			});
 		}
 	
@@ -1028,12 +1032,16 @@ $('#decrease-counter-btn').on('click', function() {
 						const snappedLeft = Math.round(newLeft / gridSize) * gridSize;
 						const snappedTop = Math.round(newTop / gridSize) * gridSize;
 
+						// Convert to cell coordinates
+						const tempPositionX = Math.round(snappedLeft / gridSize);
+						const tempPositionY = Math.round(snappedTop  / gridSize);
+						
 						// Send update to server
 						getActiveSocket().send(JSON.stringify({
 							action: 'updatePosition',
 							objectId: objectId,
-							positionX: snappedLeft,
-							positionY: snappedTop
+							positionX: tempPositionX,
+							positionY: tempPositionY
 						}));
 
 						// Update local position and reset transform
@@ -1042,6 +1050,12 @@ $('#decrease-counter-btn').on('click', function() {
 						target.style.transform = 'none';
 						target.setAttribute('data-x', 0);
 						target.setAttribute('data-y', 0);
+						
+						// Update allObjects
+						if (allObjects[objectId]) {
+							allObjects[objectId].positionX = tempPositionX;
+							allObjects[objectId].positionY = tempPositionY;
+						}
 					}
 				}
 			});
