@@ -3,7 +3,7 @@
 namespace app\Models;
 
 use PDO;
-
+use app\Controllers\NotFoundException;
 class MapModel extends Model
 {
     /*public function getMap()
@@ -24,31 +24,47 @@ class MapModel extends Model
     }*/
 	
 	
-    public function getMapById(int $mapId): ?array
-    {
-        try {
-            $stmt = $this->db()->prepare("
-                SELECT * 
-                FROM maps 
-                WHERE id = :id
-            ");
-            
-            $stmt->bindValue(':id', $mapId, PDO::PARAM_INT);
-            $stmt->execute();
-            
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-            
-        } catch (PDOException $e) {
-            // Log error here if needed
-            throw $e;
-        }
+   public function getMapById(int $mapId): ?array
+{
+    try {
+        $stmt = $this->db()->prepare("SELECT * FROM maps WHERE id = :id");
+        $stmt->bindValue(':id', $mapId, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Return null if no result, otherwise the array
+        return $result ?: null;
+    } catch (PDOException $e) {
+        error_log("Error in getMapById: " . $e->getMessage());
+        return null;
     }
+}
 	
 	public function getAllMaps(): ?array
 	{
         $req = $this->db()->prepare("SELECT * FROM maps ORDER BY id DESC");
         $req->execute();
         return $req->fetchAll(PDO::FETCH_ASSOC);
+	}
+	
+	public function addMap($name, $image, $grid_size){
+		$DB1 = $this->db();
+        $req1 = $DB1->prepare("INSERT INTO maps (name, image, grid_size) VALUES (:name, :image, :grid_size)");
+        $req1->bindValue(':name', $name);
+        $req1->bindValue(':image', $image);
+        $req1->bindValue(':grid_size', $grid_size);
+		$success = $req1->execute();    
+		if (!$success) {
+			error_log("Database error: " . print_r($req1->errorInfo(), true));
+			return false;
+		}
+		
+		// return the inserted row with id
+		$id = $DB1->lastInsertId();
+		$req2 = $DB1->prepare("SELECT * FROM maps WHERE id = :id");
+		$req2->bindValue(':id', $id);
+		$req2->execute();
+		$result = $req2->fetch(PDO::FETCH_ASSOC);
+		return $result;
 	}
 	
     public function updateGridSize(int $mapId, int $gridSize): bool
@@ -69,6 +85,23 @@ class MapModel extends Model
             // Log error here if needed
             throw $e;
         }
+    }
+
+    /**
+     * Delete a map by ID
+     * @param int $id
+     * @return bool
+     */
+    public function deleteMap(int $id): bool
+    {
+    try {
+        $stmt = $this->db()->prepare("DELETE FROM maps WHERE id = :id");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        error_log("Error deleting map: " . $e->getMessage());
+        return false;
+    }
     }
 
 }

@@ -14,12 +14,12 @@ body {
     background-color: #f8f9fa;
     padding: 20px;
     overflow-y: auto;
-	z-index: 1020;
+	z-index: 2000;
 	
 }
 
 .sidebar_left{
-	
+	background: rgba(0,0,0,0.5);
 	/*
 	top: 60px;
     left: 0;
@@ -27,6 +27,7 @@ body {
 }
 
 .sidebar_right{
+    background: rgba(0,0,0,0.5);
     /*
     top: 60px;
     right: 0;
@@ -36,10 +37,11 @@ body {
 
 
 #map-container {
-    position:relative;
+    /*position:relative; 
+    transform: translate(-50%, -50%);
+	*/
 	top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     width: 100%;
     height: calc(100vh - 60px); /* Full height minus navbar */
     display: flex;
@@ -47,6 +49,12 @@ body {
     align-items: center;
     overflow: hidden;
     background-color: #f0f0f0; /* Optional: Add a background color */
+	transform: scale(1);
+	
+}
+
+#map-parent-container {
+	overflow: visible;
 }
  
 #map-image {
@@ -62,7 +70,12 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%); /* Centers the image */
+	
+    -webkit-user-drag: none;  /* Safari */
+    user-drag: none;           /* Standard */
+    pointer-events: none;      /* Prevents mouse events on images */
 }
+
 
 .draggable {
     position: absolute;
@@ -70,6 +83,9 @@ body {
     height: 50px;
     cursor: grab;
     transition: transform 0.1s ease;
+	
+	-webkit-user-drag: none;
+    user-drag: none;
 }
 
 .draggable:active {
@@ -148,4 +164,46 @@ body {
 
 .selected-effects-box {
 	outline: 4px solid red;
+}
+
+.selected-blue-button {
+	background-color: #0d6efd;
+	border-radius: 8px;
+    color: white;
+    padding: 12px;
+	margin: 0 3px;
+}
+
+.unselected-blue-button{
+	background-color: #ccc;
+	border-radius: 8px;
+    color: black;
+    padding: 12px;
+    margin: 0 3px;
+}
+
+.vc-menu-item{
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.duplicate-counter {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    padding: 2px 0;
+    z-index: 1000;
+    pointer-events: none; /* So clicks pass through to the object */
+}
+
+.counter-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+#counter-display {
+    min-width: 40px;
+    text-align: center;
+    font-weight: bold;
 }
