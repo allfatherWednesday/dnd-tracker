@@ -9,8 +9,7 @@
             <h3>Grid Settings</h3>
 			<div class="mb-3">
 				<label for="grid-size-input" class="form-label">Vertical Grid Cell Number</label>
-				<input type="number" class="form-control" id="grid-size-input" 
-					   name="grid-size">
+				<input type="number" class="form-control" id="grid-size-input" name="grid-size">
 			</div>
 			<div style="display: flex; justify-content: start;">
 				<div class="selected-blue-button" id="objects-menu-button"><h4>Objects</h4></div>
@@ -30,10 +29,8 @@
 						</div>
 						<button class="btn btn-primary">Add Object</button>
 					</form>
-
 					<h4>Loaded Objects</h4>
-					<ul id="object-list" class="list-group">		
-					</ul>
+					<ul id="object-list" class="list-group"></ul>
 					<button id="show-bin-btn" class="btn btn-info mt-3">Show Bin</button>
 				</div>
 				<div id="maps-menu-body">
@@ -49,10 +46,8 @@
 						</div>
 						<button class="btn btn-primary">Add Map</button>
 					</form>
-
 					<h4>Loaded Maps</h4>
-					<ul id="maps-list" class="list-group">		
-					</ul>
+					<ul id="maps-list" class="list-group"></ul>
 				</div>
 			</div>
         </div>
@@ -61,91 +56,70 @@
         <div class="col-md-8 col-lg-8" id="map-parent-container" style="padding: 0">
             <div id="map-container">        
 				<img id="map-image">
-				
-                <!-- Grid Overlay Added Here -->
                 <div class="grid-overlay"></div>
-                
             </div>
         </div>
 	
-		
 		<!-- Right Sidebar -->
         <div class="col-md-2 col-md-2 sidebar_right sidebar_custom">
-			<div id="status-effects-container" style="display: none;">
-				<h4>Status Effects</h4>
-			</div>
+			<div id="status-effects-container" style="display: none;"><h4>Status Effects</h4></div>
 			<div id="delete-button-container" style="display: none;">
-				<button id="remove-object-btn" class="btn btn-danger mt-2" >
-					Remove Object
-				</button>
+				<button id="remove-object-btn" class="btn btn-danger mt-2">Remove Object</button>
 			</div>
 			<div id="size-button-container" style="display: none;">
-				<button id="increase-size-btn" class="btn btn-danger mt-2" >
-					Size+
-				</button>
-				<button id="decrease-size-btn" class="btn btn-danger mt-2" >
-					Size-
-				</button>
+				<button id="increase-size-btn" class="btn btn-danger mt-2">Size+</button>
+				<button id="decrease-size-btn" class="btn btn-danger mt-2">Size-</button>
 			</div> 
 			<div id="rotation-button-container" style="display: none;">
-				<button id="rotate-left-btn" class="btn btn-danger mt-2">
-					Rotate -90°
-				</button>
-				<button id="rotate-right-btn" class="btn btn-danger mt-2">
-					Rotate +90°
-				</button>
-       </div>
-			<div id="counter-container" style="display: none;">
-					<h4>Duplicate Counter</h4>
-					<div class="counter-controls">
-							<button id="decrease-counter-btn" class="btn btn-secondary mt-2">-</button>
-							<span id="counter-display" class="mx-3" style="font-size: 1.5rem;">1</span>
-							<button id="increase-counter-btn" class="btn btn-secondary mt-2">+</button>
-					</div>
+				<button id="rotate-left-btn" class="btn btn-danger mt-2">Rotate -90°</button>
+				<button id="rotate-right-btn" class="btn btn-danger mt-2">Rotate +90°</button>
 			</div>
-    </div>
-<!-- Bin Modal -->
-<div class="modal fade" id="binModal" tabindex="-1" aria-labelledby="binModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="binModalLabel">Binned Objects</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <button id="restore-selected-bin" class="btn btn-success">Restore Selected</button>
-          <button id="delete-selected-bin" class="btn btn-danger">Delete Selected</button>
-          <button id="select-all-bin" class="btn btn-secondary">Select All</button>
-        </div>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th><input type="checkbox" id="select-all-bin-checkbox"></th>
-              <th>Name</th>
-              <th>Position (X, Y)</th>
-              <th>Size</th>
-              <th>Duplicate Count</th>
-            </tr>
-          </thead>
-          <tbody id="bin-list-body">
-            <!-- Populated via JS -->
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+			<div id="counter-container" style="display: none;">
+				<h4>Duplicate Counter</h4>
+				<div class="counter-controls">
+					<button id="decrease-counter-btn" class="btn btn-secondary mt-2">-</button>
+					<span id="counter-display" class="mx-3" style="font-size: 1.5rem;">1</span>
+					<button id="increase-counter-btn" class="btn btn-secondary mt-2">+</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bin Modal -->
+	<div class="modal fade" id="binModal" tabindex="-1" aria-labelledby="binModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="binModalLabel">Binned Objects</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="mb-3">
+						<button id="restore-selected-bin" class="btn btn-success">Restore Selected</button>
+						<button id="delete-selected-bin" class="btn btn-danger">Delete Selected</button>
+						<button id="select-all-bin" class="btn btn-secondary">Select All</button>
+					</div>
+					<table class="table table-striped">
+						<thead>
+							<tr><th><input type="checkbox" id="select-all-bin-checkbox"></th><th>Name</th><th>Position (X, Y)</th><th>Size</th><th>Duplicate Count</th></tr>
+						</thead>
+						<tbody id="bin-list-body"></tbody>
+					20~</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 <script>
-const statusEffectsLinks =
-    { 'Acid': 'https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png',
+// ========================= CONSTANTS & GLOBALS =========================
+const statusEffectsLinks = {
+    'Acid': 'https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png',
     'Bleeding': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Bleeding%20Out.png',
     'Blind': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Blinded.png',
     'Burning': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/On%20Fire.png',
@@ -163,1285 +137,693 @@ const statusEffectsLinks =
     'Frightened': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Frightened.png',
     'Possessed': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Possessed.png',
     'Unconscious': 'https://raw.githubusercontent.com/orangetruth/dnd5e-status-icons/refs/heads/main/Conditions/Unconcious.png' 
-};		
-		
-let temp;		
+};
+
 let activeSocket;
-let gridSize;
-let vGridCellNumber;
-let mapId;
-let mapImage;
+let gridSize, vGridCellNumber, mapId, mapImage;
 let allMaps = new Map();
-let allObjects = new Map();		
-let selectedObjectId = null; //if it breaks use this instead  const selectedObject = $('#object-list li.selected')[0].getAttribute('data-id');
-var mapRect;
-var mapOffset;
+let allObjects = new Map();
+let selectedObjectId = null;
+let mapRect, mapOffset;
 let scale = 1;
-const minZoom = 0.5; // Minimum zoom level
-const maxZoom = 3;   // Maximum zoom level
-const zoomStep = 0.1; // Zoom step amount
-let offsetX = 0;
-let offsetY = 0;
-		
-		
-    $(document).ready(function() {
-		
-		// Connect to WebSocket
-		activeSocket = getActiveSocket();
-		//const websocket = new WebSocket('ws://YOUR_LOCAL_IP:8080'); if on LAN
-		function getActiveSocket (){
-			if (!activeSocket || activeSocket.readyState === 3){
-				activeSocket = new WebSocket('ws://localhost:8080');
-			}
-			return activeSocket;
-		}
-		
+const minZoom = 0.5, maxZoom = 3, zoomStep = 0.1;
+let offsetX = 0, offsetY = 0;
 
-		getActiveSocket().onmessage = function(event) {
-			const data = JSON.parse(event.data);
-			switch (data.action){
-				case 'firstFetchReturn':
-					console.log('firstFetchReturn data: ');
-					console.log(data);
-					
-					//Set variables to the new values
-					//change to select the map with a flag of active map, and to have a dropdown for all maps
-					vGridCellNumber = data['maps'][0].grid_size;
-					
-					
-					mapId = data['maps'][0].id;
-					mapImage = data['maps'][0].image;
-				
-					
-					allMaps = Object.fromEntries(data['maps'].map(item => [item.id, {image: item.image, name: item.name,grid_size : item.grid_size}]));
-					
-					allObjects = Object.fromEntries(data['objects'].map(item => [item.id, {
-											image_url: item.image_url, 
-											name: item.name, 
-											positionX: item.positionX, 
-											positionY: item.positionY, 
-											id: item.id, 
-											statusEffects: item.statusEffects,
-											rotation: item.rotation || 0, 
-											size: item.size,
-											duplicate_count: item.duplicate_count || 1  
-									}]));
-					redrawMap();
-					adjustMapSize(vGridCellNumber);
-					redrawAllObjects();
-					break;
-				case 'positionUpdated':
-					const containers = document.querySelectorAll('.draggable-container');
-					containers.forEach(container => {
-						const img = container.querySelector('img');
-						if (img.dataset.id === data.objectId.toString()) {
-							// Update position (swap X/Y due to existing structure)
-							container.style.left = (gridSize *data.positionX) + 'px';
-							container.style.top = (gridSize *data.positionY) + 'px';
-							// Reset transform
-							container.style.transform = 'none';
-							container.setAttribute('data-x', 0);
-							container.setAttribute('data-y', 0);
-							
-							if (allObjects[data.objectId]) {
-								allObjects[data.objectId].positionX = data.positionX;
-								allObjects[data.objectId].positionY = data.positionY;
-							}
-						}
-					});
-					break;
-				case 'gridSizeUpdated':
-					if (data.gridSize !== vGridCellNumber) {
-						vGridCellNumber = data.gridSize;
-						$('#grid-size-input').val(vGridCellNumber);
-						updateGridSize(vGridCellNumber, false); // Pass false to prevent sending updates
-					}
-					break;
-				case 'sizeUpdated':
-					console.log("sizeUpdated", data);
-					allObjects[data.objectId].size = data.newSize;
-					const containers1 = document.querySelectorAll('.draggable-container');
-					containers1.forEach(container => {
-						const img = container.querySelector('img');
-						if (container.id === data.objectId.toString()) {
-							// Update position (swap X/Y due to existing structure)
-							container.style.width = gridSize*data.newSize + 'px';
-							container.style.height = gridSize*data.newSize + 'px';
-							// Reset transform
-							container.style.transform = 'none';
-							container.setAttribute('data-x', 0);
-							container.setAttribute('data-y', 0);
-						}	
-					});
-					console.log("Received new size:", data);
-					
-					break;
-				case 'rotationUpdated':
-					allObjects[data.objectId].rotation = data.newRotation;
-					$(`#${data.objectId} img`).css('transform', `rotate(${data.newRotation}deg)`);
-					break;
-				case 'duplicateCountUpdated':
-					allObjects[data.objectId].duplicate_count = data.duplicateCount;
-					updateCounterDisplay(data.objectId, data.duplicateCount);
-					break;
-				case 'objectAdded':
-					const obj = data.object;
-					console.log("New object:", obj);
-
-					allObjects[obj.id] = {
-						id: obj.id,
-						name: obj.name,
-						image_url: obj.image_url,
-						positionX: obj.positionX || 0,
-						positionY: obj.positionY || 0,
-						statusEffects: obj.statusEffects || [],
-						size: obj.size || 1,
-						duplicate_count: obj.duplicate_count || 1
-					};
-					
-					//sidebar
-					document.getElementById('object-list').innerHTML += 
-    '<li class="list-group-item" data-id="' + obj.id + '" data-url="' + obj.image_url + '">' + 
-        obj.name + 
-        ' <span class="bin-object" data-id="' + obj.id + '" style="float:right; cursor:pointer;">🗑️</span>' +
-    '</li>';
-					
-					//on the map
-					//currentlyworking change to individual object's size
-					document.getElementById('map-container').innerHTML += ('<div class="draggable-container" style="position: absolute; width:'+gridSize*obj.size+'px; height:'+gridSize*obj.size+'px; left:'+(gridSize *obj.positionX)+'px; top:'+(gridSize *obj.positionY)	+'px;" data-id="'+obj.id+'" id="'+obj.id+'"> <img src="'+obj.image_url+'" class="draggable" data-id="'+obj.id+'" style="width: 100%; height: 100%; transform: rotate(' + (obj.rotation || 0) + 'deg);"> <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: none;gap: 5%;background: brown; justify-content: space-between;"></div>	</div>');
-					
-					addClickHandlersOnObjectList();
-					initializeDraggables(gridSize, `.draggable-container[data-id="${obj.id}"]`);
-					break;
-				
-				case "ObjectRemoved":
-					//removes both 
-					console.log("Received confirmation of deletion");
-					console.log(data);
-					$(`.list-group-item[data-id=${data.id}]`).replaceWith(); 
-					$(`.draggable-container[data-id=${data.id}]`).replaceWith(); 
-					
-					delete allObjects[data.id];
-					
-					//TODO should be put in a separate method later
-					// Deselect
-					$('#object-list li').removeClass('selected');
-					$('.draggable-container').removeClass('selected').css('z-index', 1);
-					//REMEMBER the selector for interact must match when setting it to false or true
-					interact(`.draggable-container[data-id="${data.id}"]`).draggable(false);
-					interact('.draggable-container').draggable(true);
-					$('#status-effects-container').css('display', 'none');
-					$('#delete-button-container').css('display', 'none');
-					$('#size-button-container').css('display', 'none');
-					$('#rotation-button-container').css('display', 'none');
-					//remove all highlighted
-					$('#status-effects-container div').removeClass('selected-effects-box');
-					break;
-				
-				case "effectsUpdated":
-					console.log(data);
-					//'objectId' => $objectId,
-					//'statusEffects' => $statusEffects
-					
-					
-					allObjects[data.objectId].statusEffects = data.statusEffects;
-					updateEffectsLegend(data.objectId);
-					
-					break;
-				case "MapAdded":
-					console.log(data);
-					
-					const map1 = data.map1;
-					
-					allMaps[map1.id] = {
-						image: map1.image,
-						name: map1.name,
-						grid_size: map1.grid_size
-					};
-					
-					gridSize = map1.grid_size;
-					mapId = map1.id;
-					mapImage = map1.image;
-					
-					redrawMap();
-					updateGridSize(gridSize);
-					
-					// show the correct map
-					//Recalc dimentions of the map
-					
-					break;
-				
-				case 'mapDeleted':
-					const deletedMapId = data.id;
-					console.log('Map deleted:', deletedMapId);
-
-					// Remove from allMaps object
-					delete allMaps[deletedMapId];
-
-					// Remove the corresponding <li> from the maps list
-					$(`#maps-list li[data-id="${deletedMapId}"]`).remove();
-
-					// If the deleted map was the currently active map, switch to another one (if any)
-					if (deletedMapId == mapId) {
-							const remainingMapIds = Object.keys(allMaps);
-							if (remainingMapIds.length > 0) {
-									// Automatically select the first remaining map
-									const newMapId = remainingMapIds[0];
-									// Trigger map switch (same as clicking on it)
-									getActiveSocket().send(JSON.stringify({
-											action: 'switchMap',
-											selectedId: newMapId
-									}));
-							} else {
-									// No maps left – clear the map view
-									$('#map-image').attr('src', '');
-									$('.grid-overlay').css('background-size', '0 0');
-									$('#grid-size-input').val('');
-									mapId = null;
-									mapImage = '';
-									gridSize = 0;
-							}
-					}
-					break;
-					
-				case "mapSwitched":
-					temp = data;
-					mapId = data.selected_map_id;;
-					gridSize = allMaps[mapId].grid_size;
-					mapImage = allMaps[mapId].image;
-					
-					redrawMap();
-					updateGridSize(gridSize);
-				
-					break;
-				case 'binList':
-					console.log('binList', data);
-					const tbody = $('#bin-list-body');
-					tbody.empty();
-					data.objects.forEach(item => {
-							const state = item.object_state; // already parsed
-							tbody.append(`
-									<tr data-bin-id="${item.id}">
-											<td><input type="checkbox" class="bin-select" value="${item.id}"></td>
-											<td>${state.name}</td>
-											<td>(${state.positionX}, ${state.positionY})</td>
-											<td>${state.size}</td>
-											<td>${state.duplicate_count}</td>
-									</tr>
-							`);
-					});
-					$('#binModal').modal('show');
-					break;
-				default:
-					//do nothing
-			}
-		};
-		
-		getActiveSocket().onopen = () => getActiveSocket().send(JSON.stringify({
-					action: 'firstFetch',
-				}));
-		
-		
-		function redrawMap(){
-			$("#grid-size-input").val(vGridCellNumber);
-			$("#map-image").attr("src",mapImage);
-			//$(".grid-overlay").css("background-size", gridSize+"px " +gridSize + "px"); //Moving this to adjustMapSize
-			
-			document.getElementById('maps-list').innerHTML = "";
-			
-			for (const key in allMaps) {
-					const selectedClass = (mapId == key) ? 'selected' : '';
-					document.getElementById('maps-list').innerHTML += 
-							'<li class="list-group-item ' + selectedClass + '" data-id="' + key + '" data-url="' + allMaps[key].image + '">' +
-									allMaps[key].name + 
-									' <span class="delete-map" data-id="' + key + '" style="float:right; cursor:pointer;">🗑️</span>' +
-							'</li>';
-				}
-			
-			const mapImageElement = document.getElementById('map-image');
-			$("#map-image")
-				.off("load.redraw") //makes sure that handler runs once
-				.on("load.redraw", function() {
-					adjustMapSize(vGridCellNumber);
-					// window.addEventListener('resize', takeMaxSpaceWithoutCropping);
-					const mapContainer = document.getElementById('map-container');
-					mapRect = mapContainer.getBoundingClientRect();
-					mapOffset = {
-						left: mapRect.left,
-						top: mapRect.top
-					};
-			});
-			
-			addClickHandlersOnMapsList();
-		}
-		
-		
-		
-		function redrawAllObjects(){
-							
-			// Creating a list of divs for objects
-			for (const key in allObjects) {
-				
-				document.getElementById('object-list').innerHTML += '<li class="list-group-item" data-id="'+allObjects[key].id +'" data-url="'+allObjects[key].image_url+'">'+allObjects[key].name+' <span class="bin-object" data-id="'+allObjects[key].id+'" style="float:right; cursor:pointer;">🗑️</span></li>';
-				document.getElementById('map-container').innerHTML += 
-						'<div class="draggable-container" style="position: absolute; width:'+gridSize*allObjects[key].size+'px; height: '+gridSize*allObjects[key].size+'px; left: '+(gridSize *allObjects[key].positionX)+'px; top: '+(gridSize *allObjects[key].positionY)+'px;" data-id="'+allObjects[key].id+'" id="'+allObjects[key].id+'">' +
-						'  <img src="'+allObjects[key].image_url+'" class="draggable" data-id="'+allObjects[key].id+'" style="width: 100%; height: 100%; transform: rotate(' + (allObjects[key].rotation || 0) + 'deg);">' +
-						'  <div class="status-effects-indicator" style="position: absolute;bottom: 100%;display: flex;gap: 5%;background: brown; justify-content: space-between;"></div>' +
-						'  <div class="duplicate-counter" style="position: absolute; top: 100%; left: 0; right: 0; text-align: center; background: rgba(0,0,0,0.7); color: white; font-size: 12px; font-weight: bold; border-radius: 0 0 5px 5px; display: none;">' +
-						'    x<span class="count">' + (allObjects[key].duplicate_count || 1) + '</span>' +
-						'  </div>' +
-						'</div>';
-			}
-			
-			$("#map-image")
-				.off("load.objects") //makes sure that handler runs once
-				.on("load.objects", function() {
-					
-				const mapContainer = document.getElementById('map-container');
-				const rect = mapContainer.getBoundingClientRect();
-				mapOffset = { left: rect.left, top: rect.top };	
-
-				initializeDraggables(gridSize);
-				updateEffectsLegend(0, updateAll=true);
-			});
-			
-			// handler for grid size change
-			$('#grid-size-input').on('input', function() {
-				const newCellCount = parseInt($(this).val(), 10);
-				if (!isNaN(newCellCount) && newCellCount > 0 && newCellCount !== vGridCellNumber) {
-					vGridCellNumber = newCellCount;
-					// Recalculate container and grid size
-					adjustMapSize();
-
-					snapAllObjectsToGrid(true);
-
-					// Send update to server
-					getActiveSocket().send(JSON.stringify({
-						action: 'updateGridSize',
-						mapId: mapId,
-						gridSize: vGridCellNumber
-					}));
-				}
-			});
-			
-			addClickHandlersOnObjectList();
-		}
-		
-		
-		function addClickHandlersOnObjectList(){
-			// Add click handler to lock all but one object from moving 
-			// When selecting an object, disable others after all are initialized.
-			$('#object-list li').off('click');
-			$('#object-list li').on('click', function() {
-				const objectId = $(this).data('id');
-				const clickedObjAlreadySelected = $(this).hasClass('selected');
-
-				if (clickedObjAlreadySelected) {
-					// Deselect
-					$('#object-list li').removeClass('selected');
-					$('.draggable-container').removeClass('selected').css('z-index', 1);
-					//REMEMBER the selector for interact must match when setting it to false or true
-					interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
-					interact('.draggable-container').draggable(true);
-					$('#status-effects-container').css('display', 'none');
-					$('#delete-button-container').css('display', 'none');
-					$('#size-button-container').css('display', 'none');
-					$('#rotation-button-container').css('display', 'none');
-					$('#counter-container').css('display', 'none');
-					//remove all highlighted
-					$('#status-effects-container div').removeClass('selected-effects-box');
-				
-				} else {				
-					
-					
-					//if anything is already selected by
-					//checking if any $('#object-list li'). has a class selected
-					//switch the selection to another object
-					if ($('#object-list li').hasClass('selected')){
-						interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(false);
-						$('#object-list li').removeClass('selected');
-						$('.draggable-container').removeClass('selected').css('z-index', 1);
-						
-					}else{
-						interact('.draggable-container').draggable(false);
-					}
-					selectedObjectId = objectId;
-					interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
-					$(`.draggable-container[data-id="${objectId}"]`).addClass('selected').css('z-index', 9999);
-					$(this).addClass('selected');
-					$('#status-effects-container').css('display', 'block');
-					$('#delete-button-container').css('display', 'block');
-					$('#size-button-container').css('display', 'block');
-					$('#rotation-button-container').css('display', 'block');
-					$('#counter-container').css('display', 'block');
-					$('#counter-display').text(allObjects[selectedObjectId].duplicate_count || 1);
-					
-					initializeDraggables(gridSize, `.draggable-container[data-id="${objectId}"]`);
-					
-					
-					$('#status-effects-container div').removeClass('selected-effects-box');
-					for (const effect of allObjects[selectedObjectId].statusEffects) {
-						const nameOfEffect = '#effect-'+effect;
-						$(nameOfEffect).addClass('selected-effects-box');
-					}
-					
-				}
-			});
-		}
-		
-		function addClickHandlersOnMapsList(){
-			$('#maps-list li').off('click');
-			$('#maps-list li').on('click', function() {
-				const selectedMapId = $(this).data('id');
-				const clickedMapNotYetSelected = !($(this).hasClass('selected'));	
-				
-				
-				if(clickedMapNotYetSelected){		
-					
-					//!@#$
-					//Change to do so on the receiving websocket
-					$('#maps-list li').removeClass('selected');
-					console.log($(this).addClass('selected'));
-					
-					console.log(`Sending update - Map changed to ${allMaps[selectedMapId].name}`);
-					
-					// Send addObject request to WebSocket
-					getActiveSocket().send(JSON.stringify({
-						action: "switchMap",
-						selectedId: selectedMapId
-					}));
-				
-				}
-			});
-		}
-		
-		// generate a grid with status effect in status-effects-list div
-		// <div class="square-effects-menu" style="background-image: url('https://cdn0.iconfinder.com/data/icons/poison-symbol/66/22-512.png')"> </div>
-		// status-effects-list
-		
-		function appendHtmlFromArray(container, arr) {
-			var currentIndex = 0;
-			for (const key in arr){
-				container.innerHTML += '<div class="square-effects-menu" id="effect-'+key +'" style="background-image: url('+arr[key]+')" title="'+key+'"></div>';
-			}
-			while (currentIndex<arr.length) {
-				container.innerHTML += '<div class="square-effects-menu" id="effect-'+arr[currentIndex].name +'" style="background-image: url('+arr[currentIndex].icon+')" title="'+arr[currentIndex].name+'"></div>';
-				currentIndex += 1;
-			
-			}
-		}
-		appendHtmlFromArray(document.getElementById('status-effects-container'), statusEffectsLinks)
-		
-		// add an event listener for each of the effects to be implemented on the selected:
-		$('#status-effects-container div').on('click', function() {
-			const clickedEffectId = (this).id.replace("effect-", "");
-			
-			console.log(selectedObjectId+ " " + clickedEffectId);
-			
-			if(allObjects[selectedObjectId].statusEffects.includes(clickedEffectId)){
-				allObjects[selectedObjectId].statusEffects = allObjects[selectedObjectId].statusEffects.filter(e => e !== clickedEffectId);
-				$(this).removeClass('selected-effects-box');
-			}else{
-				allObjects[selectedObjectId].statusEffects.push(clickedEffectId);
-				$(this).addClass('selected-effects-box');
-			}
-			
-			updateRemoteEffects(allObjects[selectedObjectId].statusEffects, selectedObjectId);
-			updateEffectsLegend(selectedObjectId);
-		});
-		
-		$('#remove-object-btn').on('click', function() {
-			const objectId = selectedObjectId;
-			if (!objectId) return;
-			
-			getActiveSocket().send(JSON.stringify({
-				action: "removeObject",
-				id: objectId
-			}));
-			console.log(`Deleted ${objectId}`);
-			
-			//TODO should be put in a separate method later
-			// Deselect
-			$('#object-list li').removeClass('selected');
-			$('.draggable-container').removeClass('selected').css('z-index', 1);
-			//REMEMBER the selector for interact must match when setting it to false or true
-			interact(`.draggable-container[data-id="${objectId}"]`).draggable(false);
-			interact('.draggable-container').draggable(true);
-			$('#status-effects-container').css('display', 'none');
-			$('#delete-button-container').css('display', 'none');
-			$('#size-button-container').css('display', 'none');
-			$('#rotation-button-container').css('display', 'none');
-			$('#counter-container').css('display', 'none');
-			//remove all highlighted
-			$('#status-effects-container div').removeClass('selected-effects-box');
-		});
-		
-		//////////////////////////////currentlyworking
-		$('#increase-size-btn').on('click', function(){
-			const objectId = selectedObjectId;
-			if (!objectId) return;
-			const tempSize = +allObjects[objectId].size+1;
-			allObjects[objectId].size = `${tempSize}`;
-			
-			getActiveSocket().send(JSON.stringify({
-				action: "updateSize",
-				objectId: objectId,
-				newSize: tempSize
-			}));
-			console.log(`Increased ${objectId} to ${tempSize}`);
-			
-			$(`.draggable-container[data-id="${objectId}"]`).css({ width: `${gridSize*tempSize}px`, height: `${gridSize*tempSize}px` });
-			
-		});
-		
-		$('#decrease-size-btn').on('click', function(){
-			const objectId = selectedObjectId;
-			if (!objectId) return;
-			const tempSize = +allObjects[objectId].size-1;
-			if (tempSize<1) return;
-			allObjects[objectId].size = `${tempSize}`;
-			
-			getActiveSocket().send(JSON.stringify({
-				action: "updateSize",
-				objectId: objectId,
-				newSize: tempSize
-			}));
-			console.log(`Decreased ${objectId} to ${tempSize}`);
-			
-			$(`.draggable-container[data-id="${objectId}"]`).css({ width: `${gridSize*tempSize}px`, height: `${gridSize*tempSize}px` });
-		});
-
-		$('#rotate-left-btn').on('click', function(){
-    const objectId = selectedObjectId;
-    if (!objectId) return;
-    const newRotation = (+allObjects[objectId].rotation - 90) % 360;
-    allObjects[objectId].rotation = newRotation;
-    
-    getActiveSocket().send(JSON.stringify({
-        action: "updateRotation",
-        objectId: objectId,
-        newRotation: newRotation
-    }));
-    
-    $(`#${objectId} img`).css('transform', `rotate(${newRotation}deg)`);
-		});
-
-		$('#rotate-right-btn').on('click', function(){
-				const objectId = selectedObjectId;
-				if (!objectId) return;
-				const newRotation = (+allObjects[objectId].rotation + 90) % 360;
-				allObjects[objectId].rotation = newRotation;
-				
-				getActiveSocket().send(JSON.stringify({
-					action: "updateRotation",
-					objectId: objectId,
-					newRotation: newRotation
-    		}));
-				
-				$(`#${objectId} img`).css('transform', `rotate(${newRotation}deg)`);
-		});
-		
-		
-$('#increase-counter-btn').on('click', function() {
-    const objectId = selectedObjectId;
-    if (!objectId) return;
-    const currentCount = allObjects[objectId].duplicate_count || 1;
-    const newCount = +currentCount + 1;
-    allObjects[objectId].duplicate_count = newCount;
-    
-    // Send to server
-    getActiveSocket().send(JSON.stringify({
-        action: "updateDuplicateCount",
-        objectId: objectId,
-        duplicateCount: newCount
-    }));
-    
-    // Update UI immediately
-    updateCounterDisplay(objectId, newCount);
-});
-
-$('#decrease-counter-btn').on('click', function() {
-    const objectId = selectedObjectId;
-    if (!objectId) return;
-    const currentCount = allObjects[objectId].duplicate_count || 1;
-    if (currentCount <= 1) return; // Minimum 1
-    const newCount = currentCount - 1;
-    allObjects[objectId].duplicate_count = newCount;
-    
-    // Send to server
-    getActiveSocket().send(JSON.stringify({
-        action: "updateDuplicateCount",
-        objectId: objectId,
-        duplicateCount: newCount
-    }));
-    
-    // Update UI immediately
-    updateCounterDisplay(objectId, newCount);
-});
-        function dragMoveListener(event) {
-            var target = event.target;
-			var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx/ scale;
-			var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy/ scale;
-
-            target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
-			
-			// Update the position text relative to map-container
-			// var positionText = target.querySelector('.position-text');
-			// var originalLeft = parseFloat(target.style.left) || 0;
-			// var originalTop = parseFloat(target.style.top) || 0;
-			// var currentX = originalLeft + x;
-			// var currentY = originalTop + y;
-			// positionText.textContent = Math.round(currentX) + ', ' + Math.round(currentY);
-        }
-		
-		//Ensures map container dimensions are multiples of grid size
-		//Handles image fitting using contain/cover strategies
-		function adjustMapSize() {
-			const mapContainer = document.getElementById('map-container');
-			const mapImage = document.getElementById('map-image');
-			const parentContainer = document.getElementById('map-parent-container');
-
-			// Ensure the image has loaded
-			if (!mapImage.complete || mapImage.naturalWidth === 0) {
-				mapImage.addEventListener('load', adjustMapSize, { once: true });
-				return;
-			}
-
-			const parentWidth = parentContainer.clientWidth;
-			const parentHeight = parentContainer.clientHeight;
-			const imgWidth = mapImage.naturalWidth;
-			const imgHeight = mapImage.naturalHeight;
-			const imgAspect = imgWidth / imgHeight;
-
-			// Determine the maximum container size that fits in the parent while preserving aspect ratio
-			let containerWidth, containerHeight;
-			if (imgAspect > parentWidth / parentHeight) {
-				containerWidth = parentWidth;
-				containerHeight = containerWidth / imgAspect;
-			} else {
-				containerHeight = parentHeight;
-				containerWidth = containerHeight * imgAspect;
-			}
-
-			// Now adjust so that height is exactly cellCountY * gridPixelSize
-			const cellCountY = vGridCellNumber;
-			let gridPixelSize = Math.floor(containerHeight / cellCountY);
-			if (gridPixelSize < 1) gridPixelSize = 1;
-
-			containerHeight = gridPixelSize * cellCountY;
-			containerWidth = containerHeight * imgAspect;
-			containerWidth = Math.floor(containerWidth / gridPixelSize) * gridPixelSize;
-
-			// Apply dimensions to container
-			mapContainer.style.width = containerWidth + 'px';
-			mapContainer.style.height = containerHeight + 'px';
-
-			// Update the image to fill the container
-			mapImage.style.width = '100%';
-			mapImage.style.height = '100%';
-			mapImage.style.objectFit = 'cover';
-
-			// Store the final pixel grid size
-			gridSize = gridPixelSize;
-
-			// Update the overlay
-			document.querySelector('.grid-overlay').style.backgroundSize = gridSize + 'px ' + gridSize + 'px';
-
-			// Recompute offset for snapping
-			const mapRect = mapContainer.getBoundingClientRect();
-			mapOffset = { left: mapRect.left, top: mapRect.top };
-
-			// Update object sizes (they are multiples of gridSize)
-			document.querySelectorAll('.draggable-container').forEach(container => {
-				const objId = container.dataset.id;
-				const obj = allObjects[objId];
-				if (obj) {
-					container.style.width = gridSize * obj.size + 'px';
-					container.style.height = gridSize * obj.size + 'px';
-				}
-			});
-
-			// Re-initialize draggables with the new grid size
-			initializeDraggables(gridSize);
-
-			// Snap all objects to grid (which now also clamps to container bounds)
-			snapAllObjectsToGrid(true);
-		}
-		
-		// Take the images natural W and H,
-		//set image to take the maximum space within the container, without cropping it or stretching it, the whole image is within the container, plus white margins only on L+R or only T+B
-		function takeMaxSpaceWithoutCropping(mi) {
-
-			const imageWidth = mi.naturalWidth;
-			const imageHeight = mi.naturalHeight;
-
-			if (imageHeight > imageWidth) {
-				// Container is wider than the image
-				mi.style.height = '100%';
-				mi.style.width = 'auto';
-			} else {
-				// Container is taller than the image
-				mi.style.width = '100%';
-				mi.style.height = 'auto';
-			}
-		}	
-		
-		function makeElementAMultipleOfGridSize(container, gridSize){
-			// Adjust the container to be the multiple of grid-size, by shrinking it
-			var mapRect = container.getBoundingClientRect();
-			container.style.width = roundDownToMultiple(mapRect.width, gridSize)+'px';
-			container.style.height = roundDownToMultiple(mapRect.height, gridSize)+'px';
-		}
-		
-		// Modified updateGridSize function
-		// Reinitialize all draggables unconditionally, then adjust for selection.
-		// Modified updateGridSize function
-		function updateGridSize(newSize, sendUpdates = true) {
-			gridSize = newSize;
-			allMaps[mapId].grid_size = newSize;
-			$('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
-			
-			// Update container sizes
-			document.querySelectorAll('.draggable-container').forEach(container => {
-				const tempID = parseFloat(container.id);
-				container.style.width = gridSize * allObjects[tempID].size + "px";
-				container.style.height = gridSize * allObjects[tempID].size + "px";
-			});
-			
-			adjustMapSize(gridSize);
-			const mc = document.getElementById('map-container');
-			const mapRect = mc.getBoundingClientRect();
-			mapOffset = { left: mapRect.left, top: mapRect.top };
-
-			snapAllObjectsToGrid(sendUpdates);
-
-			interact('.draggable-container').off('dragmove dragend');
-			
-			const mapImageEl = document.getElementById('map-image');			
-			if (mapImageEl.complete && mapImageEl.naturalWidth !== 0) {
-				initializeDraggables(gridSize);
-			} else {
-				$("#map-image")
-					.off("load.updateGrid")
-					.one("load.updateGrid", function () {
-						initializeDraggables(gridSize);
-					});
-			}
-			
-			if (selectedObjectId !== null) {
-				interact('.draggable-container').draggable(false);
-				interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(true);
-			}
-		}
-		
-		// Add this new function to snap all objects to the current grid
-		function snapAllObjectsToGrid(sendUpdates = true) {
-			const mapContainer = document.getElementById('map-container');
-			const containerWidth = mapContainer.clientWidth;
-			const containerHeight = mapContainer.clientHeight;
-
-			document.querySelectorAll('.draggable-container').forEach(container => {
-				const objectId = container.dataset.id;
-				if (!objectId || !allObjects[objectId]) return;
-
-				const objSize = allObjects[objectId].size;
-				const objectWidth = gridSize * objSize;
-				const objectHeight = gridSize * objSize;
-				const sizeInCells = allObjects[objectId].size;   
-				let cellX = allObjects[objectId].positionX;
-				let cellY = allObjects[objectId].positionY;
-
-				// Maximum allowed cell index (0‑based)
-				const maxCellX = Math.floor(containerWidth / gridSize) - sizeInCells;
-				const maxCellY = Math.floor(containerHeight / gridSize) - sizeInCells;
-
-				// Clamp cell coordinates
-				let newCellX = Math.min(Math.max(cellX, 0), maxCellX);
-				let newCellY = Math.min(Math.max(cellY, 0), maxCellY);
-				
-				// If clamping changed the cell, update allObjects and (optionally) the server
-				if (newCellX !== cellX || newCellY !== cellY) {
-					allObjects[objectId].positionX = newCellX;
-					allObjects[objectId].positionY = newCellY;
-					if (sendUpdates) {
-						getActiveSocket().send(JSON.stringify({
-							action: 'updatePosition',
-							objectId: objectId,
-							positionX: newCellX,
-							positionY: newCellY
-						}));
-					}
-				}
-
-				// Set pixel position
-				container.style.left = (newCellX * gridSize) + 'px';
-				container.style.top  = (newCellY * gridSize) + 'px';
-				container.style.transform = 'none';
-				container.setAttribute('data-x', 0);
-				container.setAttribute('data-y', 0);
-		
-		
-			});
-		}
-	
-		// Modified initializeDraggables function
-		//The function always targets all .draggable-container elements unless specifically handling a selection (managed separately in click handler).
-		function initializeDraggables(gridSize, filterSelector = '.draggable-container') {
-			interact(filterSelector).draggable({
-				inertia: false,
-				modifiers: [
-					interact.modifiers.restrictRect({
-						restriction: 'parent',
-						endOnly: true
-					}),
-					interact.modifiers.snap({
-						targets: [
-							(x, y) => {
-								// Get current container screen position and spacing
-								const rect = document.getElementById('map-container').getBoundingClientRect();
-								const spacing = gridSize * scale;
-								// Snap to nearest grid line in screen coordinates
-								const snapX = Math.round((x - rect.left) / spacing) * spacing + rect.left;
-								const snapY = Math.round((y - rect.top) / spacing) * spacing + rect.top;
-								return { x: snapX, y: snapY };
-							}
-						],
-						range: Infinity,
-						relativePoints: [{ x: 0, y: 0 }]
-					})
-				],
-				autoScroll: true,
-				listeners: {
-					move: dragMoveListener,
-					end: function(event) {
-						const target = event.target;
-						const img = target.querySelector('img');
-						const objectId = img.dataset.id;
-
-						const originalLeft = parseFloat(target.style.left) || 0;
-						const originalTop = parseFloat(target.style.top) || 0;
-						const translateX = parseFloat(target.getAttribute('data-x')) || 0;
-						const translateY = parseFloat(target.getAttribute('data-y')) || 0;
-
-						const newLeft = originalLeft + translateX;
-						const newTop = originalTop + translateY;
-
-						// Snap to grid in container coordinates
-						const snappedLeft = Math.round(newLeft / gridSize) * gridSize;
-						const snappedTop = Math.round(newTop / gridSize) * gridSize;
-
-						// Convert to cell coordinates
-						const tempPositionX = Math.round(snappedLeft / gridSize);
-						const tempPositionY = Math.round(snappedTop  / gridSize);
-						
-						// Send update to server
-						getActiveSocket().send(JSON.stringify({
-							action: 'updatePosition',
-							objectId: objectId,
-							positionX: tempPositionX,
-							positionY: tempPositionY
-						}));
-
-						// Update local position and reset transform
-						target.style.left = snappedLeft + 'px';
-						target.style.top = snappedTop + 'px';
-						target.style.transform = 'none';
-						target.setAttribute('data-x', 0);
-						target.setAttribute('data-y', 0);
-						
-						// Update allObjects
-						if (allObjects[objectId]) {
-							allObjects[objectId].positionX = tempPositionX;
-							allObjects[objectId].positionY = tempPositionY;
-						}
-					}
-				}
-			});
-		}
-		
-		function roundDownToMultiple(num, mutlipleOf){
-			return (Math.floor(num/mutlipleOf)*mutlipleOf);
-		}
-		
-		function updateDraggableObjects(gridSize, sendUpdates) {
-			document.querySelectorAll('.draggable-container').forEach(container => {
-				const left = parseFloat(container.style.left) || 0;
-				const top = parseFloat(container.style.top) || 0;
-				
-				const snappedLeft = roundDownToMultiple(left, gridSize);
-				const snappedTop = roundDownToMultiple(top, gridSize);
-				
-				container.style.left = snappedLeft + 'px';
-				container.style.top = snappedTop + 'px';
-				
-				//const text = container.querySelector('.position-text');
-				//text.textContent = `${snappedLeft}, ${snappedTop}`;
-				
-				container.style.transform = 'none';
-				container.setAttribute('data-x', 0);
-				container.setAttribute('data-y', 0);
-				
-				if (sendUpdates) {
-					const objectId = container.getAttribute('data-id');
-					getActiveSocket().send(JSON.stringify({
-						action: 'updatePosition',
-						objectId: objectId,
-						positionX: snappedLeft,
-						positionY: snappedTop
-					}));
-				}
-			});
-		}
-		
-		function updateRemoteEffects(statusEffects, objectId){	
-				
-			getActiveSocket().send(JSON.stringify({
-				action: 'updateEffects',
-				objectId: objectId,
-				statusEffects: statusEffects
-			}));
-		}
-		
-		//todododod call this function from all needed places
-		function updateEffectsLegend(selectedID, updateAll=false){
-			let arrOfBoxes;
-			if (updateAll){
-				for (const id in allObjects){updateEffectsLegend(id);}
-			} else {
-				switch (allObjects[selectedID].statusEffects.length){
-					case 0:
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "none";
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = "";
-						break;
-						
-					case 1:
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = $(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '35%';
-						//todododod
-						//statusEffectsLinks[allObjects[selectedID].statusEffects[0]] gives a link to image
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div>';
-						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
-						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
-						break;
-						
-					case 2:
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '65%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '17%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div>';
-						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
-						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
-						break;
-						
-					case 3:
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '100%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '0%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = '<div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div><div style="width: 100%;height: 100%;background-size: contain;background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>';
-						arrOfBoxes = $(".draggable-container#"+selectedID+" div.status-effects-indicator div");
-						arrOfBoxes.height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
-						break;
-						
-					default:
-						// For 4 or more effects, show 3 icons and ellipsis on the same line
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.display = "flex";
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.width = '100%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.height = '30%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].style.left = '0%';
-						$(".draggable-container#"+selectedID+" div.status-effects-indicator")[0].innerHTML = 
-							'<div style="flex: 1; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[0]]+');"></div>' +
-							'<div style="flex: 1; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[1]]+');"></div>' +
-							'<div style="flex: 1; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; background-image: url('+statusEffectsLinks[allObjects[selectedID].statusEffects[2]]+');"></div>' +
-							'<div style="flex: 1; height: 100%; display: flex; justify-content: center; align-items: center; font-size: ' + Math.trunc(gridSize*0.2) + 'px;">...</div>';
-						break;
-				}
-			}	
-		}
-		function updateCounterDisplay(objectId, count) {
-			const counterElement = $(`#${objectId} .duplicate-counter .count`);
-			const container = $(`#${objectId} .duplicate-counter`);
-			
-			counterElement.text(count);
-			
-			// Show counter only if count > 1
-			if (count > 1) {
-					container.css('display', 'block');
-			} else {
-					container.css('display', 'none');
-			}
-			
-			// Update sidebar display if this object is selected
-			if (objectId === selectedObjectId) {
-					$('#counter-display').text(count);
-			}
+// ========================= HELPER FUNCTIONS =========================
+function getActiveSocket() {
+    if (!activeSocket || activeSocket.readyState === 3) {
+        activeSocket = new WebSocket('ws://localhost:8080');
+    }
+    return activeSocket;
 }
-		// Function to toggle menu visibility
-		function toggleMapObjectMenu(selectedMenu) {
-			const isObjectsMenu = selectedMenu === 'objects';
-			
-			// Toggle button classes
-			if (isObjectsMenu) {
-				$('#objects-menu-button').removeClass('unselected-blue-button').addClass('selected-blue-button');
-				$('#maps-menu-button').removeClass('selected-blue-button').addClass('unselected-blue-button');
-			} else {
-				$('#maps-menu-button').removeClass('unselected-blue-button').addClass('selected-blue-button');
-				$('#objects-menu-button').removeClass('selected-blue-button').addClass('unselected-blue-button');
-			}
-			
-			// Toggle menu visibility
-			if (isObjectsMenu) {
-				$('#objects-menu-body').css('display', 'block');
-				$('#maps-menu-body').css('display', 'none');
-			} else {
-				$('#maps-menu-body').css('display', 'block');
-				$('#objects-menu-body').css('display', 'none');
-			}
-		}
-		
-		
-		$('#objects-menu-button').on('click', function() {
-			toggleMapObjectMenu('objects');
-		});
 
-		$('#maps-menu-button').on('click', function() {
-			toggleMapObjectMenu('maps');
-		});
-
-		toggleMapObjectMenu('objects');
-	
-		
-		document.getElementById("addObjectForm").addEventListener("submit", function (e) {
-			e.preventDefault();
-
-			const name = document.getElementById("form_object_name").value;
-			const imageUrl = document.getElementById("form_object_image_url").value;
-
-			console.log("Sent");
-			console.log(name);
-			console.log(imageUrl);
-			
-			// Send addObject request to WebSocket
-			getActiveSocket().send(JSON.stringify({
-				action: "addObject",
-				name: name,
-				image_url: imageUrl
-			}));
-
-			// clear inputs
-			this.reset();
-		});
-		
-		document.getElementById("addMapForm").addEventListener("submit", function (e) {
-			e.preventDefault();
-
-			const name = document.getElementById("form_map_name").value;
-			const imageUrl = document.getElementById("form_map_image_url").value;
-
-			console.log(`Sent ${name}`);
-			console.log(imageUrl);
-			
-			// Send addObject request to WebSocket
-			getActiveSocket().send(JSON.stringify({
-				action: "addMap",
-				name: name,
-				image_url: imageUrl,
-				grid_size: gridSize
-			}));
-
-			// clear inputs
-			this.reset();
-		});
-		
-		
-		
-		
-
-		const zoomElement = document.getElementById("map-container");
-		const zoomContainer = document.getElementById("map-parent-container");
-
-		// Add event listener to the container
-		zoomContainer.addEventListener("wheel", function(event) {
-			// Prevent default scroll behavior
-			event.preventDefault();
-			
-			// Get container bounds
-            const containerRect = zoomContainer.getBoundingClientRect();
-            
-            // Mouse position relative to container
-            const mouseX = event.clientX - containerRect.left;
-            const mouseY = event.clientY - containerRect.top;
-			
-			const direction = event.deltaY > 0 ? -1 : 1;
-			
-			console.log(mouseX+" "+mouseY);
-			
-			// Calculate zoom direction and factor
-            const zoomFactor = 1 + direction * zoomStep;
-            const newScale = scale * zoomFactor;
-            
-            // Clamp to min/max
-            if (newScale < minZoom || newScale > maxZoom) {
-                console.log(`Zoom clamped: ${newScale.toFixed(2)}`);
-                return;
-            }
-			
-            // Calculate mouse position in the unscaled coordinate space
-            const mouseXUnscaled = (mouseX - offsetX) / scale;
-            const mouseYUnscaled = (mouseY - offsetY) / scale;
-            
-            // Calculate new offset to keep mouse position fixed
-            offsetX = mouseX - mouseXUnscaled * newScale;
-            offsetY = mouseY - mouseYUnscaled * newScale;
-            
-            // Update scale
-            scale = newScale;
-			 
-            // Apply transformation
-            zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-            zoomElement.style.transformOrigin = '0 0';
-			
-			
-		});
-		
-		let isPanning = false;
-        let initialOffsetX, initialOffsetY;
-		// Pan functionality
-        zoomContainer.addEventListener('mousedown', (event) => {
-            if (event.target.closest('.draggable-container') || event.target.closest('.draggable')) {
-				console.log('Clicked on object, not starting pan');
-				return; // Don't start panning if clicking on an object
-			}
-            
-            isPanning = true;
-            startX = event.clientX;
-            startY = event.clientY;
-            initialOffsetX = offsetX;
-            initialOffsetY = offsetY;
-            
-            zoomContainer.style.cursor = 'grabbing';
-            console.log('Pan started');
-        });
-		
-        
-        zoomContainer.addEventListener('mousemove', (event) => {
-            if (!isPanning) return;
-            
-            const dx = event.clientX - startX;
-            const dy = event.clientY - startY;
-            
-            offsetX = initialOffsetX + dx;
-            offsetY = initialOffsetY + dy;
-            
-            zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-            
-			
-            console.log(`Panning: ${dx.toFixed(0)}, ${dy.toFixed(0)}`);
-        });
-        
-        zoomContainer.addEventListener('mouseup', () => {
-            if (isPanning) {
-                isPanning = false;
-                zoomContainer.style.cursor = 'grab';
-				console.log('Pan ended');
-            }
-        });
-        
-		
-// Bin icon click handler
-$('#object-list').on('click', '.bin-object', function(e) {
-    e.stopPropagation(); // prevent selecting the object
-    const objectId = $(this).data('id');
-    if (confirm('Move this object to the bin? It will be removed from the map.')) {
-        getActiveSocket().send(JSON.stringify({
-            action: 'binObject',
-            id: objectId
-        }));
+// ---- Selection management ----
+function clearObjectSelection() {
+    $('#object-list li').removeClass('selected');
+    $('.draggable-container').removeClass('selected').css('z-index', 1);
+    if (selectedObjectId) {
+        interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(false);
     }
-});
+    interact('.draggable-container').draggable(true);
+    $('#status-effects-container, #delete-button-container, #size-button-container, #rotation-button-container, #counter-container')
+        .css('display', 'none');
+    $('#status-effects-container div').removeClass('selected-effects-box');
+    selectedObjectId = null;
+}
 
-$('#show-bin-btn').on('click', function() {
-    getActiveSocket().send(JSON.stringify({
-        action: 'fetchBinList'
-    }));
-});
+function selectObject(objectId) {
+    if (selectedObjectId === objectId) return;
+    clearObjectSelection();
+    selectedObjectId = objectId;
+    interact(`.draggable-container[data-id="${objectId}"]`).draggable(true);
+    $(`.draggable-container[data-id="${objectId}"]`).addClass('selected').css('z-index', 9999);
+    $(`#object-list li[data-id="${objectId}"]`).addClass('selected');
+    $('#status-effects-container, #delete-button-container, #size-button-container, #rotation-button-container, #counter-container')
+        .css('display', 'block');
+    $('#counter-display').text(allObjects[objectId].duplicate_count || 1);
+    // highlight active effects
+    allObjects[objectId].statusEffects.forEach(effect => {
+        $(`#effect-${effect}`).addClass('selected-effects-box');
+    });
+}
 
+// ---- Rendering templates ----
+function renderObjectListItem(obj) {
+    return `<li class="list-group-item" data-id="${obj.id}" data-url="${obj.image_url}">
+                ${obj.name}
+                <span class="bin-object" data-id="${obj.id}" style="float:right; cursor:pointer;">🗑️</span>
+            </li>`;
+}
 
-// Handle "Select All" checkbox in table header
-$('#select-all-bin-checkbox').on('change', function() {
-    $('.bin-select').prop('checked', $(this).is(':checked'));
-});
+function renderObjectContainer(obj, gridSize) {
+    return `<div class="draggable-container" style="position: absolute; width:${gridSize*obj.size}px; height:${gridSize*obj.size}px; left:${gridSize*obj.positionX}px; top:${gridSize*obj.positionY}px;" data-id="${obj.id}" id="${obj.id}">
+                <img src="${obj.image_url}" class="draggable" data-id="${obj.id}" style="width:100%; height:100%; transform: rotate(${obj.rotation || 0}deg);">
+                <div class="status-effects-indicator" style="position:absolute; bottom:100%; display:none; gap:5%; background:brown; justify-content:space-between;"></div>
+                <div class="duplicate-counter" style="position:absolute; top:100%; left:0; right:0; text-align:center; background:rgba(0,0,0,0.7); color:white; font-size:12px; font-weight:bold; border-radius:0 0 5px 5px; display:none;">
+                    x<span class="count">${obj.duplicate_count || 1}</span>
+                </div>
+            </div>`;
+}
 
-// Keep the header checkbox in sync with individual ones
-$('#bin-list-body').on('change', '.bin-select', function() {
-    const allChecked = $('.bin-select:checked').length === $('.bin-select').length;
-    $('#select-all-bin-checkbox').prop('checked', allChecked);
-});
+// ---- Grid & geometry ----
+function roundDownToMultiple(num, multiple) {
+    return Math.floor(num / multiple) * multiple;
+}
 
-// Select All button (same as checkbox)
-$('#select-all-bin').on('click', function() {
-    const check = !$('#select-all-bin-checkbox').is(':checked');
-    $('.bin-select').prop('checked', check);
-    $('#select-all-bin-checkbox').prop('checked', check);
-});
-
-$('#restore-selected-bin').on('click', function() {
-    const selectedIds = $('.bin-select:checked').map(function() {
-        return $(this).val();
-    }).get();
-    if (selectedIds.length === 0) {
-        alert('Select at least one object to restore.');
+function adjustMapSize() {
+    const mapContainer = document.getElementById('map-container');
+    const mapImg = document.getElementById('map-image');
+    const parent = document.getElementById('map-parent-container');
+    if (!mapImg.complete || mapImg.naturalWidth === 0) {
+        mapImg.addEventListener('load', adjustMapSize, { once: true });
         return;
     }
-    if (confirm(`Restore ${selectedIds.length} object(s)?`)) {
-        getActiveSocket().send(JSON.stringify({
-            action: 'restoreBinObjects',
-            ids: selectedIds
-        }));
-        // Optionally close modal or wait for confirmation
-        $('#binModal').modal('hide');
+    const parentW = parent.clientWidth, parentH = parent.clientHeight;
+    const imgW = mapImg.naturalWidth, imgH = mapImg.naturalHeight;
+    const imgAspect = imgW / imgH;
+    let containerW, containerH;
+    if (imgAspect > parentW / parentH) {
+        containerW = parentW;
+        containerH = containerW / imgAspect;
+    } else {
+        containerH = parentH;
+        containerW = containerH * imgAspect;
     }
-});
+    const cellCountY = vGridCellNumber;
+    let gridPx = Math.floor(containerH / cellCountY);
+    if (gridPx < 1) gridPx = 1;
+    containerH = gridPx * cellCountY;
+    containerW = containerH * imgAspect;
+    containerW = Math.floor(containerW / gridPx) * gridPx;
+    mapContainer.style.width = containerW + 'px';
+    mapContainer.style.height = containerH + 'px';
+    mapImg.style.width = '100%';
+    mapImg.style.height = '100%';
+    mapImg.style.objectFit = 'cover';
+    gridSize = gridPx;
+    document.querySelector('.grid-overlay').style.backgroundSize = gridSize + 'px ' + gridSize + 'px';
+    const rect = mapContainer.getBoundingClientRect();
+    mapOffset = { left: rect.left, top: rect.top };
+    document.querySelectorAll('.draggable-container').forEach(container => {
+        const obj = allObjects[container.dataset.id];
+        if (obj) {
+            container.style.width = gridSize * obj.size + 'px';
+            container.style.height = gridSize * obj.size + 'px';
+        }
+    });
+    initializeDraggables(gridSize);
+    snapAllObjectsToGrid(true);
+}
 
-$('#delete-selected-bin').on('click', function() {
-    const selectedIds = $('.bin-select:checked').map(function() {
-        return $(this).val();
-    }).get();
-    if (selectedIds.length === 0) {
-        alert('Select at least one object to delete.');
-        return;
+function snapAllObjectsToGrid(sendUpdates = true) {
+    const mapContainer = document.getElementById('map-container');
+    const containerW = mapContainer.clientWidth, containerH = mapContainer.clientHeight;
+    document.querySelectorAll('.draggable-container').forEach(container => {
+        const id = container.dataset.id;
+        if (!id || !allObjects[id]) return;
+        const obj = allObjects[id];
+        const sizeInCells = obj.size;
+        let cellX = obj.positionX, cellY = obj.positionY;
+        const maxCellX = Math.floor(containerW / gridSize) - sizeInCells;
+        const maxCellY = Math.floor(containerH / gridSize) - sizeInCells;
+        let newX = Math.min(Math.max(cellX, 0), maxCellX);
+        let newY = Math.min(Math.max(cellY, 0), maxCellY);
+        if (newX !== cellX || newY !== cellY) {
+            obj.positionX = newX;
+            obj.positionY = newY;
+            if (sendUpdates) {
+                getActiveSocket().send(JSON.stringify({
+                    action: 'updatePosition',
+                    objectId: id,
+                    positionX: newX,
+                    positionY: newY
+                }));
+            }
+        }
+        container.style.left = (newX * gridSize) + 'px';
+        container.style.top = (newY * gridSize) + 'px';
+        container.style.transform = 'none';
+        container.setAttribute('data-x', 0);
+        container.setAttribute('data-y', 0);
+    });
+}
+
+function updateGridSize(newSize, sendUpdates = true) {
+    gridSize = newSize;
+    allMaps[mapId].grid_size = newSize;
+    $('.grid-overlay').css('background-size', `${gridSize}px ${gridSize}px`);
+    document.querySelectorAll('.draggable-container').forEach(container => {
+        const id = parseInt(container.id);
+        container.style.width = gridSize * allObjects[id].size + "px";
+        container.style.height = gridSize * allObjects[id].size + "px";
+    });
+    adjustMapSize();
+    const mc = document.getElementById('map-container');
+    mapOffset = { left: mc.getBoundingClientRect().left, top: mc.getBoundingClientRect().top };
+    snapAllObjectsToGrid(sendUpdates);
+    interact('.draggable-container').off('dragmove dragend');
+    const mapImg = document.getElementById('map-image');
+    if (mapImg.complete && mapImg.naturalWidth !== 0) {
+        initializeDraggables(gridSize);
+    } else {
+        $("#map-image").one("load", () => initializeDraggables(gridSize));
     }
-    if (confirm(`Permanently delete ${selectedIds.length} object(s) from bin?`)) {
-        getActiveSocket().send(JSON.stringify({
-            action: 'deleteBinObjects',
-            ids: selectedIds
-        }));
-        // Remove rows immediately (optimistic) or refresh after response
-        selectedIds.forEach(id => {
-            $(`tr[data-bin-id="${id}"]`).remove();
+    if (selectedObjectId !== null) {
+        interact('.draggable-container').draggable(false);
+        interact(`.draggable-container[data-id="${selectedObjectId}"]`).draggable(true);
+    }
+}
+
+// ---- Draggable setup ----
+function dragMoveListener(event) {
+    const target = event.target;
+    let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx / scale;
+    let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy / scale;
+    target.style.transform = `translate(${x}px, ${y}px)`;
+    target.setAttribute('data-x', x);
+    target.setAttribute('data-y', y);
+}
+
+function initializeDraggables(gridSize, filterSelector = '.draggable-container') {
+    interact(filterSelector).draggable({
+        inertia: false,
+        modifiers: [
+            interact.modifiers.restrictRect({ restriction: 'parent', endOnly: true }),
+            interact.modifiers.snap({
+                targets: [(x, y) => {
+                    const rect = document.getElementById('map-container').getBoundingClientRect();
+                    const spacing = gridSize * scale;
+                    const snapX = Math.round((x - rect.left) / spacing) * spacing + rect.left;
+                    const snapY = Math.round((y - rect.top) / spacing) * spacing + rect.top;
+                    return { x: snapX, y: snapY };
+                }],
+                range: Infinity,
+                relativePoints: [{ x: 0, y: 0 }]
+            })
+        ],
+        autoScroll: true,
+        listeners: {
+            move: dragMoveListener,
+            end: function(event) {
+                const target = event.target;
+                const img = target.querySelector('img');
+                const objectId = img.dataset.id;
+                const origLeft = parseFloat(target.style.left) || 0;
+                const origTop = parseFloat(target.style.top) || 0;
+                const transX = parseFloat(target.getAttribute('data-x')) || 0;
+                const transY = parseFloat(target.getAttribute('data-y')) || 0;
+                const newLeft = origLeft + transX;
+                const newTop = origTop + transY;
+                const snappedLeft = Math.round(newLeft / gridSize) * gridSize;
+                const snappedTop = Math.round(newTop / gridSize) * gridSize;
+                const cellX = Math.round(snappedLeft / gridSize);
+                const cellY = Math.round(snappedTop / gridSize);
+                getActiveSocket().send(JSON.stringify({
+                    action: 'updatePosition',
+                    objectId: objectId,
+                    positionX: cellX,
+                    positionY: cellY
+                }));
+                target.style.left = snappedLeft + 'px';
+                target.style.top = snappedTop + 'px';
+                target.style.transform = 'none';
+                target.setAttribute('data-x', 0);
+                target.setAttribute('data-y', 0);
+                if (allObjects[objectId]) {
+                    allObjects[objectId].positionX = cellX;
+                    allObjects[objectId].positionY = cellY;
+                }
+            }
+        }
+    });
+}
+
+// ---- Status effects UI ----
+function updateEffectsLegend(objectId, updateAll = false) {
+    const updateOne = (id) => {
+        const effects = allObjects[id].statusEffects;
+        const $indicator = $(`.draggable-container#${id} div.status-effects-indicator`);
+        if (effects.length === 0) {
+            $indicator.hide().empty();
+            return;
+        }
+        $indicator.show().css({
+            width: effects.length === 1 ? '30%' : effects.length === 2 ? '65%' : '100%',
+            height: '30%',
+            left: effects.length === 1 ? '35%' : effects.length === 2 ? '17%' : '0%'
         });
-        // If you prefer to refresh after response, handle binDeleteComplete
+        const icons = effects.slice(0, 3).map(e => `<div style="flex:1; height:100%; background-size:contain; background-repeat:no-repeat; background-position:center; background-image:url(${statusEffectsLinks[e]});"></div>`);
+        if (effects.length > 3) {
+            icons.push(`<div style="flex:1; display:flex; justify-content:center; align-items:center; font-size:${Math.trunc(gridSize*0.2)}px;">...</div>`);
+        }
+        $indicator.html(icons.join(''));
+        $indicator.find('div').height(Math.trunc(gridSize*0.3)).width(Math.trunc(gridSize*0.3));
+    };
+    if (updateAll) Object.keys(allObjects).forEach(updateOne);
+    else updateOne(objectId);
+}
+
+function updateCounterDisplay(objectId, count) {
+    $(`#${objectId} .duplicate-counter .count`).text(count);
+    const $container = $(`#${objectId} .duplicate-counter`);
+    $container.css('display', count > 1 ? 'block' : 'none');
+    if (objectId === selectedObjectId) $('#counter-display').text(count);
+}
+
+// ---- WebSocket message handlers (mapped) ----
+function handleFirstFetch(data) {
+    console.log('firstFetchReturn', data);
+    vGridCellNumber = data.maps[0].grid_size;
+    mapId = data.maps[0].id;
+    mapImage = data.maps[0].image;
+    allMaps = Object.fromEntries(data.maps.map(m => [m.id, { image: m.image, name: m.name, grid_size: m.grid_size }]));
+    allObjects = Object.fromEntries(data.objects.map(obj => [obj.id, {
+        image_url: obj.image_url, name: obj.name, positionX: obj.positionX, positionY: obj.positionY,
+        id: obj.id, statusEffects: obj.statusEffects, rotation: obj.rotation || 0,
+        size: obj.size, duplicate_count: obj.duplicate_count || 1
+    }]));
+    redrawMap();
+    adjustMapSize();
+    redrawAllObjects();
+}
+
+function handlePositionUpdate(data) {
+    document.querySelectorAll('.draggable-container').forEach(container => {
+        if (container.querySelector('img').dataset.id === data.objectId.toString()) {
+            container.style.left = (gridSize * data.positionX) + 'px';
+            container.style.top = (gridSize * data.positionY) + 'px';
+            container.style.transform = 'none';
+            container.setAttribute('data-x', 0);
+            container.setAttribute('data-y', 0);
+            if (allObjects[data.objectId]) {
+                allObjects[data.objectId].positionX = data.positionX;
+                allObjects[data.objectId].positionY = data.positionY;
+            }
+        }
+    });
+}
+
+function handleGridSizeUpdate(data) {
+    if (data.gridSize !== vGridCellNumber) {
+        vGridCellNumber = data.gridSize;
+        $('#grid-size-input').val(vGridCellNumber);
+        updateGridSize(vGridCellNumber, false);
     }
-});
+}
 
+function handleSizeUpdate(data) {
+    allObjects[data.objectId].size = data.newSize;
+    $(`.draggable-container[id="${data.objectId}"]`).css({ width: gridSize*data.newSize + 'px', height: gridSize*data.newSize + 'px' })
+        .css({ transform: 'none' }).attr({ 'data-x': 0, 'data-y': 0 });
+}
 
-// Delete map icon click handler
-$('#maps-list').on('click', '.delete-map', function(e) {
-    e.stopPropagation(); // prevent selecting the map
-    const mapId = $(this).data('id');
-    if (confirm('Are you sure you want to delete this map? This action cannot be undone.')) {
+function handleRotationUpdate(data) {
+    allObjects[data.objectId].rotation = data.newRotation;
+    $(`#${data.objectId} img`).css('transform', `rotate(${data.newRotation}deg)`);
+}
+
+function handleDuplicateUpdate(data) {
+    allObjects[data.objectId].duplicate_count = data.duplicateCount;
+    updateCounterDisplay(data.objectId, data.duplicateCount);
+}
+
+function handleObjectAdded(data) {
+    const obj = data.object;
+    allObjects[obj.id] = {
+        id: obj.id, name: obj.name, image_url: obj.image_url,
+        positionX: obj.positionX || 0, positionY: obj.positionY || 0,
+        statusEffects: obj.statusEffects || [], size: obj.size || 1,
+        duplicate_count: obj.duplicate_count || 1, rotation: obj.rotation || 0
+    };
+    $('#object-list').append(renderObjectListItem(obj));
+    $('#map-container').append(renderObjectContainer(obj, gridSize));
+    addClickHandlersOnObjectList();
+    initializeDraggables(gridSize, `.draggable-container[data-id="${obj.id}"]`);
+}
+
+function handleObjectRemoved(data) {
+    $(`.list-group-item[data-id=${data.id}]`).remove();
+    $(`.draggable-container[data-id=${data.id}]`).remove();
+    delete allObjects[data.id];
+    clearObjectSelection();
+}
+
+function handleEffectsUpdate(data) {
+    allObjects[data.objectId].statusEffects = data.statusEffects;
+    updateEffectsLegend(data.objectId);
+}
+
+function handleMapAdded(data) {
+    const map = data.map1;
+    allMaps[map.id] = { image: map.image, name: map.name, grid_size: map.grid_size };
+    gridSize = map.grid_size;
+    mapId = map.id;
+    mapImage = map.image;
+    redrawMap();
+    updateGridSize(gridSize);
+}
+
+function handleMapDeleted(data) {
+    const delId = data.id;
+    delete allMaps[delId];
+    $(`#maps-list li[data-id="${delId}"]`).remove();
+    if (delId == mapId) {
+        const remaining = Object.keys(allMaps);
+        if (remaining.length) {
+            getActiveSocket().send(JSON.stringify({ action: 'switchMap', selectedId: remaining[0] }));
+        } else {
+            $('#map-image').attr('src', '');
+            $('.grid-overlay').css('background-size', '0 0');
+            $('#grid-size-input').val('');
+            mapId = null; mapImage = ''; gridSize = 0;
+        }
+    }
+}
+
+function handleMapSwitched(data) {
+    mapId = data.selected_map_id;
+    gridSize = allMaps[mapId].grid_size;
+    mapImage = allMaps[mapId].image;
+    redrawMap();
+    updateGridSize(gridSize);
+}
+
+function handleBinList(data) {
+    const tbody = $('#bin-list-body').empty();
+    data.objects.forEach(item => {
+        const state = item.object_state;
+        tbody.append(`<tr data-bin-id="${item.id}">
+            <td><input type="checkbox" class="bin-select" value="${item.id}"></td>
+            <td>${state.name}</td><td>(${state.positionX}, ${state.positionY})</td>
+            <td>${state.size}</td><td>${state.duplicate_count}</td>
+        </tr>`);
+    });
+    $('#binModal').modal('show');
+}
+
+// ---- Redraw functions ----
+function redrawMap() {
+    $("#grid-size-input").val(vGridCellNumber);
+    $("#map-image").attr("src", mapImage);
+    $('#maps-list').empty();
+    for (const [key, val] of Object.entries(allMaps)) {
+        const selectedClass = (mapId == key) ? 'selected' : '';
+        $('#maps-list').append(`<li class="list-group-item ${selectedClass}" data-id="${key}" data-url="${val.image}">
+            ${val.name} <span class="delete-map" data-id="${key}" style="float:right; cursor:pointer;">🗑️</span>
+        </li>`);
+    }
+    $("#map-image").off("load.redraw").on("load.redraw", () => {
+        adjustMapSize();
+        const rect = document.getElementById('map-container').getBoundingClientRect();
+        mapRect = rect;
+        mapOffset = { left: rect.left, top: rect.top };
+    });
+    addClickHandlersOnMapsList();
+}
+
+function redrawAllObjects() {
+    // Clear only the object list and existing draggable containers (keep map image and grid overlay)
+    $('#object-list').empty();
+    $('.draggable-container').remove();
+    for (const obj of Object.values(allObjects)) {
+        $('#object-list').append(renderObjectListItem(obj));
+        $('#map-container').append(renderObjectContainer(obj, gridSize));
+    }
+    $("#map-image").off("load.objects").on("load.objects", () => {
+        const rect = document.getElementById('map-container').getBoundingClientRect();
+        mapOffset = { left: rect.left, top: rect.top };
+        initializeDraggables(gridSize);
+        updateEffectsLegend(0, true);
+    });
+    $('#grid-size-input').off('input').on('input', function() {
+        const newVal = parseInt($(this).val(), 10);
+        if (!isNaN(newVal) && newVal > 0 && newVal !== vGridCellNumber) {
+            vGridCellNumber = newVal;
+            adjustMapSize();
+            snapAllObjectsToGrid(true);
+            getActiveSocket().send(JSON.stringify({ action: 'updateGridSize', mapId, gridSize: vGridCellNumber }));
+        }
+    });
+    addClickHandlersOnObjectList();
+}
+
+// ---- Click handlers ----
+function addClickHandlersOnObjectList() {
+    $('#object-list li').off('click').on('click', function() {
+        const id = $(this).data('id');
+        if ($(this).hasClass('selected')) clearObjectSelection();
+        else selectObject(id);
+    });
+}
+
+function addClickHandlersOnMapsList() {
+    $('#maps-list li').off('click').on('click', function() {
+        const id = $(this).data('id');
+        if (!$(this).hasClass('selected')) {
+            getActiveSocket().send(JSON.stringify({ action: 'switchMap', selectedId: id }));
+        }
+    });
+}
+
+// ---- Zoom & Pan (encapsulated) ----
+function initZoomPan() {
+    const zoomElement = document.getElementById("map-container");
+    const zoomContainer = document.getElementById("map-parent-container");
+    zoomContainer.addEventListener("wheel", function(e) {
+        e.preventDefault();
+        const rect = zoomContainer.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
+        const direction = e.deltaY > 0 ? -1 : 1;
+        const newScale = scale * (1 + direction * zoomStep);
+        if (newScale < minZoom || newScale > maxZoom) return;
+        const mouseXUnscaled = (mouseX - offsetX) / scale;
+        const mouseYUnscaled = (mouseY - offsetY) / scale;
+        offsetX = mouseX - mouseXUnscaled * newScale;
+        offsetY = mouseY - mouseYUnscaled * newScale;
+        scale = newScale;
+        zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        zoomElement.style.transformOrigin = '0 0';
+    });
+    let isPanning = false, startX, startY, initOffX, initOffY;
+    zoomContainer.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.draggable-container') || e.target.closest('.draggable')) return;
+        isPanning = true;
+        startX = e.clientX; startY = e.clientY;
+        initOffX = offsetX; initOffY = offsetY;
+        zoomContainer.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', (e) => {
+        if (!isPanning) return;
+        offsetX = initOffX + (e.clientX - startX);
+        offsetY = initOffY + (e.clientY - startY);
+        zoomElement.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    });
+    window.addEventListener('mouseup', () => {
+        if (isPanning) {
+            isPanning = false;
+            zoomContainer.style.cursor = 'grab';
+        }
+    });
+}
+
+// ========================= DOCUMENT READY =========================
+$(document).ready(function() {
+    // Setup WebSocket message router
+    const wsHandlers = {
+        firstFetchReturn: handleFirstFetch,
+        positionUpdated: handlePositionUpdate,
+        gridSizeUpdated: handleGridSizeUpdate,
+        sizeUpdated: handleSizeUpdate,
+        rotationUpdated: handleRotationUpdate,
+        duplicateCountUpdated: handleDuplicateUpdate,
+        objectAdded: handleObjectAdded,
+        ObjectRemoved: handleObjectRemoved,
+        effectsUpdated: handleEffectsUpdate,
+        MapAdded: handleMapAdded,
+        mapDeleted: handleMapDeleted,
+        mapSwitched: handleMapSwitched,
+        binList: handleBinList
+    };
+    getActiveSocket().onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const handler = wsHandlers[data.action];
+        if (handler) handler(data);
+    };
+    getActiveSocket().onopen = () => getActiveSocket().send(JSON.stringify({ action: 'firstFetch' }));
+
+    // Build status effects palette
+    const effectsContainer = document.getElementById('status-effects-container');
+    for (const [name, url] of Object.entries(statusEffectsLinks)) {
+        effectsContainer.innerHTML += `<div class="square-effects-menu" id="effect-${name}" style="background-image: url(${url})" title="${name}"></div>`;
+    }
+    $('#status-effects-container div').on('click', function() {
+        const effectId = this.id.replace("effect-", "");
+        if (!selectedObjectId) return;
+        const obj = allObjects[selectedObjectId];
+        if (obj.statusEffects.includes(effectId)) {
+            obj.statusEffects = obj.statusEffects.filter(e => e !== effectId);
+            $(this).removeClass('selected-effects-box');
+        } else {
+            obj.statusEffects.push(effectId);
+            $(this).addClass('selected-effects-box');
+        }
+        getActiveSocket().send(JSON.stringify({ action: 'updateEffects', objectId: selectedObjectId, statusEffects: obj.statusEffects }));
+        updateEffectsLegend(selectedObjectId);
+    });
+
+    // Sidebar menu toggle
+    function toggleMenu(menu) {
+        const isObjects = menu === 'objects';
+        $('#objects-menu-button').toggleClass('selected-blue-button unselected-blue-button', isObjects);
+        $('#maps-menu-button').toggleClass('selected-blue-button unselected-blue-button', !isObjects);
+        $('#objects-menu-body').css('display', isObjects ? 'block' : 'none');
+        $('#maps-menu-body').css('display', isObjects ? 'none' : 'block');
+    }
+    $('#objects-menu-button').on('click', () => toggleMenu('objects'));
+    $('#maps-menu-button').on('click', () => toggleMenu('maps'));
+    toggleMenu('objects');
+
+    // Forms
+    $('#addObjectForm').on('submit', function(e) {
+        e.preventDefault();
         getActiveSocket().send(JSON.stringify({
-            action: 'deleteMap',
-            id: mapId
+            action: 'addObject',
+            name: $('#form_object_name').val(),
+            image_url: $('#form_object_image_url').val()
         }));
-    }
-});
+        this.reset();
+    });
+    $('#addMapForm').on('submit', function(e) {
+        e.preventDefault();
+        getActiveSocket().send(JSON.stringify({
+            action: 'addMap',
+            name: $('#form_map_name').val(),
+            image_url: $('#form_map_image_url').val(),
+            grid_size: gridSize
+        }));
+        this.reset();
+    });
 
-	});
+    // Object manipulation buttons
+    $('#remove-object-btn').on('click', () => {
+        if (selectedObjectId) {
+            getActiveSocket().send(JSON.stringify({ action: 'removeObject', id: selectedObjectId }));
+        }
+    });
+    $('#increase-size-btn').on('click', () => {
+        if (selectedObjectId) {
+            const newSize = allObjects[selectedObjectId].size + 1;
+            allObjects[selectedObjectId].size = newSize;
+            getActiveSocket().send(JSON.stringify({ action: 'updateSize', objectId: selectedObjectId, newSize }));
+            $(`.draggable-container[data-id="${selectedObjectId}"]`).css({ width: `${gridSize*newSize}px`, height: `${gridSize*newSize}px` });
+        }
+    });
+    $('#decrease-size-btn').on('click', () => {
+        if (selectedObjectId) {
+            const newSize = allObjects[selectedObjectId].size - 1;
+            if (newSize < 1) return;
+            allObjects[selectedObjectId].size = newSize;
+            getActiveSocket().send(JSON.stringify({ action: 'updateSize', objectId: selectedObjectId, newSize }));
+            $(`.draggable-container[data-id="${selectedObjectId}"]`).css({ width: `${gridSize*newSize}px`, height: `${gridSize*newSize}px` });
+        }
+    });
+    $('#rotate-left-btn').on('click', () => {
+        if (selectedObjectId) {
+            const newRot = (allObjects[selectedObjectId].rotation - 90) % 360;
+            allObjects[selectedObjectId].rotation = newRot;
+            getActiveSocket().send(JSON.stringify({ action: 'updateRotation', objectId: selectedObjectId, newRotation: newRot }));
+            $(`#${selectedObjectId} img`).css('transform', `rotate(${newRot}deg)`);
+        }
+    });
+    $('#rotate-right-btn').on('click', () => {
+        if (selectedObjectId) {
+            const newRot = (allObjects[selectedObjectId].rotation + 90) % 360;
+            allObjects[selectedObjectId].rotation = newRot;
+            getActiveSocket().send(JSON.stringify({ action: 'updateRotation', objectId: selectedObjectId, newRotation: newRot }));
+            $(`#${selectedObjectId} img`).css('transform', `rotate(${newRot}deg)`);
+        }
+    });
+    $('#increase-counter-btn').on('click', () => {
+        if (selectedObjectId) {
+            const newCount = (allObjects[selectedObjectId].duplicate_count || 1) + 1;
+            allObjects[selectedObjectId].duplicate_count = newCount;
+            getActiveSocket().send(JSON.stringify({ action: 'updateDuplicateCount', objectId: selectedObjectId, duplicateCount: newCount }));
+            updateCounterDisplay(selectedObjectId, newCount);
+        }
+    });
+    $('#decrease-counter-btn').on('click', () => {
+        if (selectedObjectId) {
+            let newCount = (allObjects[selectedObjectId].duplicate_count || 1) - 1;
+            if (newCount < 1) return;
+            allObjects[selectedObjectId].duplicate_count = newCount;
+            getActiveSocket().send(JSON.stringify({ action: 'updateDuplicateCount', objectId: selectedObjectId, duplicateCount: newCount }));
+            updateCounterDisplay(selectedObjectId, newCount);
+        }
+    });
+
+    // Bin interactions
+    $('#object-list').on('click', '.bin-object', function(e) {
+        e.stopPropagation();
+        const id = $(this).data('id');
+        if (confirm('Move this object to the bin?')) {
+            getActiveSocket().send(JSON.stringify({ action: 'binObject', id }));
+        }
+    });
+    $('#show-bin-btn').on('click', () => getActiveSocket().send(JSON.stringify({ action: 'fetchBinList' })));
+    $('#select-all-bin-checkbox').on('change', function() { $('.bin-select').prop('checked', $(this).is(':checked')); });
+    $('#bin-list-body').on('change', '.bin-select', function() {
+        const allChecked = $('.bin-select:checked').length === $('.bin-select').length;
+        $('#select-all-bin-checkbox').prop('checked', allChecked);
+    });
+    $('#select-all-bin').on('click', function() {
+        const check = !$('#select-all-bin-checkbox').is(':checked');
+        $('.bin-select').prop('checked', check);
+        $('#select-all-bin-checkbox').prop('checked', check);
+    });
+    $('#restore-selected-bin').on('click', function() {
+        const ids = $('.bin-select:checked').map((_, el) => $(el).val()).get();
+        if (ids.length && confirm(`Restore ${ids.length} object(s)?`)) {
+            getActiveSocket().send(JSON.stringify({ action: 'restoreBinObjects', ids }));
+            $('#binModal').modal('hide');
+        }
+    });
+    $('#delete-selected-bin').on('click', function() {
+        const ids = $('.bin-select:checked').map((_, el) => $(el).val()).get();
+        if (ids.length && confirm(`Permanently delete ${ids.length} object(s)?`)) {
+            getActiveSocket().send(JSON.stringify({ action: 'deleteBinObjects', ids }));
+            ids.forEach(id => $(`tr[data-bin-id="${id}"]`).remove());
+        }
+    });
+    $('#maps-list').on('click', '.delete-map', function(e) {
+        e.stopPropagation();
+        const id = $(this).data('id');
+        if (confirm('Delete this map permanently?')) {
+            getActiveSocket().send(JSON.stringify({ action: 'deleteMap', id }));
+        }
+    });
+
+    initZoomPan();
+});
 </script>
 
 <?php include_once 'partials/editor_bottom_tpl.php'; ?>
