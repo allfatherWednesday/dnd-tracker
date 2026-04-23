@@ -226,6 +226,64 @@ class MapWebSocket implements MessageComponentInterface {
 					]));
 				}
 				break;
+			case 'binMap':
+    $mapId = $data['id'] ?? null;
+    if ($mapId && $this->mapModel->moveMapToBin($mapId)) {
+        // Broadcast removal to all clients
+        foreach ($this->clients as $client) {
+            $client->send(json_encode([
+                'action' => 'mapDeleted',
+                'id' => $mapId
+            ]));
+        }
+    } else {
+        $from->send(json_encode(['action' => 'error', 'message' => 'Failed to bin map']));
+    }
+    break;
+
+case 'fetchMapBinList':
+    $binned = $this->mapModel->getBinnedMaps();
+    $from->send(json_encode([
+        'action' => 'mapBinList',
+        'maps' => $binned
+    ]));
+    break;
+
+case 'restoreMapBinObjects':
+    $binIds = $data['ids'] ?? [];
+    // You may want to get the current default grid size from somewhere.
+    // For simplicity, we'll use a fixed value; adapt as needed.
+    $defaultGridSize = 40; // or retrieve from global state
+    $restored = [];
+    foreach ($binIds as $binId) {
+        $map = $this->mapModel->restoreMapFromBin($binId, $defaultGridSize);
+        if ($map) {
+            $restored[] = $map;
+            foreach ($this->clients as $client) {
+                $client->send(json_encode([
+                    'action' => 'MapAdded',
+                    'map1' => $map
+                ]));
+            }
+        }
+    }
+    $from->send(json_encode([
+        'action' => 'mapBinRestoreComplete',
+        'count' => count($restored)
+    ]));
+    break;
+
+case 'deleteMapBinObjects':
+    $binIds = $data['ids'] ?? [];
+    $deleted = 0;
+    foreach ($binIds as $binId) {
+        if ($this->mapModel->deleteMapFromBin($binId)) $deleted++;
+    }
+    $from->send(json_encode([
+        'action' => 'mapBinDeleteComplete',
+        'count' => $deleted
+    ]));
+    break;
 			case "addMap":
 				$added_map_name = $data['name'];
 				$added_map_image_url = $data['image_url'];
@@ -336,8 +394,12 @@ class MapWebSocket implements MessageComponentInterface {
 								'action' => 'binDeleteComplete',
 								'count' => $deletedCount
 						]));
-						break;				
+						break;		
+						
+					
 					}
+
+					
 	}
 
 	public function onClose(ConnectionInterface $conn) {

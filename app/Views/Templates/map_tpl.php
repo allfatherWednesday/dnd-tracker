@@ -48,6 +48,7 @@
 					</form>
 					<h4>Loaded Maps</h4>
 					<ul id="maps-list" class="list-group"></ul>
+                    <button id="show-map-bin-btn" class="btn btn-info mt-3">Show Map Bin</button>
 				</div>
 			</div>
         </div>
@@ -112,6 +113,31 @@
 			</div>
 		</div>
 	</div>
+
+    <!-- Map Bin Modal -->
+<div class="modal fade" id="mapBinModal" tabindex="-1" aria-labelledby="mapBinModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Binned Maps</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <button id="restore-selected-map-bin" class="btn btn-success">Restore Selected</button>
+                    <button id="delete-selected-map-bin" class="btn btn-danger">Delete Selected</button>
+                    <button id="select-all-map-bin" class="btn btn-secondary">Select All</button>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr><th><input type="checkbox" id="select-all-map-bin-checkbox"></th><th>Name</th><th>Image URL</th></tr>
+                    </thead>
+                    <tbody id="map-bin-list-body"></tbody>
+                20~
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -541,6 +567,20 @@ function handleBinList(data) {
     $('#binModal').modal('show');
 }
 
+function handleMapBinList(data) {
+    const tbody = $('#map-bin-list-body').empty();
+    data.maps.forEach(item => {
+        tbody.append(`
+            <tr data-bin-id="${item.id}">
+                <td><input type="checkbox" class="map-bin-select" value="${item.id}"></td>
+                <td>${escapeHtml(item.name)}</td>
+                <td><a href="${item.image}" target="_blank">${escapeHtml(item.image.substring(0, 60))}...</a></td>
+            </tr>
+        `);
+    });
+    $('#mapBinModal').modal('show');
+}
+
 // ---- Redraw functions ----
 function redrawMap() {
     $("#grid-size-input").val(vGridCellNumber);
@@ -548,9 +588,12 @@ function redrawMap() {
     $('#maps-list').empty();
     for (const [key, val] of Object.entries(allMaps)) {
         const selectedClass = (mapId == key) ? 'selected' : '';
-        $('#maps-list').append(`<li class="list-group-item ${selectedClass}" data-id="${key}" data-url="${val.image}">
-            ${val.name} <span class="delete-map" data-id="${key}" style="float:right; cursor:pointer;">🗑️</span>
-        </li>`);
+        $('#maps-list').append(`
+            <li class="list-group-item ${selectedClass}" data-id="${key}" data-url="${val.image}">
+                ${escapeHtml(val.name)}
+                <span class="bin-map" data-id="${key}" style="float:right; cursor:pointer;">🗑️</span>
+            </li>
+        `);
     }
     $("#map-image").off("load.redraw").on("load.redraw", () => {
         adjustMapSize();
@@ -558,7 +601,7 @@ function redrawMap() {
         mapRect = rect;
         mapOffset = { left: rect.left, top: rect.top };
     });
-    addClickHandlersOnMapsList();
+    addClickHandlersOnMapsList(); // already handles map switching
 }
 
 function redrawAllObjects() {
@@ -585,6 +628,16 @@ function redrawAllObjects() {
         }
     });
     addClickHandlersOnObjectList();
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 // ---- Click handlers ----
@@ -662,7 +715,8 @@ $(document).ready(function() {
         MapAdded: handleMapAdded,
         mapDeleted: handleMapDeleted,
         mapSwitched: handleMapSwitched,
-        binList: handleBinList
+        binList: handleBinList,
+        mapBinList: handleMapBinList  
     };
     getActiveSocket().onmessage = (event) => {
         const data = JSON.parse(event.data);
@@ -821,6 +875,51 @@ $(document).ready(function() {
             getActiveSocket().send(JSON.stringify({ action: 'deleteMap', id }));
         }
     });
+
+    // --- Map Bin actions (move to bin, permanent delete) ---
+$('#maps-list').on('click', '.bin-map', function(e) {
+    e.stopPropagation();
+    const id = $(this).data('id');
+    if (confirm('Move this map to the bin? It can be restored later.')) {
+        getActiveSocket().send(JSON.stringify({ action: 'binMap', id }));
+    }
+});
+
+
+// --- Show Map Bin button ---
+$('#show-map-bin-btn').on('click', () => {
+    getActiveSocket().send(JSON.stringify({ action: 'fetchMapBinList' }));
+});
+
+// --- Map Bin Modal handlers ---
+$('#select-all-map-bin-checkbox').on('change', function() {
+    $('.map-bin-select').prop('checked', $(this).is(':checked'));
+});
+$('#map-bin-list-body').on('change', '.map-bin-select', function() {
+    const allChecked = $('.map-bin-select:checked').length === $('.map-bin-select').length;
+    $('#select-all-map-bin-checkbox').prop('checked', allChecked);
+});
+$('#select-all-map-bin').on('click', function() {
+    const check = !$('#select-all-map-bin-checkbox').is(':checked');
+    $('.map-bin-select').prop('checked', check);
+    $('#select-all-map-bin-checkbox').prop('checked', check);
+});
+$('#restore-selected-map-bin').on('click', function() {
+    const ids = $('.map-bin-select:checked').map((_, el) => $(el).val()).get();
+    if (ids.length && confirm(`Restore ${ids.length} map(s)? They will reappear in the Maps list.`)) {
+        getActiveSocket().send(JSON.stringify({ action: 'restoreMapBinObjects', ids }));
+        $('#mapBinModal').modal('hide');
+    }
+});
+$('#delete-selected-map-bin').on('click', function() {
+    const ids = $('.map-bin-select:checked').map((_, el) => $(el).val()).get();
+    if (ids.length && confirm(`Permanently delete ${ids.length} map(s) from the bin? This cannot be undone.`)) {
+        getActiveSocket().send(JSON.stringify({ action: 'deleteMapBinObjects', ids }));
+        ids.forEach(id => $(`tr[data-bin-id="${id}"]`).remove());
+        // Refresh the modal list after deletion
+        getActiveSocket().send(JSON.stringify({ action: 'fetchMapBinList' }));
+    }
+});
 
     initZoomPan();
 });
