@@ -3,9 +3,13 @@
 <link rel="stylesheet" href="<?= HOST ?>/public/css/maps.css">
 
 <div class="container-fluid no-select" style="padding-top: 4px;">
-    <div class="row">
+     <!-- Toggle Sidebars Button (mobile view) -->
+    <button id="toggle-sidebars-btn" class="btn btn-primary d-md-none mb-2" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; border-radius: 50%; width: 50px; height: 50px;">
+        ☰
+    </button>
+	<div class="row flex-nowrap">
         <!-- Left Sidebar -->
-        <div class="col-md-2 col-md-2 sidebar_left sidebar_custom">
+        <div class="col-4 col-md-2 sidebar_left sidebar_custom d-none d-md-block" id="left-sidebar">
             <h3>Grid Settings</h3>
 			<div class="mb-3">
 				<label for="grid-size-input" class="form-label">Vertical Grid Cell Number</label>
@@ -53,7 +57,7 @@
         </div>
 
         <!-- Map Container -->
-        <div class="col-md-8 col-lg-8" id="map-parent-container" style="padding: 0">
+        <div class="col-12 col-md-8" id="map-parent-container" style="padding: 0">
             <div id="map-container">        
 				<img id="map-image">
                 <div class="grid-overlay"></div>
@@ -61,7 +65,7 @@
         </div>
 	
 		<!-- Right Sidebar -->
-        <div class="col-md-2 col-md-2 sidebar_right sidebar_custom">
+        <div class="col-4 col-md-2 sidebar_right sidebar_custom d-none d-md-block" id="right-sidebar">
 			<div id="status-effects-container" style="display: none;"><h4>Status Effects</h4></div>
 			<div id="delete-button-container" style="display: none;">
 				<button id="remove-object-btn" class="btn btn-danger mt-2">Remove Object</button>
@@ -824,6 +828,64 @@ $(document).ready(function() {
 
     initZoomPan();
 });
+
+// Sidebar toggle functionality for mobile
+let sidebarsVisible = false;
+
+function toggleSidebars() {
+    sidebarsVisible = !sidebarsVisible;
+    if (sidebarsVisible) {
+        $('#left-sidebar, #right-sidebar').removeClass('d-none').addClass('d-block');
+        $('#toggle-sidebars-btn').html('✕');
+        // Adjust map container when sidebars are shown
+        $('#map-parent-container').removeClass('col-12').addClass('col-md-8');
+    } else {
+        $('#left-sidebar, #right-sidebar').removeClass('d-block').addClass('d-none');
+        $('#toggle-sidebars-btn').html('☰');
+        // Make map take full width when sidebars are hidden
+        $('#map-parent-container').removeClass('col-md-8').addClass('col-12');
+    }
+}
+
+// Handle window resize - auto-hide sidebars on mobile and reset zoom/pan
+$(window).on('resize', function() {
+    if ($(window).width() < 768) {
+        // On mobile, hide sidebars if they're visible
+        if (sidebarsVisible) {
+            toggleSidebars();
+        }
+    } else {
+        // On desktop, ensure sidebars are visible
+        if (!sidebarsVisible && $('#left-sidebar').hasClass('d-none')) {
+            sidebarsVisible = true;
+            toggleSidebars();
+        }
+    }
+    
+    // Reset zoom and pan on window resize to prevent sidebar positioning issues
+    setTimeout(function() {
+        // Reset scale and offset
+        scale = 1;
+        offsetX = 0;
+        offsetY = 0;
+        
+        // Reset transform on map container
+        const zoomElement = document.getElementById("map-container");
+        if (zoomElement) {
+            zoomElement.style.transform = 'translate(0px, 0px) scale(1)';
+            zoomElement.style.transformOrigin = '0 0';
+        }
+        
+        // Re-adjust map size after a brief delay to allow DOM to update
+        setTimeout(function() {
+            adjustMapSize();
+        }, 50);
+    }, 100);
+});
+
+// Event listener for toggle button
+$('#toggle-sidebars-btn').on('click', toggleSidebars);
+
 </script>
 
 <?php include_once 'partials/editor_bottom_tpl.php'; ?>

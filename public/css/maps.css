@@ -211,3 +211,52 @@ body {
 .status-effects-indicator{
 	display:flex;
 }
+
+@media (max-width: 768px) {
+    .sidebar_custom {
+        padding: 10px;
+        font-size: 12px;
+        position: fixed;
+        top: 56px;
+        bottom: 0;
+        z-index: 2000;
+        width: 80%;
+        max-width: 300px;
+        overflow-y: auto;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+    
+    .sidebar_left {
+        left: 0;
+        transform: translateX(0);
+    }
+    
+    .sidebar_right {
+        right: 0;
+    }
+    
+    .sidebar_custom h3, .sidebar_custom h4 {
+        font-size: 14px;
+    }
+    
+    #map-parent-container {
+        padding: 0 10px;
+    }
+    
+    #toggle-sidebars-btn {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .sidebar_custom.d-none {
+        display: none !important;
+    }
+    
+    .sidebar_custom.d-block {
+        display: block !important;
+    }
+}
+
+/* Smooth transition for sidebar visibility */
+.sidebar_custom {
+    transition: all 0.3s ease;
+}
