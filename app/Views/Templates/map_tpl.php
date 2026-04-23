@@ -83,6 +83,11 @@
 					<button id="increase-counter-btn" class="btn btn-secondary mt-2">+</button>
 				</div>
 			</div>
+
+
+            <div id="reset-view-container" style="display: block; margin-top: 20px;">
+                <button id="reset-view-btn" class="btn btn-primary">Reset View</button>
+            </div>
 		</div>
 	</div>
 
@@ -176,6 +181,44 @@ const minZoom = 0.5, maxZoom = 3, zoomStep = 0.1;
 let offsetX = 0, offsetY = 0;
 
 // ========================= HELPER FUNCTIONS =========================
+// ---- Reset view to center the map ----
+function resetView() {
+    const parent = document.getElementById('map-parent-container');
+    const mapContainer = document.getElementById('map-container');
+    const mapImg = document.getElementById('map-image');
+    if (!parent || !mapContainer) return;
+
+    // Ensure the map image is fully loaded to get correct natural dimensions
+    if (!mapImg.complete || mapImg.naturalWidth === 0) {
+        mapImg.addEventListener('load', function onLoad() {
+            resetView(); // retry after load
+            mapImg.removeEventListener('load', onLoad);
+        });
+        return;
+    }
+
+    // Temporarily remove any transform to get the true, unmodified size of the container
+    const oldTransform = mapContainer.style.transform;
+    mapContainer.style.transform = 'none';
+
+    // Get parent dimensions
+    const parentRect = parent.getBoundingClientRect();
+    // Get map container's natural (unscaled) dimensions after resetting transform
+    const mapRect = mapContainer.getBoundingClientRect();
+
+    // Reset scale to 1
+    scale = 1;
+
+    // Calculate offsets to center the map
+    offsetX = (parentRect.width - mapRect.width) / 2;
+    offsetY = (parentRect.height - mapRect.height) / 2;
+
+    // Apply new transform (scale=1)
+    mapContainer.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    mapContainer.style.transformOrigin = '0 0';
+}
+
+
 function getActiveSocket() {
     if (!activeSocket || activeSocket.readyState === 3) {
         activeSocket = new WebSocket('ws://localhost:8080');
@@ -919,6 +962,10 @@ $('#delete-selected-map-bin').on('click', function() {
         // Refresh the modal list after deletion
         getActiveSocket().send(JSON.stringify({ action: 'fetchMapBinList' }));
     }
+});
+
+$('#reset-view-btn').on('click', function() {
+    resetView();
 });
 
     initZoomPan();

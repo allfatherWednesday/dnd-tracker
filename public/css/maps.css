@@ -211,3 +211,9 @@ body {
 .status-effects-indicator{
 	display:flex;
 }
+
+/* Prevent scrollbars on the map container */
+#map-parent-container {
+    overflow: hidden !important;
+    
+}
