@@ -207,3 +207,7 @@ body {
     text-align: center;
     font-weight: bold;
 }
+
+.status-effects-indicator{
+	display:flex;
+}
