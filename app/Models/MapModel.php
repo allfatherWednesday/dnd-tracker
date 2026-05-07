@@ -104,4 +104,93 @@ class MapModel extends Model
     }
     }
 
+
+    /**
+ * Move a map to the bin
+ * @param int $id
+ * @return bool
+ */
+public function moveMapToBin($id)
+{
+    $db = $this->db();
+    // 1. Fetch the map
+    $stmt = $db->prepare("SELECT * FROM maps WHERE id = :id");
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $map = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$map) return false;
+
+    // 2. Insert into maps_bin (only name and image, ignore original_map_id but we store it)
+    $insert = $db->prepare("INSERT INTO maps_bin (original_map_id, name, image) VALUES (:oid, :name, :image)");
+    $insert->bindValue(':oid', $id, PDO::PARAM_INT);
+    $insert->bindValue(':name', $map['name']);
+    $insert->bindValue(':image', $map['image']);
+    if (!$insert->execute()) return false;
+
+    // 3. Delete from maps
+    $delete = $db->prepare("DELETE FROM maps WHERE id = :id");
+    $delete->bindValue(':id', $id, PDO::PARAM_INT);
+    return $delete->execute();
+}
+
+/**
+ * Get all binned maps
+ * @return array
+ */
+public function getBinnedMaps()
+{
+    $stmt = $this->db()->prepare("SELECT * FROM maps_bin ORDER BY id DESC");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Restore a binned map back to the maps table
+ * @param int $binId
+ * @param int $defaultGridSize Default grid size to assign (e.g., 40)
+ * @return array|false Restored map record, or false on failure
+ */
+public function restoreMapFromBin($binId, $defaultGridSize = 40)
+{
+    $db = $this->db();
+    // Fetch bin entry
+    $stmt = $db->prepare("SELECT * FROM maps_bin WHERE id = :id");
+    $stmt->bindValue(':id', $binId, PDO::PARAM_INT);
+    $stmt->execute();
+    $bin = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$bin) return false;
+
+    // Re‑insert into maps table with default grid size
+    $insert = $db->prepare("INSERT INTO maps (name, image, grid_size) VALUES (:name, :image, :grid_size)");
+    $insert->bindValue(':name', $bin['name']);
+    $insert->bindValue(':image', $bin['image']);
+    $insert->bindValue(':grid_size', $defaultGridSize, PDO::PARAM_INT);
+    if (!$insert->execute()) return false;
+
+    $newId = $db->lastInsertId();
+
+    // Delete the bin entry
+    $delete = $db->prepare("DELETE FROM maps_bin WHERE id = :id");
+    $delete->bindValue(':id', $binId, PDO::PARAM_INT);
+    $delete->execute();
+
+    // Return the restored map
+    $select = $db->prepare("SELECT * FROM maps WHERE id = :id");
+    $select->bindValue(':id', $newId, PDO::PARAM_INT);
+    $select->execute();
+    return $select->fetch(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Permanently delete a bin entry
+ * @param int $binId
+ * @return bool
+ */
+public function deleteMapFromBin($binId)
+{
+    $stmt = $this->db()->prepare("DELETE FROM maps_bin WHERE id = :id");
+    $stmt->bindValue(':id', $binId, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
 }

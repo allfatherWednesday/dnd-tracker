@@ -54,7 +54,8 @@ body {
 }
 
 #map-parent-container {
-	overflow: visible;
+    overflow: hidden !important;
+    
 }
  
 #map-image {
@@ -260,3 +261,5 @@ body {
 .sidebar_custom {
     transition: all 0.3s ease;
 }
+
+
